@@ -1,5 +1,7 @@
-v0.02---------------------
-=Updated on 16/06/2023
-+Added extract all button
-+Added delete button
-=Fixed GUI error
+v0.03--------------------
++Added support for textures
++Added support for more audio
++Added autoupdater
+=Fixed extract all button
+-Removed unused module
+-Removed some debug things
