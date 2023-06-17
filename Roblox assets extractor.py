@@ -15,7 +15,7 @@ except ImportError:
 try:
     import tkinter as tk
 except ImportError:
-    os.system("pip install tkinter")
+    os.system("pip install tk")
     import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
