@@ -1,4 +1,4 @@
-ver = 0.03
+ver = 0.04
 print(f"Roblox assets extractor v{ver}")
 print("✓ Byfron friendly")
 print("Please report bugs to https://github.com/AeEn123/Roblox-assets-extractor/issues")
@@ -7,6 +7,8 @@ print("-----{Now loading}-----")
 import os
 import shutil
 import tempfile
+import threading
+
 try:
     from requests import get
 except ImportError:
@@ -23,19 +25,35 @@ from tkinter import ttk, messagebox, filedialog
 r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/version.txt", timeout=5)
 newver = float(r.text.strip())
 
-def delete_directory_contents(directory):
+# Function to do thread's work
+def delete_directory_contents_thread(directory):
+    counter = 0
     try:
+        files = len(os.listdir(directory))
         for filename in os.listdir(directory):
             file_path = os.path.join(directory, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
+                counter += 1
+                status_label.config(text=f"Deleting files: {counter}/{files}")
         messagebox.showinfo("Success", "All files deleted successfully.")
+        status_label.config(text="Idling")
     except Exception as e:
         print(e)
-        messagebox.showerror("Error", f"Failed to delete files:\n {str(e)}")
+        messagebox.showerror("Error", f"Failed on file {counter}:\n {str(e)}")
 
-def list_files(directory):
+# Function to start thread
+def delete_directory_contents(directory):
+    status_label.config(text="Deleting files...")
+    threading.Thread(target=delete_directory_contents_thread, args=(directory,)).start()
+
+# Function to thread's work
+def list_files_thread(directory):
+    global listingFiles
+    listingFiles = True
     file_list.delete(0, tk.END)  # Clear the current file list
+    files = len(os.listdir(directory))
+    counter = 0
     for file_name in os.listdir(directory):
         file_path = os.path.join(directory, file_name)
         if os.path.isfile(file_path):
@@ -48,8 +66,20 @@ def list_files(directory):
                     file_list.insert(tk.END, file_name)
                 if b"PNG" in data and current_tab_name == "Textures":
                     file_list.insert(tk.END, file_name)
+                counter += 1
+                status_label.config(text=f"Listing files: {counter}/{files}")
+    listingFiles = False
+    status_label.config(text="Idling")
+
+# Function to start thread
+def list_files(directory):
+    if not listingFiles:
+        status_label.config(text="Listing files...")
+        threading.Thread(target=list_files_thread, args=(directory,)).start()
+
 
 def on_file_double_click(event):
+    status_label.config(text="Extracting file...")
     selected_file = file_list.get(file_list.curselection())
     source_path = os.path.join(current_directory.get(), selected_file)
     if current_tab_name != "Textures":
@@ -76,6 +106,7 @@ def on_file_double_click(event):
         with open(dest_path, "wb") as f:
             f.write(data)
     os.system("start " + dest_path)
+    status_label.config(text="Idling")
 
 def on_tab_change(event):
     global current_tab_name
@@ -107,11 +138,14 @@ def delete_all_files(event=None):
 def refresh(event=None):
     list_files(current_directory.get())
 
-def extract_all_from_directory(event=None):
+# Function to do thread's work
+def extract_all_from_directory_thread():
     destination = filedialog.askdirectory()
     if destination == "": return
     directory = current_directory.get()
     try:
+        files = len(os.listdir(directory))
+        counter = 0
         for filename in os.listdir(directory):
             file_path = os.path.join(directory, filename)
             if os.path.isfile(file_path):
@@ -142,14 +176,23 @@ def extract_all_from_directory(event=None):
                         data = data[PNGHead::]
                         with open(dest_path, "wb") as f:
                             f.write(data)
-                
+            counter += 1
+            status_label.config(text=f"Extracting files: {counter}/{files}")
         messagebox.showinfo("Success", "All files were copied successfully.")
     except Exception as e:
         print(e)
         messagebox.showerror("Error", f"Failed to copy files: {str(e)}")
-    
+    status_label.config(text="Idling")
 
+# Function to start thead
+def extract_all_from_directory(event=None):
+    status_label.config(text="Extracting files...")
+    threading.Thread(target=extract_all_from_directory_thread).start()
 
+# Init variables
+listingFiles = False
+
+# Create window
 root = tk.Tk()
 root.title(f"Roblox assets extractor v{ver}")
 
@@ -197,6 +240,10 @@ root.bind('<F5>', refresh)
 
 extract_button = tk.Button(button_frame, text="Extract all from this directory", command=extract_all_from_directory)
 extract_button.pack(side=tk.RIGHT)
+
+# Create status
+status_label = tk.Label(root, text="Idling", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
 # Create file list
 file_list = tk.Listbox(root, width=50)
