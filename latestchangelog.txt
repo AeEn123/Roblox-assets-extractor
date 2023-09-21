@@ -1,7 +1,3 @@
-v0.03--------------------
-+Added support for textures
-+Added support for more audio
-+Added autoupdater
-=Fixed extract all button
--Removed unused module
--Removed some debug things
+v0.04--------------------
++Added multithreading :D
++Added status thing so you know what the program is doing
