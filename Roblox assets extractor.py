@@ -5,6 +5,7 @@ print("Please report bugs to https://github.com/AeEn123/Roblox-assets-extractor/
 print("-----{Now loading}-----")
 # Import modules
 import os
+import time
 import shutil
 import tempfile
 import threading
@@ -28,6 +29,7 @@ newver = float(r.text.strip())
 # Function to do thread's work
 def delete_directory_contents_thread(directory):
     counter = 0
+    lastTime = time.time()
     try:
         files = len(os.listdir(directory))
         for filename in os.listdir(directory):
@@ -35,7 +37,9 @@ def delete_directory_contents_thread(directory):
             if os.path.isfile(file_path):
                 os.remove(file_path)
                 counter += 1
-                status_label.config(text=f"Deleting files: {counter}/{files}")
+                if time.time()-lastTime > 0.1:
+                    lastTime = time.time()
+                    status_label.config(text=f"Deleting files: {counter}/{files}")
         messagebox.showinfo("Success", "All files deleted successfully.")
         status_label.config(text="Idling")
     except Exception as e:
@@ -51,6 +55,7 @@ def delete_directory_contents(directory):
 def list_files_thread(directory):
     global listingFiles
     listingFiles = True
+    lastTime = time.time()
     file_list.delete(0, tk.END)  # Clear the current file list
     files = len(os.listdir(directory))
     counter = 0
@@ -67,7 +72,9 @@ def list_files_thread(directory):
                 if b"PNG" in data and current_tab_name == "Textures":
                     file_list.insert(tk.END, file_name)
                 counter += 1
-                status_label.config(text=f"Listing files: {counter}/{files}")
+                if time.time()-lastTime > 0.1:
+                    lastTime = time.time()
+                    status_label.config(text=f"Listing files: {counter}/{files}")
     listingFiles = False
     status_label.config(text="Idling")
 
@@ -145,6 +152,7 @@ def extract_all_from_directory_thread():
     directory = current_directory.get()
     try:
         files = len(os.listdir(directory))
+        lastTime = time.time()
         counter = 0
         for filename in os.listdir(directory):
             file_path = os.path.join(directory, filename)
@@ -177,7 +185,9 @@ def extract_all_from_directory_thread():
                         with open(dest_path, "wb") as f:
                             f.write(data)
             counter += 1
-            status_label.config(text=f"Extracting files: {counter}/{files}")
+            if time.time()-lastTime > 0.1:
+                lastTime = time.time()
+                status_label.config(text=f"Extracting files: {counter}/{files}")
         messagebox.showinfo("Success", "All files were copied successfully.")
     except Exception as e:
         print(e)
