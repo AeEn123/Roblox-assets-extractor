@@ -45,6 +45,7 @@ def delete_directory_contents_thread(directory):
     except Exception as e:
         print(e)
         messagebox.showerror("Error", f"Failed on file {counter}:\n {str(e)}")
+    list_files(current_directory.get())
 
 # Function to start thread
 def delete_directory_contents(directory):
@@ -140,7 +141,7 @@ def add_tab(directory, name=None):
 def delete_all_files(event=None):
     if messagebox.askyesno("Deleting...", "Are you sure you want to delete all files?"):
         delete_directory_contents(current_directory.get())
-        list_files(current_directory.get())
+        
 
 def refresh(event=None):
     list_files(current_directory.get())
