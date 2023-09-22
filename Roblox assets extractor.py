@@ -1,30 +1,15 @@
-ver = 0.04
-print(f"Roblox assets extractor v{ver}")
-print("✓ Byfron friendly")
-print("Please report bugs to https://github.com/AeEn123/Roblox-assets-extractor/issues")
-print("-----{Now loading}-----")
+ver = 0.05
 # Import modules
 import os
 import time
 import shutil
 import tempfile
 import threading
+import subprocess
 
-try:
-    from requests import get
-except ImportError:
-    os.system("pip install requests")
-    from requests import get
-try:
-    import tkinter as tk
-except ImportError:
-    os.system("pip install tk")
-    import tkinter as tk
+import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-# Check for updates
-r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/version.txt", timeout=5)
-newver = float(r.text.strip())
 
 # Function to do thread's work
 def delete_directory_contents_thread(directory):
@@ -113,7 +98,7 @@ def on_file_double_click(event):
         data = data[PNGHead::]
         with open(dest_path, "wb") as f:
             f.write(data)
-    os.system("start " + dest_path)
+    subprocess.Popen(["explorer", dest_path])
     status_label.config(text="Idling")
 
 def on_tab_change(event):
@@ -200,6 +185,35 @@ def extract_all_from_directory(event=None):
     status_label.config(text="Extracting files...")
     threading.Thread(target=extract_all_from_directory_thread).start()
 
+def update():
+    requestsInstalled = False
+    status_label.config(text="Checking for updates...")
+    try:
+        from requests import get
+        requestsInstalled = True
+    except ImportError:
+        if messagebox.askyesno("Requests not installed", "This is used for autoupdating, would you like to install it?"):
+            os.system("pip install requests")
+            from requests import get
+            requestsInstalled = True
+
+    if requestsInstalled:
+        # Check for updates
+        r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/version.txt")
+        newver = float(r.text.strip())
+
+        # Update diolgue
+        if newver > ver:
+            r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/latestchangelog.txt", timeout=5)
+            if messagebox.askyesno("Update available", r.text + "\n\nDo you want to install the new update?"):
+                r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/Roblox%20assets%20extractor.pyw")
+                with open(__file__, "wb") as f:
+                    f.write(r.content)
+                
+                subprocess.Popen(["python", __file__])
+                os._exit(0)
+    status_label.config(text="Idling")
+
 # Init variables
 listingFiles = False
 
@@ -207,16 +221,7 @@ listingFiles = False
 root = tk.Tk()
 root.title(f"Roblox assets extractor v{ver}")
 
-# Update diolgue
-if newver > ver:
-    r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/latestchangelog.txt", timeout=5)
-    if messagebox.askyesno("Update available", r.text + "\n\nDo you want to install the new update?"):
-        r = get("https://raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/main/Roblox%20assets%20extractor.py")
-        with open(__file__, "wb") as f:
-            f.write(r.content)
-        import subprocess
-        subprocess.Popen(["python", __file__])
-        os._exit(0)
+
 
 # Create temporary directory
 temporary_directory_object = tempfile.TemporaryDirectory()
@@ -253,7 +258,7 @@ extract_button = tk.Button(button_frame, text="Extract all from this directory",
 extract_button.pack(side=tk.RIGHT)
 
 # Create status
-status_label = tk.Label(root, text="Idling", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+status_label = tk.Label(root, text="Loading", bd=1, relief=tk.SUNKEN, anchor=tk.W)
 status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
 # Create file list
@@ -272,8 +277,8 @@ file_list.bind("<Double-Button-1>", on_file_double_click)
 
 # Set up tab change event
 tab_control.bind("<<NotebookTabChanged>>", on_tab_change)
+threading.Thread(target=update).start()
 
 # Start GUI event loop
-print("All modules loaded")
 root.mainloop()
 temporary_directory_object.cleanup()
