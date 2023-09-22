@@ -1,3 +1,5 @@
-v0.04--------------------
-+Added multithreading :D
-+Added status thing so you know what the program is doing
+⚠NOTE: DO NOT UPDATE USING AUTOUPDATER, CLICK NO AND DOWNLOAD FROM GITHUB
+v0.05--------------------
++Added multithreading to autoupdater
+=Changed default file format (that's why autoupdater is broken)
+⚠NOTE: DO NOT UPDATE USING AUTOUPDATER, CLICK NO AND DOWNLOAD FROM GITHUB
