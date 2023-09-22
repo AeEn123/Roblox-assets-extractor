@@ -1,3 +1,4 @@
+# ⚠NOTE: If you're running on version 0.4 or under, autoupdate will be broken, please download from here instead.
 # Roblox-assets-extractor
 This tool is to extract cached data from your roblox installation. It does this by looking through the headers of cached files<br>
 This is all in one script, the other files are not required
