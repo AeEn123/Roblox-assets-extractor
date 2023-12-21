@@ -1,4 +1,9 @@
-ver = 0.05
+# Settings
+CacheDirectory = "" # Leave blank for default
+
+# Version
+ver = 0.06
+
 # Import modules
 import os
 import time
@@ -98,7 +103,10 @@ def on_file_double_click(event):
         data = data[PNGHead::]
         with open(dest_path, "wb") as f:
             f.write(data)
-    subprocess.Popen(["explorer", dest_path])
+    if os.name == "nt":
+        subprocess.Popen(["explorer", dest_path])
+    else:
+        subprocess.Popen(["xdg-open", dest_path])
     status_label.config(text="Idling")
 
 def on_tab_change(event):
@@ -216,6 +224,23 @@ def update():
 
 # Init variables
 listingFiles = False
+try:
+    username = os.environ['USER']
+except:
+    username = ""
+if CacheDirectory == "":
+    defaultDirectories = ["%Temp%\\Roblox\\", f"/home/{username}/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefix/drive_c/users/{username}/Temp/Roblox"]
+
+    # Check directories
+    for directory in defaultDirectories:
+        try:
+            d = os.path.expandvars(directory)
+            if os.listdir(d):
+                mainDirectory = directory
+                break
+        except: pass
+else:
+    mainDirectory = CacheDirectory
 
 # Create window
 root = tk.Tk()
@@ -234,14 +259,14 @@ tab_control = ttk.Notebook(tab_frame)
 tab_directory_map = {}
 
 # Add initial tab for main directory
-home_directory = os.path.expandvars("%Temp%\\Roblox\\sounds")
+home_directory = os.path.expandvars(mainDirectory + "/sounds")
 current_directory = tk.StringVar(value=home_directory)
 add_tab(home_directory, "Music")
 current_tab_name = "Music"
 
 # Create other tabs
-add_tab(os.path.expandvars("%Temp%\\Roblox\\http"), "Sounds")
-add_tab(os.path.expandvars("%Temp%\\Roblox\\http"), "Textures")
+add_tab(os.path.expandvars(mainDirectory + "/http"), "Sounds")
+add_tab(os.path.expandvars(mainDirectory + "/http"), "Textures")
 
 # Create buttons
 button_frame = tk.Frame(root)
