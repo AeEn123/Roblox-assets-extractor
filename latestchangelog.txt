@@ -1,5 +1,5 @@
-⚠NOTE: DO NOT UPDATE USING AUTOUPDATER, CLICK NO AND DOWNLOAD FROM GITHUB
-v0.05--------------------
-+Added multithreading to autoupdater
-=Changed default file format (that's why autoupdater is broken)
-⚠NOTE: DO NOT UPDATE USING AUTOUPDATER, CLICK NO AND DOWNLOAD FROM GITHUB
+⚠Note: If you're below v0.05 then please download from github
+v0.06--------------------
++ Added Linux support
++ Added custom directory support
+⚠Note: If you're below v0.05 then please download from github.
