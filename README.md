@@ -13,4 +13,4 @@ Use the delete all button to clear the currently selected cache folder (this is 
 ![Screenshot](https://img.guildedcdn.com/ContentMediaGenericFiles/d64200649953156687eb159ea5efcb25-Full.webp?w=1920&h=1040)
 ## More info
 I am very new to tkinter so please note that the UI does look a bit messy<br>
-Note: This is made for Windows and will not work for any other operating systems <br>
+Note: This is made for Windows and Linux and will not work for any other operating systems <br>
