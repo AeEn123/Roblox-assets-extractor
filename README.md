@@ -30,3 +30,5 @@ If file listing becomes too slow, consider clearing your Roblox cache. You can d
 I am relatively new to Tkinter, so please be aware that the UI may appear a bit messy.
 
 **Note:** This tool is designed for Windows and Linux and may not work on other operating systems.
+
+*I admit. This readme is AI generated. I am really bad at writing up documents. Sorry.*
