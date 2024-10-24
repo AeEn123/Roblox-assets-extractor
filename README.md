@@ -27,7 +27,7 @@ Building from source requires cargo, [which can be installed from rustup.](https
 
 ## 1. Clone the repository
 ```bash
-git clone https://github.com/AeEn123/Roblox-assets-extractor
+git clone -b rust-rewrite https://github.com/AeEn123/Roblox-assets-extractor
 cd Roblox-assets-extractor
 ```
 ## 2. Build with cargo
