@@ -229,7 +229,7 @@ try:
 except:
     username = ""
 if CacheDirectory == "":
-    defaultDirectories = ["%Temp%\\Roblox\\", f"/home/{username}/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefix/drive_c/users/{username}/Temp/Roblox"]
+    defaultDirectories = ["%Temp%\\Roblox\\", f"/home/{username}/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefix/drive_c/users/{username}/Temp/Roblox", f"/home/{username}/.var/app/org.vinegarhq.Sober/cache/sober"]
 
     # Check directories
     for directory in defaultDirectories:

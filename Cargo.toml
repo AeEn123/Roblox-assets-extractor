@@ -1,0 +1,13 @@
+[package]
+name = "Roblox-assets-extractor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.28.1"
+egui = "0.28.1"
+egui_dock = "0.13.0"
+im = "15.1.0"
+lazy_static = "1.5.0"
+tempfile = "3"
+whoami = "1.5.2"
