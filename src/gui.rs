@@ -36,10 +36,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             // Top UI buttons
             ui.horizontal(|ui| {
-                if ui.button("Delete All Files <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                if ui.button("Delete this directory <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
                     logic::delete_all_directory_contents(cache_directory.to_owned());
                 }
-                if ui.button("Extract all from this directory <F2>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
+                if ui.button("Extract all of this type <F2>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
                     println!("Extract");
                 }
                 if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
