@@ -1,6 +1,11 @@
-**NOTE:** Roblox Assets Extractor has been rewritten in Rust with egui. The python version is kept for updating to the rust version.
+> [!CAUTION]
+> # The rust rewrite is unfinished, please use the python version for now
 
-**NOTE:** If you are using version 0.4 or earlier, autoupdate functionality will be broken. In such cases, please download from here instead.
+> [!NOTE]
+> Roblox Assets Extractor has been rewritten in Rust with egui. The python version is kept for updating to the rust version.
+
+> [!NOTE]
+> If you are using version 0.4 or earlier, autoupdate functionality will be broken. In such cases, please download from here instead.
 
 # Roblox Assets Extractor
 This tool is designed to extract cached data from your Roblox installation by inspecting the headers of cached files.
@@ -13,7 +18,8 @@ Use the "Delete All" button to clear the currently selected cache folder. This i
 ## More Info
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
 
-**Note:** This tool is designed for Windows and Linux and may not work on other operating systems.
+> [!IMPORTANT]
+> This tool is designed for Windows and Linux and may not work on other operating systems.
 
 # Building from source
 
@@ -52,6 +58,7 @@ Info below here is about the python version, and would not apply if you are usin
 ## More Info
 I am relatively new to Tkinter, so please be aware that the UI may appear a bit messy.
 
-If file listing becomes too slow, consider clearing your Roblox cache. You can do this by navigating to your cache folder (%Temp%\Roblox) and deleting all the files.
+> [!TIP]
+> If file listing becomes too slow, consider clearing your Roblox cache. You can do this by navigating to your cache folder (%Temp%\Roblox) and deleting all the files.
 
 *I admit. This readme is AI generated. I am really bad at writing up documents. Sorry.*
