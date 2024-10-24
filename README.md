@@ -10,6 +10,22 @@
 # Roblox Assets Extractor
 This tool is designed to extract cached data from your Roblox installation by inspecting the headers of cached files.
 
+# FAQ
+### Is this malware?
+No, this is not malware, similar to other Free and Open Source applications, the code is available for everyone to see. It would be impossible for me to hide malware in here, if you are still not confident, you can always check the source code and [build it yourself!](https://github.com/AeEn123/Roblox-assets-extractor/tree/rust-rewrite?tab=readme-ov-file#building-from-source)
+
+### Can this get me banned?
+No, unlike cheats, this does not inject into roblox. Making this an anti-cheat friendly way of extracting assets. I have been using this myself for years and I have not got any account warnings because of it.
+
+### Are you sure this won't get me banned?
+Take a look at the source code and see for yourself, this does not inject into applications, it doesn't even require admin rights. It **only reads** cache files from your %temp%\Roblox directory, **which roblox themselves** recommends to **modify** if something goes wrong.
+
+### My extracted assets don’t play in my media player, what can I do?
+Some media players may not support the format that the file is in. If that is the case, please try another media player that supports all of the formats this supports, e.g VLC. **If the file is really broken, please [create an issue.](https://github.com/AeEn123/Roblox-assets-extractor/issues)**
+
+### Can I switch to the light/dark theme?
+Yes, the theme of the program automatically syncs to your system theme.
+
 ## Usage
 You can extract Roblox music, sounds, and textures from your Roblox cache (ensure your client is open for music).
 
