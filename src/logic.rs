@@ -5,8 +5,10 @@ use lazy_static::lazy_static;
 
 // Define static values
 lazy_static! {
+    
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(String::new());
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
+    static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_RUNNING: Mutex<bool> = Mutex::new(false);
@@ -24,6 +26,7 @@ fn update_status(value: String) {
     *request = true;
 }
 
+// Define public functions
 pub fn detect_directory() {
     // Directory detection
     for directory in DEFAULT_DIRECTORIES {
@@ -122,6 +125,14 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
+pub fn refresh(tab: String) {
+    println!("Refresh: {}", tab)
+}
+
+pub fn get_file_list() -> Vec<String> {
+    FILE_LIST.lock().unwrap().clone()
+}
+
 pub fn get_cache_directory() -> String {
     CACHE_DIRECTORY.lock().unwrap().clone()
 }
@@ -130,10 +141,15 @@ pub fn get_status() -> String {
     STATUS.lock().unwrap().clone()
 }
 
+pub fn get_task_running() -> bool {
+    TASK_RUNNING.lock().unwrap().clone()
+}
+
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
+    let old_request_repaint = request_repaint.clone();
     *request_repaint = false;
-    return !*request_repaint
+    return old_request_repaint
 }
 
 pub fn double_click(value: usize) {
