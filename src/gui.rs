@@ -3,7 +3,6 @@ use native_dialog::{FileDialog, MessageDialog, MessageType};
 use egui_dock::{DockArea, DockState, Style};
 use crate::logic;
 
-const ICO_ICON: &[u8; 11951] = include_bytes!("../assets/icon.ico");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 
@@ -203,14 +202,11 @@ impl eframe::App for MyApp {
 
 pub fn run_gui() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder {
-            icon: Some(egui::IconData{
-                rgba: ICO_ICON.to_vec(),
-                width: 512,
-                height: 512,
-            }.into()),
-            ..Default::default()
-        },
+        viewport: egui::ViewportBuilder::default()
+            .with_icon(
+                eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon.png")[..])
+                    .expect("Failed to load icon"),
+            ),
         ..Default::default()
     };
     
