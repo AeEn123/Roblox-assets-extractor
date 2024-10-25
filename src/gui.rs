@@ -39,6 +39,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             // Top UI buttons
             ui.horizontal(|ui| {
+                // Confirmation dialog
                 if ui.button("Delete this directory <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
                     let yes = MessageDialog::new()
                     .set_type(MessageType::Info)
