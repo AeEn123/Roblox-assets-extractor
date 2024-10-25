@@ -65,12 +65,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // Allow the user to select up and down using arrow key
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
                 if let Some(selected) = *self.selected {
-                    if selected > 1 {
+                    if selected > 0 {
                         *self.selected = Some(selected - 1);
                         scroll_to = Some(selected - 1);
                     }
                 } else {
-                    *self.selected = Some(1);  // Start at the first label if nothing is selected
+                    *self.selected = Some(0);  // Start at the first label if nothing is selected
                 }
             }
 

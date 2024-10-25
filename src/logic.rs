@@ -3,6 +3,7 @@ use std::thread;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
+// Define static values
 lazy_static! {
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(String::new());
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
@@ -14,6 +15,14 @@ lazy_static! {
 
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"];
 // For windows and linux (sober)
+
+// Define local functions
+fn update_status(value: String) {
+    let mut status = STATUS.lock().unwrap();
+    *status = value;
+    let mut request = REQUEST_REPAINT.lock().unwrap();
+    *request = true;
+}
 
 pub fn detect_directory() {
     // Directory detection
@@ -65,24 +74,31 @@ pub fn delete_all_directory_contents(dir: String) {
 
                         for entry in entries {
                             count += 1; // Increase counter for progress
-                            match fs::remove_file(entry.unwrap().path()) {
-                                // Error handling and update status
-                                Ok(_) => {
-                                    let mut status = STATUS.lock().unwrap();
-                                    *status = format!("Deleting files ({count}/{total})");
-                                    let mut request = REQUEST_REPAINT.lock().unwrap();
-                                    *request = true;
-                                }
+                            let path = entry.unwrap().path();
+                            if path.is_dir() {
+                                match fs::remove_dir_all(path) {
+                                    // Error handling and update status
+                                    Ok(_) => update_status(format!("Deleting files ({count}/{total})")),
 
-                                // If it's an error, log it and show on GUI
-                                Err(e) => {
-                                    println!("ERROR: Failed to delete file: {}: {}", count, e);
-                                    let mut status = STATUS.lock().unwrap();
-                                    *status = format!("ERROR: Failed to delete ({count}/{total})");
-                                    let mut request = REQUEST_REPAINT.lock().unwrap();
-                                    *request = true;
+                                    // If it's an error, log it and show on GUI
+                                    Err(e) => {
+                                        println!("ERROR: Failed to delete file: {}: {}", count, e);
+                                        update_status(format!("ERROR: Failed to delete ({count}/{total})"));
+                                    }
                                 }
-                            }                            
+                            } else {
+                                match fs::remove_file(path) {
+                                    // Error handling and update status
+                                    Ok(_) => update_status(format!("Deleting files ({count}/{total})")),
+    
+                                    // If it's an error, log it and show on GUI
+                                    Err(e) => {
+                                        println!("ERROR: Failed to delete file: {}: {}", count, e);
+                                        update_status(format!("ERROR: Failed to delete ({count}/{total})"));
+                                    }
+                                }    
+                            }
+                        
                             
                         }
                         { 
@@ -114,21 +130,11 @@ pub fn get_status() -> String {
     STATUS.lock().unwrap().clone()
 }
 
-// pub fn set_status(value: String) {
-//     let mut status = STATUS.lock().unwrap();
-//     *status = value
-// }
-
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
     *request_repaint = false;
     return !*request_repaint
 }
-
-// pub fn set_request_repaint(value: bool) {
-//     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
-//     *request_repaint = value
-// }
 
 pub fn double_click(value: usize) {
     let mut status = STATUS.lock().unwrap();
