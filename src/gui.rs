@@ -1,4 +1,5 @@
 use eframe::egui;
+use native_dialog::{FileDialog, MessageDialog, MessageType};
 use egui_dock::{DockArea, DockState, Style};
 use crate::logic;
 
@@ -39,7 +40,16 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // Top UI buttons
             ui.horizontal(|ui| {
                 if ui.button("Delete this directory <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
-                    logic::delete_all_directory_contents(cache_directory.to_owned());
+                    let yes = MessageDialog::new()
+                    .set_type(MessageType::Info)
+                    .set_title("Confirmation")
+                    .set_text("Are you sure you want to delete all files in this directory?")
+                    .show_confirm()
+                    .unwrap();
+            
+                    if yes {
+                        logic::delete_all_directory_contents(cache_directory.to_owned());
+                    }                    
                 }
                 if ui.button("Extract all of this type <F2>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
                     println!("Extract");
