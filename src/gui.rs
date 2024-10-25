@@ -1,9 +1,11 @@
-use eframe::{egui, NativeOptions};
+use eframe::egui;
 use egui_dock::{DockArea, DockState, Style};
+use crate::logic;
 
+const ICO_ICON: &[u8; 11951] = include_bytes!("../assets/icon.ico");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-use crate::logic;
+
 
 struct TabViewer<'a> {
     // passing selected label to TabViewer
@@ -189,7 +191,18 @@ impl eframe::App for MyApp {
 }
 
 pub fn run_gui() -> eframe::Result {
-    let options = NativeOptions::default();
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder {
+            icon: Some(egui::IconData{
+                rgba: ICO_ICON.to_vec(),
+                width: 512,
+                height: 512,
+            }.into()),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    
     eframe::run_native(
         &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
         options,

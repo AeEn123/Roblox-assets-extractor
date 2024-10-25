@@ -33,7 +33,7 @@ pub fn detect_directory() {
                 }
             }
             Err(e) => {
-                println!("WARN: {directory}: {e}\n↑↑↑Happened during directory detection, you can safely ignore it.");
+                println!("WARN: {directory}: {e}");
             }
         }
 

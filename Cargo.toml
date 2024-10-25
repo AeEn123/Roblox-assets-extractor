@@ -11,3 +11,6 @@ im = "15.1.0"
 lazy_static = "1.5.0"
 tempfile = "3"
 whoami = "1.5.2"
+
+[build-dependencies]
+winresource = "0.1.17"
