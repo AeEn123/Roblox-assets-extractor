@@ -15,7 +15,7 @@ This tool is designed to extract cached data from your Roblox installation by in
 No, this is not malware, similar to other Free and Open Source applications, the code is available for everyone to see. It would be impossible for me to hide malware in here, if you are still not confident, you can always check the source code and [build it yourself!](https://github.com/AeEn123/Roblox-assets-extractor/tree/rust-rewrite?tab=readme-ov-file#building-from-source)
 
 ### Can this get me banned?
-No, unlike cheats, this does not inject into roblox. Making this an anti-cheat friendly way of extracting assets. I have been using this myself for years and I have not got any account warnings because of it.
+No, unlike cheats, this **does not** inject into roblox. Making this an anti-cheat friendly way of extracting assets. I have been using this myself for years and I have not got any account warnings because of it.
 
 ### Are you sure this won't get me banned?
 Take a look at the source code and see for yourself, this does not inject into applications, it doesn't even require admin rights. It **only reads** cache files from your %temp%\Roblox directory, **which roblox themselves** recommends to **modify** if something goes wrong.

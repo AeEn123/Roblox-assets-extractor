@@ -1,7 +1,6 @@
 use std::fs;
 use std::thread;
 use std::sync::Mutex;
-use std::time::Duration;
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -41,6 +40,7 @@ pub fn detect_directory() {
 }
 
 pub fn delete_all_directory_contents(dir: String) {
+    // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
             if metadata.is_dir() {
@@ -55,18 +55,35 @@ pub fn delete_all_directory_contents(dir: String) {
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = true;
                         }
-                        for entry in fs::read_dir(dir).unwrap() {
-                            println!("{}", entry.unwrap().path().display());
-                        }
-                        for i in 1..10000 {
-                            // Update status and request refresh
-                            {
-                                let mut status = STATUS.lock().unwrap();
-                                *status = format!("Deleting files ({i}/10000)");
-                                let mut request = REQUEST_REPAINT.lock().unwrap();
-                                *request = true;
-                            }
-                            thread::sleep(Duration::from_millis(1));
+                        
+                        // Read directory
+                        let entries: Vec<_> = fs::read_dir(dir).unwrap().collect();
+
+                        // Get amount and initlilize counter for progress
+                        let total = entries.len();
+                        let mut count = 0;
+
+                        for entry in entries {
+                            count += 1; // Increase counter for progress
+                            match fs::remove_file(entry.unwrap().path()) {
+                                // Error handling and update status
+                                Ok(_) => {
+                                    let mut status = STATUS.lock().unwrap();
+                                    *status = format!("Deleting files ({count}/{total})");
+                                    let mut request = REQUEST_REPAINT.lock().unwrap();
+                                    *request = true;
+                                }
+
+                                // If it's an error, log it and show on GUI
+                                Err(e) => {
+                                    println!("ERROR: Failed to delete file: {}: {}", count, e);
+                                    let mut status = STATUS.lock().unwrap();
+                                    *status = format!("ERROR: Failed to delete ({count}/{total})");
+                                    let mut request = REQUEST_REPAINT.lock().unwrap();
+                                    *request = true;
+                                }
+                            }                            
+                            
                         }
                         { 
                             let mut task = TASK_RUNNING.lock().unwrap();
