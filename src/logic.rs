@@ -1,4 +1,5 @@
 use std::fs;
+use std::fs::File;
 use std::thread;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -10,8 +11,11 @@ lazy_static! {
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
-    static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false);
-    static ref STOP_RUNNING: Mutex<bool> = Mutex::new(false);
+
+
+    static ref DELETE_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
+    static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
+    static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
 }
 
 
@@ -57,14 +61,14 @@ pub fn delete_all_directory_contents(dir: String) {
         Ok(metadata) => {
             if metadata.is_dir() {
                 let running = {
-                    let task = TASK_RUNNING.lock().unwrap();
+                    let task = DELETE_TASK_RUNNING.lock().unwrap();
                     task.clone()
                 };
                 // Stop multiple threads from running
                 if running == false {
                     thread::spawn(|| {
                         { 
-                            let mut task = TASK_RUNNING.lock().unwrap();
+                            let mut task = DELETE_TASK_RUNNING.lock().unwrap();
                             *task = true;
                         }
                         
@@ -105,7 +109,7 @@ pub fn delete_all_directory_contents(dir: String) {
                             
                         }
                         { 
-                            let mut task = TASK_RUNNING.lock().unwrap();
+                            let mut task = DELETE_TASK_RUNNING.lock().unwrap();
                             *task = false;
                         }
                     });
@@ -125,8 +129,81 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
-pub fn refresh(tab: String) {
-    println!("Refresh: {}", tab)
+pub fn refresh(dir: String) {
+    // Bunch of error checking to check if it's a valid directory
+    match fs::metadata(dir.clone()) {
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                thread::spawn(|| {
+                    // This loop here is to make it wait until it is not running, and to set the STOP_LIST_RUNNING to true if it is running to make the other thread
+                    loop {
+                        let running = {
+                            let task = LIST_TASK_RUNNING.lock().unwrap();
+                            task.clone()
+                        };
+                        if !running {
+                            break // Break if not running
+                        } else {
+                            let mut stop = STOP_LIST_RUNNING.lock().unwrap(); // Tell the other thread to stop
+                            *stop = true;
+                        }
+                        thread::sleep(std::time::Duration::from_millis(10)); // Sleep for a bit to not be CPU intensive
+                    }
+                    { 
+                        let mut task = LIST_TASK_RUNNING.lock().unwrap();
+                        *task = true;
+                        let mut stop = STOP_LIST_RUNNING.lock().unwrap();
+                        *stop = false;
+                    }
+                    
+                    // Read directory
+                    let entries: Vec<_> = fs::read_dir(dir).unwrap().collect();
+
+                    // Get amount and initlilize counter for progress
+                    let total = entries.len();
+                    let mut count = 0;
+
+                    for entry in entries {
+                        let stop = {
+                            let stop_task = STOP_LIST_RUNNING.lock().unwrap();
+                            stop_task.clone()
+                        };
+
+                        if stop {
+                            break // Stop if another thread requests to stop this task.
+                        }
+                        
+                        count += 1; // Increase counter for progress
+                        let path = entry.unwrap().path();
+                        let display = path.display();
+
+                        let safe = true; // TODO: make this false when error and use this to check if it is safe to proceeed.
+                        
+                        let mut file = match File::open(&path) {
+                            Err(why) => panic!("couldn't open {}: {}", display, why),
+                            Ok(file) => file,
+                        };
+                    
+                        
+                    }
+                    { 
+                        let mut task = LIST_TASK_RUNNING.lock().unwrap();
+                        *task = false;
+                    }
+                });
+            // Error handling just so the program doesn't crash for seemingly no reason
+            } else {
+                let mut status = STATUS.lock().unwrap();
+                *status = format!("Error: check logs for more details.");
+                println!("ERROR: Directory detection failed.")
+            }
+        }
+        Err(e) => {
+            let mut status = STATUS.lock().unwrap();
+            *status = format!("Error: '{dir}' is not a valid directory: {e}");
+            println!("ERROR: Directory detection failed. {}", format!("'{dir}' is not a valid directory: {e}"))
+        }
+    }
 }
 
 pub fn get_file_list() -> Vec<String> {
@@ -148,9 +225,6 @@ pub fn get_status() -> String {
     STATUS.lock().unwrap().clone()
 }
 
-pub fn get_task_running() -> bool {
-    TASK_RUNNING.lock().unwrap().clone()
-}
 
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
