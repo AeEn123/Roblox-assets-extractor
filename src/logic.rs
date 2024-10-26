@@ -134,7 +134,14 @@ pub fn get_file_list() -> Vec<String> {
 }
 
 pub fn get_cache_directory() -> String {
-    CACHE_DIRECTORY.lock().unwrap().clone()
+    let cache_dir = {
+        CACHE_DIRECTORY.lock().unwrap().clone()
+    };
+    if cache_dir == "" {
+        panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
+    } else {
+        cache_dir
+    }
 }
 
 pub fn get_status() -> String {

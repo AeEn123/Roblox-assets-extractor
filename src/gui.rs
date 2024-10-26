@@ -162,7 +162,21 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         } else {
             // This is only shown in the settings tab
-            ui.label("Settings");
+            ui.heading("Settings");
+
+            ui.label("If it is taking too long to list files and extracting all from a directory, you can clear your roblox cache with the button below. This removes all files from your cache and your roblox client will automatically re-create these files when these assets are needed again.");
+            if ui.button("Clear roblox cache").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                let yes = MessageDialog::new()
+                .set_type(MessageType::Info)
+                .set_title("Confirmation")
+                .set_text("Are you sure you want to clear your roblox cache?")
+                .show_confirm()
+                .unwrap();
+        
+                if yes {
+                    logic::delete_all_directory_contents(logic::get_cache_directory().to_owned());
+                }                    
+            }     
         }
 
     }
