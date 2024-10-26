@@ -10,7 +10,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
-    current_tab: Option<String>
+    current_tab: &'a mut Option<String>
 }
 
 
@@ -35,19 +35,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
         }
 
-        // Detect if tab changed and do a refresh if so
-        if let Some(current_tab) = &self.current_tab {
-            if current_tab.to_owned() != tab.to_owned() {
-                self.current_tab = Some(tab.to_owned());
-                logic::refresh(tab.to_owned());
-            }
-        } else {
-            self.current_tab = Some(tab.to_owned());
-            logic::refresh(tab.to_owned());
-        }
-
         if tab != "Settings" {
             // This is only shown on tabs other than settings (Extracting assets)
+
+            // Detect if tab changed and do a refresh if so
+            if let Some(current_tab) = self.current_tab {
+                if current_tab.to_owned() != tab.to_owned() {
+                    *self.current_tab = Some(tab.to_owned());
+                    logic::refresh(tab.to_owned());
+                }
+            } else {
+                *self.current_tab = Some(tab.to_owned());
+                logic::refresh(tab.to_owned());
+            }
             
             // Top UI buttons
             ui.horizontal(|ui| {
@@ -204,7 +204,7 @@ impl eframe::App for MyApp {
             .show(ctx, &mut TabViewer { 
                 // Pass selected as a mutable referance
                 selected: &mut self.selected,
-                current_tab: self.current_tab.clone(),
+                current_tab: &mut self.current_tab,
             });
         
         {
