@@ -1,5 +1,6 @@
 use std::fs;
 use std::fs::File;
+use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -129,12 +130,13 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
-pub fn refresh(dir: String) {
+pub fn refresh(dir: String, mode: String) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
             if metadata.is_dir() {
-                thread::spawn(|| {
+                
+                thread::spawn(move || {
                     // This loop here is to make it wait until it is not running, and to set the STOP_LIST_RUNNING to true if it is running to make the other thread
                     loop {
                         let running = {
@@ -162,13 +164,11 @@ pub fn refresh(dir: String) {
                     // Get amount and initlilize counter for progress
                     let total = entries.len();
                     let mut count = 0;
-
                     for entry in entries {
                         let stop = {
                             let stop_task = STOP_LIST_RUNNING.lock().unwrap();
                             stop_task.clone()
                         };
-
                         if stop {
                             break // Stop if another thread requests to stop this task.
                         }
@@ -177,14 +177,26 @@ pub fn refresh(dir: String) {
                         let path = entry.unwrap().path();
                         let display = path.display();
 
-                        let safe = true; // TODO: make this false when error and use this to check if it is safe to proceeed.
-                        
-                        let mut file = match File::open(&path) {
-                            Err(why) => panic!("couldn't open {}: {}", display, why),
-                            Ok(file) => file,
+                        match &mut File::open(&path) {
+                            Err(why) => {
+                                println!("ERROR: couldn't open {}: {}", display, why);
+                                update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                            },
+                            Ok(file) => {
+                                let mut buffer = vec![0; 2048];
+                                match file.read(&mut buffer) {
+                                    Err(why) => {
+                                        println!("ERROR: couldn't open {}: {}", display, why);
+                                        update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                    },
+                                    Ok(bytes_read) => {
+                                        buffer.truncate(bytes_read);
+                                        print!("{:?}, ", bytes_read);
+                                    }
+                                }
+                                
+                            },
                         };
-                    
-                        
                     }
                     { 
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();
