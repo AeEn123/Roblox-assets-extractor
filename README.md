@@ -35,7 +35,7 @@ Use the "Delete All" button to clear the currently selected cache folder. This i
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
 
 > [!IMPORTANT]
-> This tool is designed for Windows and Linux and may not work on other operating systems.
+> This tool is designed for Windows and GNU/Linux and may not work on other operating systems.
 
 # Building from source
 
