@@ -14,8 +14,8 @@ This tool is designed to extract cached data from your Roblox installation by in
 ### Is this malware?
 No, this is not malware, similar to other Free and Open Source applications, the code is available for everyone to see. It would be impossible for me to hide malware in here, if you are still not confident, you can always check the source code and [build it yourself!](https://github.com/AeEn123/Roblox-assets-extractor/tree/rust-rewrite?tab=readme-ov-file#building-from-source)
 
-### Windows says "This program may harm your device." What do I do?
-Firstly, This program should not harm your device, but if Windows detects a program from an unverified publisher, this popup will appear. If this popup does appear, click read more and click allow anyways.
+### Windows says "Windows protected your PC" What do I do?
+If Windows detects a program from an unverified publisher, this popup will appear. If this popup does appear, click "More info" and click "Run anyway".
 
 ### Can this get me banned?
 No, unlike cheats, this **does not** inject into roblox. Making this an anti-cheat friendly way of extracting assets. I have been using this myself for years and I have not got any account warnings because of it.
