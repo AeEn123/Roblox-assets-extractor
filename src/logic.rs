@@ -31,6 +31,16 @@ fn update_status(value: String) {
     *request = true;
 }
 
+fn update_file_list(value: String) {
+    let mut file_list = FILE_LIST.lock().unwrap();
+    file_list.push(value)
+}
+
+fn clear_file_list() {
+    let mut file_list = FILE_LIST.lock().unwrap();
+    *file_list = Vec::new()
+}
+
 // Define public functions
 pub fn detect_directory() {
     // Directory detection
@@ -157,7 +167,9 @@ pub fn refresh(dir: String, mode: String) {
                         let mut stop = STOP_LIST_RUNNING.lock().unwrap();
                         *stop = false;
                     }
-                    
+
+                    clear_file_list(); // Only list the files on the current tab
+
                     // Read directory
                     let entries: Vec<_> = fs::read_dir(dir).unwrap().collect();
 
@@ -177,26 +189,32 @@ pub fn refresh(dir: String, mode: String) {
                         let path = entry.unwrap().path();
                         let display = path.display();
 
-                        match &mut File::open(&path) {
-                            Err(why) => {
-                                println!("ERROR: couldn't open {}: {}", display, why);
-                                update_status(format!("ERROR: couldn't open ({count}/{total})"));
-                            },
-                            Ok(file) => {
-                                let mut buffer = vec![0; 2048];
-                                match file.read(&mut buffer) {
-                                    Err(why) => {
-                                        println!("ERROR: couldn't open {}: {}", display, why);
-                                        update_status(format!("ERROR: couldn't open ({count}/{total})"));
-                                    },
-                                    Ok(bytes_read) => {
-                                        buffer.truncate(bytes_read);
-                                        print!("{:?}, ", bytes_read);
+                        if let Some(filename) = path.file_name() {
+                            match &mut File::open(&path) {
+                                Err(why) => {
+                                    println!("ERROR: couldn't open {}: {}", display, why);
+                                    update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                },
+                                Ok(file) => {
+                                    let mut buffer = vec![0; 2048];
+                                    match file.read(&mut buffer) {
+                                        Err(why) => {
+                                            println!("ERROR: couldn't open {}: {}", display, why);
+                                            update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                        },
+                                        Ok(bytes_read) => {
+                                            buffer.truncate(bytes_read);
+                                            
+                                            {
+                                                update_file_list(filename.to_string_lossy().to_string());   
+                                            }
+                                            update_status(format!("Reading files ({count}/{total})"));
+                                        }
                                     }
-                                }
-                                
-                            },
-                        };
+                                    
+                                },
+                            };
+                        }
                     }
                     { 
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();

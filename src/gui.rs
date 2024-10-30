@@ -1,7 +1,7 @@
 use eframe::egui;
 use native_dialog::{FileDialog, MessageDialog, MessageType};
 use egui_dock::{DockArea, DockState, Style};
-use crate::logic::{self, refresh};
+use crate::logic::{self};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -103,58 +103,62 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     logic::double_click(selected);
                 }
             }
+
+            let file_list = logic::get_file_list();
             
             // Scroll area which contains the assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
                 ui,
                 ui.text_style_height(&egui::TextStyle::Body),
-                1500,
+                file_list.len(),
                 |ui, row_range| {
-                    for i in row_range {
-                    let label_text = format!("Clickable Label {i}");
-                    
-                    let is_selected = *self.selected == Some(i); // Check if this current one is selected
+                for i in row_range {
+                    if let Some(file_name) = file_list.get(i) {
+                        let label_text = file_name;
+                        
+                        let is_selected = *self.selected == Some(i); // Check if this current one is selected
 
-                    let visuals = ui.visuals();
+                        let visuals = ui.visuals();
 
-                    let background_colour = if is_selected {
-                        // Use different colours for light mode and dark mode for good contrast
-                        if visuals.dark_mode {
-                            egui::Color32::from_rgb(0, 50, 100) // This colour matches with dark egui nicely
+                        let background_colour = if is_selected {
+                            // Use different colours for light mode and dark mode for good contrast
+                            if visuals.dark_mode {
+                                egui::Color32::from_rgb(0, 50, 100) // This colour matches with dark egui nicely
+                            } else {
+                                egui::Color32::from_rgb(0, 140, 255) // Not sure if this is the best colour for light theme, do a pull request to change the colour if you want
+                            }
                         } else {
-                            egui::Color32::from_rgb(0, 140, 255) // Not sure if this is the best colour for light theme, do a pull request to change the colour if you want
+                            egui::Color32::TRANSPARENT // No background colour if not selected
+                        };
+                
+                        // Using a rect to allow the user to click across the entire list, not just the text
+                        let full_width = ui.available_width();
+                        let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
+                        let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
+                        // Draw the background color
+                        ui.painter().rect_filled(rect, 0.0, background_colour);
+
+                        // Draw the text
+                        ui.painter().text(
+                            rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
+                            egui::Align2::LEFT_TOP,
+                            label_text,
+                            egui::TextStyle::Body.resolve(ui.style()),
+                            ui.visuals().text_color(),
+                        );
+
+                        // Handle the click/double click
+                        if response.clicked() && is_selected {
+                            logic::double_click(i);
+                        } else if response.clicked() {
+                            *self.selected = Some(i);
                         }
-                    } else {
-                        egui::Color32::TRANSPARENT // No background colour if not selected
-                    };
-            
-                    // Using a rect to allow the user to click across the entire list, not just the text
-                    let full_width = ui.available_width();
-                    let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
-                    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
 
-                    // Draw the background color
-                    ui.painter().rect_filled(rect, 0.0, background_colour);
-
-                    // Draw the text
-                    ui.painter().text(
-                        rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
-                        egui::Align2::LEFT_TOP,
-                        label_text,
-                        egui::TextStyle::Body.resolve(ui.style()),
-                        ui.visuals().text_color(),
-                    );
-
-                    // Handle the click/double click
-                    if response.clicked() && is_selected {
-                        logic::double_click(i);
-                    } else if response.clicked() {
-                        *self.selected = Some(i);
-                    }
-
-                    // Handle keyboard scrolling
-                    if scroll_to == Some(i) {
-                        response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
+                        // Handle keyboard scrolling
+                        if scroll_to == Some(i) {
+                            response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
+                        }
                     }
                 }
             });
