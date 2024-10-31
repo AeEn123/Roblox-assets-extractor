@@ -51,10 +51,6 @@ fn main() -> eframe::Result<()> {
             panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
         }
         logic::refresh(cache_directory, tab, true);
-        let file_list = logic::get_file_list();
-        for file in file_list {
-            println!("{}", file);
-        }
         Ok(())
     } else {
         // Otherwise, run the GUI

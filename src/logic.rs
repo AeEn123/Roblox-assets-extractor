@@ -31,7 +31,10 @@ fn update_status(value: String) {
     *request = true;
 }
 
-fn update_file_list(value: String) {
+fn update_file_list(value: String, cli_list_mode: bool) {
+    if cli_list_mode {
+        println!("{}", value);
+    }
     let mut file_list = FILE_LIST.lock().unwrap();
     file_list.push(value)
 }
@@ -43,6 +46,8 @@ fn clear_file_list() {
 
 // Define public functions
 pub fn detect_directory() {
+    let mut errors = "".to_owned();
+    let mut success = false;
     // Directory detection
     for directory in DEFAULT_DIRECTORIES {
         let resolved_directory = directory
@@ -55,15 +60,22 @@ pub fn detect_directory() {
                 if metadata.is_dir() {
                     let mut cache_dir = CACHE_DIRECTORY.lock().unwrap();
                     *cache_dir = resolved_directory;
+                    success = true;
                     break;
                 }
             }
             Err(e) => {
-                println!("WARN: {directory}: {e}");
+                errors.push_str(&format!("\n{}: {}",directory, e.to_string()));
             }
         }
+        
 
     }
+    
+    if !success {
+        println!("WARN: Directory detection failed:{}", errors)
+    }
+
 }
 
 pub fn delete_all_directory_contents(dir: String) {
@@ -140,7 +152,7 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
-pub fn refresh(dir: String, mode: String, yield_for_thread: bool) {
+pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -206,7 +218,7 @@ pub fn refresh(dir: String, mode: String, yield_for_thread: bool) {
                                             buffer.truncate(bytes_read);
                                             
                                             {
-                                                update_file_list(filename.to_string_lossy().to_string());   
+                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);   
                                             }
                                             update_status(format!("Reading files ({count}/{total})"));
                                         }
@@ -221,7 +233,8 @@ pub fn refresh(dir: String, mode: String, yield_for_thread: bool) {
                         *task = false;
                     }
                 });
-                if yield_for_thread {
+
+                if cli_list_mode {
                     handle.join();
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
