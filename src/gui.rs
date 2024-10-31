@@ -5,8 +5,6 @@ use crate::logic::{self};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-
-
 struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
@@ -42,11 +40,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             if let Some(current_tab) = self.current_tab {
                 if current_tab.to_owned() != tab.to_owned() {
                     *self.current_tab = Some(tab.to_owned());
-                    logic::refresh(cache_directory.to_owned(), tab.to_owned());
+                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
                 }
             } else {
                 *self.current_tab = Some(tab.to_owned());
-                logic::refresh(cache_directory.to_owned(), tab.to_owned());
+                logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
             }
             
             // Top UI buttons

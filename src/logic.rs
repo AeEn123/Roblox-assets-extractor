@@ -140,13 +140,13 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
-pub fn refresh(dir: String, mode: String) {
+pub fn refresh(dir: String, mode: String, yield_for_thread: bool) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
             if metadata.is_dir() {
                 
-                thread::spawn(move || {
+                let handle = thread::spawn(move || {
                     // This loop here is to make it wait until it is not running, and to set the STOP_LIST_RUNNING to true if it is running to make the other thread
                     loop {
                         let running = {
@@ -221,6 +221,9 @@ pub fn refresh(dir: String, mode: String) {
                         *task = false;
                     }
                 });
+                if yield_for_thread {
+                    handle.join();
+                }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
                 let mut status = STATUS.lock().unwrap();
