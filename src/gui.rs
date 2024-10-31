@@ -1,5 +1,5 @@
 use eframe::egui;
-use native_dialog::{FileDialog, MessageDialog, MessageType};
+use native_dialog::{MessageDialog, MessageType};
 use egui_dock::{DockArea, DockState, Style};
 use crate::logic::{self};
 

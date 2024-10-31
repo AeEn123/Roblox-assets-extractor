@@ -3,7 +3,7 @@
 mod gui;
 mod logic;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, ValueEnum};
 
 #[derive(ValueEnum, Clone, Debug)]
 enum Category {

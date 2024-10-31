@@ -71,7 +71,7 @@ pub fn detect_directory() {
         
 
     }
-    
+
     if !success {
         println!("WARN: Directory detection failed:{}", errors)
     }
