@@ -217,7 +217,7 @@ impl eframe::App for MyApp {
         {
             // allow for different threads to request refresh
             if logic::get_request_repaint() {
-                ctx.request_repaint();
+                ctx.request_repaint_after(std::time::Duration::from_millis(250));
             }
         }
     }

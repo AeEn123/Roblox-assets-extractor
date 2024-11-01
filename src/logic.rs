@@ -141,9 +141,9 @@ pub fn delete_all_directory_contents(dir: String) {
                         }
                         { 
                             let mut task = DELETE_TASK_RUNNING.lock().unwrap();
-                            *task = false;
+                            *task = false; // Allow other threads to run again
                         }
-                        update_status("Idling".to_owned());
+                        update_status("Idling".to_owned()); // Set the status back
                     });
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
@@ -240,8 +240,9 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     }
                     { 
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();
-                        *task = false;
+                        *task = false; // Allow other threads to run again
                     }
+                    update_status("Idling".to_owned()); // Set the status back
                 });
 
                 if cli_list_mode {
