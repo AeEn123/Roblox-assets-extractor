@@ -304,7 +304,7 @@ pub fn get_request_repaint() -> bool {
     return old_request_repaint
 }
 
-pub fn double_click(value: usize) {
+pub fn double_click(value: String) {
     let mut status = STATUS.lock().unwrap();
     *status = format!("Double clicked {}", value);
 }

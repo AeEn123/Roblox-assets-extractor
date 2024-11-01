@@ -95,14 +95,17 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
             }
 
+            let file_list = logic::get_file_list(); // Get file list here since it is accessed heavily after this
+
             // Allow the user to confirm with enter
             if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                 if let Some(selected) = *self.selected {
-                    logic::double_click(selected);
+                    // Get file name after getting the selected value
+                    if let Some(file_name) = file_list.get(selected) {
+                        logic::double_click(file_name.to_string());
+                    }                   
                 }
-            }
-
-            let file_list = logic::get_file_list();
+            }           
             
             // Scroll area which contains the assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
@@ -111,9 +114,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 file_list.len(),
                 |ui, row_range| {
                 for i in row_range {
-                    if let Some(file_name) = file_list.get(i) {
-                        let label_text = file_name;
-                        
+                    if let Some(file_name) = file_list.get(i) {                        
                         let is_selected = *self.selected == Some(i); // Check if this current one is selected
 
                         let visuals = ui.visuals();
@@ -144,14 +145,14 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         ui.painter().text(
                             rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
                             egui::Align2::LEFT_TOP,
-                            label_text,
+                            file_name,
                             egui::TextStyle::Body.resolve(ui.style()),
                             text_colour,
                         );
 
                         // Handle the click/double click
                         if response.clicked() && is_selected {
-                            logic::double_click(i);
+                            logic::double_click(file_name.to_string());
                         } else if response.clicked() {
                             *self.selected = Some(i);
                         }
