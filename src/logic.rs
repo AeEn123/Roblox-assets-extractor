@@ -51,6 +51,14 @@ fn clear_file_list() {
     *file_list = Vec::new()
 }
 
+fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
+    haystack.windows(needle.len()).position(|window| window == needle)
+}
+
+fn bytes_contains(haystack: Vec<u8>, needle: &[u8]) -> bool {
+    haystack.windows(needle.len()).any(|window| window == needle)
+}
+
 // Define public functions
 pub fn detect_directory() {
     let mut errors = "".to_owned();
@@ -226,10 +234,12 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                                         },
                                         Ok(bytes_read) => {
                                             buffer.truncate(bytes_read);
-                                            
-                                            {
-                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);   
+                                            // TODO: Use `mode` argument to filter, ideally use a HashMap initilised under lazy_static to assign multiple data types
+                                            if bytes_contains(buffer, b"WEBP") {
+                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
                                             }
+                                             
+                                            
                                             update_status(format!("Reading files ({count}/{total})"));
                                         }
                                     }
@@ -246,7 +256,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                 });
 
                 if cli_list_mode {
-                    handle.join();
+                    let _ = handle.join(); // Ignore this value as it is not needed
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
