@@ -12,7 +12,7 @@ lazy_static! {
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
-
+    static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
     static ref DELETE_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
@@ -27,6 +27,13 @@ const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinega
 fn update_status(value: String) {
     let mut status = STATUS.lock().unwrap();
     *status = value;
+    let mut request = REQUEST_REPAINT.lock().unwrap();
+    *request = true;
+}
+
+fn update_progress(value: f32) {
+    let mut progress = PROGRESS.lock().unwrap();
+    *progress = value;
     let mut request = REQUEST_REPAINT.lock().unwrap();
     *request = true;
 }
@@ -104,6 +111,7 @@ pub fn delete_all_directory_contents(dir: String) {
 
                         for entry in entries {
                             count += 1; // Increase counter for progress
+                            update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                             let path = entry.unwrap().path();
                             if path.is_dir() {
                                 match fs::remove_dir_all(path) {
@@ -135,6 +143,7 @@ pub fn delete_all_directory_contents(dir: String) {
                             let mut task = DELETE_TASK_RUNNING.lock().unwrap();
                             *task = false;
                         }
+                        update_status("Idling".to_owned());
                     });
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
@@ -198,6 +207,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                         }
                         
                         count += 1; // Increase counter for progress
+                        update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                         let path = entry.unwrap().path();
                         let display = path.display();
 
@@ -269,6 +279,10 @@ pub fn get_cache_directory() -> String {
 
 pub fn get_status() -> String {
     STATUS.lock().unwrap().clone()
+}
+
+pub fn get_progress() -> f32 {
+    PROGRESS.lock().unwrap().clone()
 }
 
 

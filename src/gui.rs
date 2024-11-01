@@ -208,9 +208,7 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Display the status bar at the bottom
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
-            ui.horizontal(|ui| {
-                ui.label(logic::get_status());
-            });
+            ui.add(egui::ProgressBar::new(logic::get_progress()).text(logic::get_status()));
         });
         
         DockArea::new(&mut self.tree)
