@@ -274,7 +274,7 @@ pub fn get_status() -> String {
 
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
-    let old_request_repaint = request_repaint.clone();
+    let old_request_repaint = *request_repaint;
     *request_repaint = false;
     return old_request_repaint
 }

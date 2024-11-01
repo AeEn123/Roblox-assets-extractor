@@ -134,7 +134,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
                         let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
 
-                        // Draw the background color
+                        // Draw the background colour
                         ui.painter().rect_filled(rect, 0.0, background_colour);
 
                         // Draw the text
