@@ -116,11 +116,21 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         
                         let is_selected = *self.selected == Some(i); // Check if this current one is selected
 
+                        let visuals = ui.visuals();
+
                         let background_colour = if is_selected {
-                            ui.visuals().selection.bg_fill
+                            visuals.selection.bg_fill
                         } else {
                             egui::Color32::TRANSPARENT // No background colour if not selected
                         };
+
+                        let text_colour = if is_selected {
+                            visuals.strong_text_color()
+                        } else {
+                            visuals.text_color()
+                        };
+
+
                 
                         // Using a rect to allow the user to click across the entire list, not just the text
                         let full_width = ui.available_width();
@@ -136,7 +146,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             egui::Align2::LEFT_TOP,
                             label_text,
                             egui::TextStyle::Body.resolve(ui.style()),
-                            ui.visuals().text_color(),
+                            text_colour,
                         );
 
                         // Handle the click/double click
