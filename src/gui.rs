@@ -116,15 +116,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         
                         let is_selected = *self.selected == Some(i); // Check if this current one is selected
 
-                        let visuals = ui.visuals();
-
                         let background_colour = if is_selected {
-                            // Use different colours for light mode and dark mode for good contrast
-                            if visuals.dark_mode {
-                                egui::Color32::from_rgb(0, 50, 100) // This colour matches with dark egui nicely
-                            } else {
-                                egui::Color32::from_rgb(0, 140, 255) // Not sure if this is the best colour for light theme, do a pull request to change the colour if you want
-                            }
+                            ui.visuals().selection.bg_fill
                         } else {
                             egui::Color32::TRANSPARENT // No background colour if not selected
                         };
