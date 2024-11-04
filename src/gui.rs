@@ -66,7 +66,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     println!("Extract");
                 }
                 if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
-                    println!("Refresh");
+                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
                 }
             });
 
