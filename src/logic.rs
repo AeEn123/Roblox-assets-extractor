@@ -235,7 +235,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     let total = entries.len();
                     let mut count = 0;
 
-                    if mode != "Music" {
+                    if mode != "Music" { // Music lists files directly and others filter.
+                        // Filter the files out
                         let all_headers = {
                             HEADERS.lock().unwrap().clone()
                         };
@@ -293,6 +294,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                             }
                         }
                     } else {
+                        // List the files from the directory instead of filtering
                         for entry in entries {
                             let stop = {
                                 let stop_task = STOP_LIST_RUNNING.lock().unwrap();
