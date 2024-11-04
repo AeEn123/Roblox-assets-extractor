@@ -1,8 +1,10 @@
 use std::fs;
 use std::fs::File;
+use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
+use clap::builder::Str;
 use lazy_static::lazy_static;
 
 // Define static values
@@ -17,6 +19,17 @@ lazy_static! {
     static ref DELETE_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
+
+
+    // File headers for each catagory
+    static ref HEADERS: Mutex<HashMap<String,[String;2]>> = {
+        let mut m = HashMap::new();
+        m.insert("Music".to_owned(), ["".to_owned(), "".to_owned()]);
+        m.insert("Sounds".to_owned(), ["OggS".to_owned(), "".to_owned()]);
+        m.insert("Images".to_owned(), ["%PNG".to_owned(), "WEBP".to_owned()]);
+        m.insert("RBXL files".to_owned(), ["<Roblox!".to_owned(), "".to_owned()]);
+        Mutex::new(m)
+    };
 }
 
 
