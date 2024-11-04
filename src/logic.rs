@@ -22,9 +22,18 @@ lazy_static! {
     // File headers for each catagory
     static ref HEADERS: Mutex<HashMap<String,[String;2]>> = {
         let mut m = HashMap::new();
-        m.insert("Sounds".to_owned(), ["OggS".to_owned(), "".to_owned()]);
-        m.insert("Images".to_owned(), ["%PNG".to_owned(), "WEBP".to_owned()]);
-        m.insert("RBXL files".to_owned(), ["<Roblox!".to_owned(), "".to_owned()]);
+        m.insert("Sounds".to_owned(),[
+            "OggS".to_owned(),
+            "".to_owned()
+            ]);
+        m.insert("Images".to_owned(), [
+            "%PNG".to_owned(),
+            "WEBP".to_owned()
+            ]);
+        m.insert("RBXL files".to_owned(), [
+            "<Roblox!".to_owned(),
+            "".to_owned()
+            ]);
         Mutex::new(m)
     };
 
