@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
-use clap::builder::Str;
 use lazy_static::lazy_static;
 
 // Define static values
