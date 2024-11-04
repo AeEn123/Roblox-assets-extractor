@@ -7,8 +7,7 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 // Define static values
-lazy_static! {
-    
+lazy_static! {    
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(String::new());
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
@@ -23,10 +22,19 @@ lazy_static! {
     // File headers for each catagory
     static ref HEADERS: Mutex<HashMap<String,[String;2]>> = {
         let mut m = HashMap::new();
-        m.insert("Music".to_owned(), ["".to_owned(), "".to_owned()]);
         m.insert("Sounds".to_owned(), ["OggS".to_owned(), "".to_owned()]);
         m.insert("Images".to_owned(), ["%PNG".to_owned(), "WEBP".to_owned()]);
         m.insert("RBXL files".to_owned(), ["<Roblox!".to_owned(), "".to_owned()]);
+        Mutex::new(m)
+    };
+
+    // File extention for headers
+    static ref EXTENTION: Mutex<HashMap<String, String>> = {
+        let mut m = HashMap::new();
+        m.insert("OggS".to_owned(), ".ogg".to_owned());
+        m.insert("%PNG".to_owned(), ".png".to_owned());
+        m.insert("WEBP".to_owned(), ".webp".to_owned());
+        m.insert("<Roblox!".to_owned(), ".rbxl".to_owned());
         Mutex::new(m)
     };
 }
@@ -217,49 +225,86 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     // Get amount and initlilize counter for progress
                     let total = entries.len();
                     let mut count = 0;
-                    for entry in entries {
-                        let stop = {
-                            let stop_task = STOP_LIST_RUNNING.lock().unwrap();
-                            stop_task.clone()
-                        };
-                        if stop {
-                            break // Stop if another thread requests to stop this task.
-                        }
-                        
-                        count += 1; // Increase counter for progress
-                        update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
-                        let path = entry.unwrap().path();
-                        let display = path.display();
 
-                        if let Some(filename) = path.file_name() {
-                            match &mut File::open(&path) {
-                                Err(why) => {
-                                    println!("ERROR: couldn't open {}: {}", display, why);
-                                    update_status(format!("ERROR: couldn't open ({count}/{total})"));
-                                },
-                                Ok(file) => {
-                                    let mut buffer = vec![0; 2048];
-                                    match file.read(&mut buffer) {
-                                        Err(why) => {
-                                            println!("ERROR: couldn't open {}: {}", display, why);
-                                            update_status(format!("ERROR: couldn't open ({count}/{total})"));
-                                        },
-                                        Ok(bytes_read) => {
-                                            buffer.truncate(bytes_read);
-                                            // TODO: Use `mode` argument to filter, ideally use a HashMap initilised under lazy_static to assign multiple data types
-                                            if bytes_contains(buffer, b"WEBP") {
-                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
-                                            }
-                                             
-                                            
-                                            update_status(format!("Reading files ({count}/{total})"));
-                                        }
-                                    }
-                                    
-                                },
+                    if mode != "Music" {
+                        let all_headers = {
+                            HEADERS.lock().unwrap().clone()
+                        };
+                        
+                        let option_headers = all_headers.get(&mode);
+
+                        for entry in entries {
+                            let stop = {
+                                let stop_task = STOP_LIST_RUNNING.lock().unwrap();
+                                stop_task.clone()
                             };
+                            if stop {
+                                break // Stop if another thread requests to stop this task.
+                            }
+                            
+                            count += 1; // Increase counter for progress
+                            update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
+                            let path = entry.unwrap().path();
+                            let display = path.display();
+    
+                            if let Some(filename) = path.file_name() {
+                                match &mut File::open(&path) {
+                                    Err(why) => {
+                                        println!("ERROR: couldn't open {}: {}", display, why);
+                                        update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                    },
+                                    Ok(file) => {
+                                        let mut buffer = vec![0; 2048];
+                                        match file.read(&mut buffer) {
+                                            Err(why) => {
+                                                println!("ERROR: couldn't open {}: {}", display, why);
+                                                update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                            },
+                                            Ok(bytes_read) => {
+                                                buffer.truncate(bytes_read);
+                                                if let Some(headers) = option_headers {
+                                                    for header in headers {
+                                                        //println!("{:?}", header);
+                                                        // Check if header is empty before actually checking file
+                                                        if header != "" {
+                                                            if bytes_contains(buffer.clone(), header.as_bytes()) {
+                                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
+                                                            }
+                                                        }
+      
+                                                    }
+                                                }
+
+                                                update_status(format!("Reading files ({count}/{total})"));
+                                            }
+                                        }
+                                        
+                                    },
+                                };
+                            }
+                        }
+                    } else {
+                        for entry in entries {
+                            let stop = {
+                                let stop_task = STOP_LIST_RUNNING.lock().unwrap();
+                                stop_task.clone()
+                            };
+                            if stop {
+                                break // Stop if another thread requests to stop this task.
+                            }
+                            
+                            count += 1; // Increase counter for progress
+                            update_progress(count as f32/total as f32);
+                            let path = entry.unwrap().path();
+                            if let Some(filename) = path.file_name() {
+                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
+                                update_status(format!("Reading files ({count}/{total})"));
+                            }
+                            
                         }
                     }
+
+
                     { 
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();
                         *task = false; // Allow other threads to run again
