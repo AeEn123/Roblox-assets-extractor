@@ -30,7 +30,7 @@ lazy_static! {
             "%PNG".to_owned(),
             "WEBP".to_owned()
             ]);
-        m.insert("RBXL files".to_owned(), [
+        m.insert("RBXM files".to_owned(), [
             "<Roblox!".to_owned(),
             "".to_owned()
             ]);
@@ -43,7 +43,7 @@ lazy_static! {
         m.insert("OggS".to_owned(), ".ogg".to_owned());
         m.insert("%PNG".to_owned(), ".png".to_owned());
         m.insert("WEBP".to_owned(), ".webp".to_owned());
-        m.insert("<Roblox!".to_owned(), ".rbxl".to_owned());
+        m.insert("<Roblox!".to_owned(), ".rbxm".to_owned());
         Mutex::new(m)
     };
 }
