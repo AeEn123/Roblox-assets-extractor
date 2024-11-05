@@ -84,9 +84,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
             }
 
+            let file_list = logic::get_file_list(); // Get file list here since it is also used in controls
+
             if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
                 if let Some(selected) = *self.selected {
-                    if selected < 1499 { // Stop it from overflowing
+                    if selected < file_list.len() { // Stop it from overflowing
                         *self.selected = Some(selected + 1);
                         scroll_to = Some(selected + 1);
                     }
@@ -95,7 +97,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
             }
 
-            let file_list = logic::get_file_list(); // Get file list here since it is accessed heavily after this
+            
 
             // Allow the user to confirm with enter
             if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
