@@ -88,7 +88,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
                 if let Some(selected) = *self.selected {
-                    if selected < file_list.len() { // Stop it from overflowing
+                    if selected < file_list.len()-1 { // Stop it from overflowing
                         *self.selected = Some(selected + 1);
                         scroll_to = Some(selected + 1);
                     }
