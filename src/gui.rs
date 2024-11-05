@@ -1,7 +1,9 @@
 use eframe::egui;
 use native_dialog::{MessageDialog, MessageType};
-use egui_dock::{DockArea, DockState, Style};
+use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 use crate::logic::{self};
+
+use std::collections::HashMap;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -192,6 +194,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
 struct MyApp {
     tree: DockState<String>,
+    tab_map: HashMap<u32, (SurfaceIndex, NodeIndex, usize)>, // Tab map for keyboard navigation
     selected: Option<usize>, // Used for storing selected state to retain keyboard navigation as seen in the tkinter version
     current_tab: Option<String> // Allows for detecting when the user changes tabs to refresh automatically
 }
@@ -200,8 +203,17 @@ impl Default for MyApp {
     fn default() -> Self {
         let tree = DockState::new(vec!["Music".to_owned(), "Sounds".to_owned(), "Images".to_owned(), "RBXM files".to_owned(), "Settings".to_owned()]);
 
+        let mut tab_map = HashMap::new();
+
+        let surface = SurfaceIndex(0);
+        let node = NodeIndex(0);
+        for (i, _) in tree.iter_all_tabs().enumerate() {
+            tab_map.insert((i as u32) + 1, (surface, node, i));
+        }
+
         Self { 
             tree, 
+            tab_map,
             selected: None,
             current_tab: None
         }
@@ -216,7 +228,16 @@ impl eframe::App for MyApp {
         egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
             ui.add(egui::ProgressBar::new(logic::get_progress()).text(logic::get_status()));
         });
-        
+
+        // Switch tabs with keyboard input
+        for i in 1..=self.tab_map.len() as u32 {
+            if ctx.input(|input| input.key_pressed(egui::Key::from_name(&i.to_string()).expect("Invalid key"))) {
+                if let Some(&(surface, node, tab)) = self.tab_map.get(&i) {
+                    self.tree.set_active_tab((surface, node, egui_dock::TabIndex(tab)));
+                }
+            }
+        }
+
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show_close_buttons(false)
