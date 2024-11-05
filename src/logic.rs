@@ -31,7 +31,7 @@ lazy_static! {
             "WEBP".to_owned()
             ]);
         m.insert("RBXM files".to_owned(), [
-            "<Roblox!".to_owned(),
+            "<roblox!".to_owned(),
             "".to_owned()
             ]);
         Mutex::new(m)
