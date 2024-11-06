@@ -118,6 +118,11 @@ pub fn detect_directory() {
     }
 
     if !success {
+        let _ = native_dialog::MessageDialog::new()
+        .set_type(native_dialog::MessageType::Error)
+        .set_title("Directory detection failed!")
+        .set_text("Directory detection failed! Is Roblox installed and you ran it at least once?")
+        .show_alert();
         panic!("Directory detection failed!{}", errors)
     }
 
