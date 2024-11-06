@@ -24,7 +24,7 @@ impl fmt::Display for Category {
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    /// List assets instead of running the GUI
+    /// List assets
     #[arg(short, long, value_name = "CATAGORY")]
     list: Option<Category>,
 }
@@ -32,9 +32,11 @@ struct Cli {
 fn main() -> eframe::Result<()> {
     let args = Cli::parse();
 
+    // Every command after this needs to have the directory detected.
     logic::detect_directory();
 
     if let Some(category) = args.list {
+        // User passed --list
         let tab = category.to_string();
 
         let cache_directory = {
@@ -46,11 +48,10 @@ fn main() -> eframe::Result<()> {
                 format!("{}/http", cache_dir)
             }
         };
-        logic::refresh(cache_directory, tab, true);
+        logic::refresh(cache_directory, tab, true); // cli_list_mode is set to true, this will print assets to console
         Ok(())
     } else {
-        // Otherwise, run the GUI
-        
+        // If nothing passed, run GUI        
         gui::run_gui()
     }
 }

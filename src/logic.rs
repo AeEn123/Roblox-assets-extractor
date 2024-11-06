@@ -1,5 +1,4 @@
 use std::fs;
-use std::fs::File;
 use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
@@ -76,6 +75,8 @@ fn update_progress(value: f32) {
 }
 
 fn update_file_list(value: String, cli_list_mode: bool) {
+    // cli_list_mode will print out to console
+    // It is done this way so it can read files and print to console in the same stage
     if cli_list_mode {
         println!("{}", value);
     }
@@ -112,7 +113,9 @@ pub fn detect_directory() {
                 if metadata.is_dir() {
                     let mut cache_dir = CACHE_DIRECTORY.lock().unwrap();
                     *cache_dir = resolved_directory;
-                    success = true;
+
+                    // Successfully detected a directory, we can stop this loop
+                    success = true; // Program will panic! if this is set to true due to the error handling
                     break;
                 }
             }
@@ -125,6 +128,7 @@ pub fn detect_directory() {
     }
 
     if !success {
+        // If it was unable to detect any directory, tell the user and panic the program
         let _ = native_dialog::MessageDialog::new()
         .set_type(native_dialog::MessageType::Error)
         .set_title("Directory detection failed!")
@@ -152,7 +156,7 @@ pub fn delete_all_directory_contents(dir: String) {
                     thread::spawn(|| {
                         { 
                             let mut task = DELETE_TASK_RUNNING.lock().unwrap();
-                            *task = true;
+                            *task = true; // Stop other threads from running
                         }
                         
                         // Read directory
@@ -237,9 +241,9 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     }
                     { 
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();
-                        *task = true;
+                        *task = true; // Tell other threads that a task is running
                         let mut stop = STOP_LIST_RUNNING.lock().unwrap();
-                        *stop = false;
+                        *stop = false; // Disable the stop, otherwise this thread will stop!
                     }
 
                     clear_file_list(); // Only list the files on the current tab
@@ -251,6 +255,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     let total = entries.len();
                     let mut count = 0;
 
+                    // Tell the user that there is no files to list to make it easy to tell that the program is working and it isn't broken
                     if total == 0 {
                         update_file_list("No files to list.".to_owned(), cli_list_mode);
                     }
@@ -278,7 +283,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                             let display = path.display();
     
                             if let Some(filename) = path.file_name() {
-                                match &mut File::open(&path) {
+                                match &mut fs::File::open(&path) {
                                     Err(why) => {
                                         println!("ERROR: couldn't open {}: {}", display, why);
                                         update_status(format!("ERROR: couldn't open ({count}/{total})"));
@@ -294,9 +299,9 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                                                 buffer.truncate(bytes_read);
                                                 if let Some(headers) = option_headers {
                                                     for header in headers {
-                                                        //println!("{:?}", header);
                                                         // Check if header is empty before actually checking file
                                                         if header != "" {
+                                                            // Add the file if the file contains the header
                                                             if bytes_contains(buffer.clone(), header.as_bytes()) {
                                                                 update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
                                                             }
@@ -344,7 +349,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                 });
 
                 if cli_list_mode {
-                    let _ = handle.join(); // Ignore this value as it is not needed
+                    // If it is in cli_list_mode, wait for the thread to stop, as if it doesn't wait, the program stops before the thread stops.
+                    let _ = handle.join();
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
@@ -401,7 +407,7 @@ pub fn get_progress() -> f32 {
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
     let old_request_repaint = *request_repaint;
-    *request_repaint = false;
+    *request_repaint = false; // Set to false when this function is called to acknoledge
     return old_request_repaint
 }
 

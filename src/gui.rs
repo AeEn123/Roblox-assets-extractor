@@ -1,11 +1,15 @@
+// Used for gui
 use eframe::egui;
 use native_dialog::{MessageDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
-use crate::logic::{self};
 
-use std::collections::HashMap;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
+use std::collections::HashMap; // Used for input
+use crate::logic::{self}; // Used for functionality
+
+
+const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
+
 
 struct TabViewer<'a> {
     // passing selected label to TabViewer
@@ -47,10 +51,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
             }
             
+            // GUI logic below here
+            
             // Top UI buttons
             ui.horizontal(|ui| {
-                // Confirmation dialog
                 if ui.button("Delete this directory <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                    // Confirmation dialog
                     let yes = MessageDialog::new()
                     .set_type(MessageType::Info)
                     .set_title("Confirmation")
@@ -70,34 +76,34 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
             });
 
-            // Scrolling
-            let mut scroll_to: Option<usize> = None;
-            // Allow the user to select up and down using arrow key
+            
+            let mut scroll_to: Option<usize> = None; // This is reset every frame, so it doesn't constantly scroll to the same label
+
+            // If the user presses up, decrement the selected value
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
                 if let Some(selected) = *self.selected {
-                    if selected > 0 {
+                    if selected > 0 { // Check if it is larger than 0 otherwise it'll attempt to select non-existant labels
                         *self.selected = Some(selected - 1);
-                        scroll_to = Some(selected - 1);
+                        scroll_to = Some(selected - 1); // This is also set to the same number, allowing for auto scrolling
                     }
                 } else {
                     *self.selected = Some(0);  // Start at the first label if nothing is selected
                 }
             }
 
-            let file_list = logic::get_file_list(); // Get file list here since it is also used in controls
+            let file_list = logic::get_file_list(); // Get file list here since it is used in file list and down arrow
 
+            // If the user presses down, increment the selected value
             if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
                 if let Some(selected) = *self.selected {
-                    if selected < file_list.len()-1 { // Stop it from overflowing
+                    if selected < file_list.len()-1 { // Stop it from overflowing otherwise it'll attempt to select non-existant labels
                         *self.selected = Some(selected + 1);
-                        scroll_to = Some(selected + 1);
+                        scroll_to = Some(selected + 1); // This is also set to the same number, allowing for auto scrolling
                     }
                 } else {
                     *self.selected = Some(1);  // Start at the first label if nothing is selected
                 }
             }
-
-            
 
             // Allow the user to confirm with enter
             if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
@@ -107,9 +113,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         logic::double_click(file_name.to_string());
                     }                   
                 }
-            }           
+            }
+
             
-            // Scroll area which contains the assets
+            // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
                 ui,
                 ui.text_style_height(&egui::TextStyle::Body),
@@ -121,18 +128,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                         let visuals = ui.visuals();
 
+                        // Highlight the background when selected
                         let background_colour = if is_selected {
-                            visuals.selection.bg_fill
+                            visuals.selection.bg_fill // Primary colour
                         } else {
-                            egui::Color32::TRANSPARENT // No background colour if not selected
+                            egui::Color32::TRANSPARENT // No background colour
                         };
 
+                        // Make the text have more contrast when selected
                         let text_colour = if is_selected {
-                            visuals.strong_text_color()
+                            visuals.strong_text_color() // Brighter
                         } else {
-                            visuals.text_color()
+                            visuals.text_color() // Normal
                         };
-
 
                 
                         // Using a rect to allow the user to click across the entire list, not just the text
@@ -147,7 +155,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         ui.painter().text(
                             rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
                             egui::Align2::LEFT_TOP,
-                            file_name,
+                            file_name, // Text is the file name
                             egui::TextStyle::Body.resolve(ui.style()),
                             text_colour,
                         );
@@ -172,8 +180,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // This is only shown in the settings tab
             ui.heading("Settings");
 
+            // Clear cache description
             ui.label("If it is taking too long to list files and extracting all from a directory, you can clear your roblox cache with the button below. This removes all files from your cache and your roblox client will automatically re-create these files when these assets are needed again.");
+            
+            // Clear cache button
             if ui.button("Clear roblox cache").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                // Confirmation dialog
                 let yes = MessageDialog::new()
                 .set_type(MessageType::Info)
                 .set_title("Confirmation")
@@ -201,6 +213,7 @@ impl Default for MyApp {
     fn default() -> Self {
         let tree = DockState::new(vec!["Music".to_owned(), "Sounds".to_owned(), "Images".to_owned(), "RBXM files".to_owned(), "Settings".to_owned()]);
 
+        // Tab map for keyboard navigation
         let mut tab_map = HashMap::new();
 
         let surface = SurfaceIndex(0);
@@ -227,7 +240,7 @@ impl eframe::App for MyApp {
             ui.add(egui::ProgressBar::new(logic::get_progress()).text(logic::get_status()));
         });
 
-        // Switch tabs with keyboard input
+        // Switch tabs with keyboard input (num keys)
         for i in 1..=self.tab_map.len() as u32 {
             if ctx.input(|input| input.key_pressed(egui::Key::from_name(&i.to_string()).expect("Invalid key"))) {
                 if let Some(&(surface, node, tab)) = self.tab_map.get(&i) {
@@ -247,9 +260,9 @@ impl eframe::App for MyApp {
             });
         
         {
-            // allow for different threads to request refresh
+            // Allow for different threads to request refresh
             if logic::get_request_repaint() {
-                ctx.request_repaint_after(std::time::Duration::from_millis(250));
+                ctx.request_repaint_after(std::time::Duration::from_millis(250)); // Delay added here to prevent refreshes from stopping
             }
         }
     }
