@@ -26,7 +26,7 @@ lazy_static! {
             "ID3".to_owned()
             ]);
         m.insert("Images".to_owned(), [
-            "%PNG".to_owned(),
+            "PNG".to_owned(),
             "WEBP".to_owned()
             ]);
         m.insert("RBXM files".to_owned(), [
