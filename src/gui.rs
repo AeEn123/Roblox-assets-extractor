@@ -211,7 +211,7 @@ struct MyApp {
 
 impl Default for MyApp {
     fn default() -> Self {
-        let tree = DockState::new(vec!["Music".to_owned(), "Sounds".to_owned(), "Images".to_owned(), "RBXM files".to_owned(), "Settings".to_owned()]);
+        let tree = DockState::new(vec!["Music".to_owned(), "Sounds".to_owned(), "Images".to_owned(), "RBXM files".to_owned(), "KTX files".to_owned(), "Settings".to_owned()]);
 
         // Tab map for keyboard navigation
         let mut tab_map = HashMap::new();

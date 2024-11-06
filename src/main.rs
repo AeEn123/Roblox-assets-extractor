@@ -10,6 +10,7 @@ enum Category {
     Music,
     Sounds,
     Images,
+    KTX,
     Rbxm,
 }
 

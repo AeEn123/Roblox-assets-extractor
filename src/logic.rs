@@ -29,6 +29,10 @@ lazy_static! {
             "PNG".to_owned(),
             "WEBP".to_owned()
             ]);
+        m.insert("KTX files".to_owned(), [
+            "KTX".to_owned(),
+            "".to_owned()
+            ]);
         m.insert("RBXM files".to_owned(), [
             "<roblox!".to_owned(),
             "".to_owned()
@@ -41,8 +45,9 @@ lazy_static! {
         let mut m = HashMap::new();
         m.insert("OggS".to_owned(), ".ogg".to_owned());
         m.insert("ID3".to_owned(), ".mp3".to_owned());
-        m.insert("%PNG".to_owned(), ".png".to_owned());
+        m.insert("PNG".to_owned(), ".png".to_owned());
         m.insert("WEBP".to_owned(), ".webp".to_owned());
+        m.insert("KTX".to_owned(), ".ktx".to_owned());
         m.insert("<Roblox!".to_owned(), ".rbxm".to_owned());
         Mutex::new(m)
     };
@@ -50,6 +55,8 @@ lazy_static! {
     // Header offsets, headers that are not in this HashMap not be offset
     static ref OFFSET: Mutex<HashMap<String, i8>> = {
         let mut m = HashMap::new();
+        m.insert("PNG".to_owned(), -1);
+        m.insert("KTX".to_owned(), -1);
         m.insert("WEBP".to_owned(), -8);
         Mutex::new(m)
     };

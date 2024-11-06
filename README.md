@@ -29,6 +29,9 @@ Some media players may not support the format that the file is in. If that is th
 ### Can I switch to the light/dark theme?
 Yes, the theme of the program automatically syncs to your system theme.
 
+### Why is KTX files in a different tab? Shouldn't it be in the Textures tab?
+Technically it should, but most image viewers don't support KTX files, so it is best to move this aside to a different tab to avoid compatability issues, this tab should be used for more advanced users.
+
 ## Usage
 You can extract Roblox music, sounds, and textures from your Roblox cache (ensure your client is open for music).
 
