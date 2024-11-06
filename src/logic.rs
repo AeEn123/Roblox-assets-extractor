@@ -362,6 +362,25 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
     }
 }
 
+pub fn extract_file(file: String, mode: String, destination: String) {
+        match fs::metadata(file.clone()) {
+        Ok(metadata) => {
+            if metadata.is_file() {
+                // TODO: Extraction logic
+            // Error handling just so the program doesn't crash for seemingly no reason
+            } else {
+                let mut status = STATUS.lock().unwrap();
+                *status = format!("Error: Not a file.");
+                println!("ERROR: Not a file.")
+            }
+        }
+        Err(e) => {
+            println!("Error extracting file: '{}' {}", file, e);
+            update_status(format!("Error extracting file: {}", e))
+        }
+    }
+}
+
 pub fn get_file_list() -> Vec<String> {
     FILE_LIST.lock().unwrap().clone()
 }
