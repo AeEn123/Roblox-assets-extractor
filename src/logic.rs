@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
+use egui::util::cache;
 use lazy_static::lazy_static;
 
 // Define static values
@@ -117,12 +118,15 @@ pub fn detect_directory() {
     }
 
     if !success {
-        println!("WARN: Directory detection failed:{}", errors)
+        panic!("Directory detection failed!{}", errors)
     }
 
 }
 
 pub fn delete_all_directory_contents(dir: String) {
+    if dir == "" {
+        panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
+    }
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -346,14 +350,7 @@ pub fn get_file_list() -> Vec<String> {
 }
 
 pub fn get_cache_directory() -> String {
-    let cache_dir = {
-        CACHE_DIRECTORY.lock().unwrap().clone()
-    };
-    if cache_dir == "" {
-        panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
-    } else {
-        cache_dir
-    }
+    CACHE_DIRECTORY.lock().unwrap().clone()
 }
 
 pub fn get_status() -> String {

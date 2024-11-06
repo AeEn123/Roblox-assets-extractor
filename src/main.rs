@@ -46,10 +46,6 @@ fn main() -> eframe::Result<()> {
                 format!("{}/http", cache_dir)
             }
         };
-
-        if cache_directory == "" {
-            panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
-        }
         logic::refresh(cache_directory, tab, true);
         Ok(())
     } else {

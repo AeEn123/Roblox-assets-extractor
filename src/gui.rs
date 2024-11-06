@@ -31,9 +31,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 format!("{}/http", cache_dir)
             }
         };
-        if cache_directory == "" {
-            panic!("Panic!ed due to safety. cache_directory was blank! Can possibly DELETE EVERYTHING!")
-        }
+
 
         if tab != "Settings" {
             // This is only shown on tabs other than settings (Extracting assets)
