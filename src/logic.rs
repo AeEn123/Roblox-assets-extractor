@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
-use egui::util::cache;
 use lazy_static::lazy_static;
 
 // Define static values
@@ -199,10 +198,9 @@ pub fn delete_all_directory_contents(dir: String) {
                 println!("ERROR: Directory detection failed.")
             }
         }
-        Err(e) => {
+        Err(_) => {
             let mut status = STATUS.lock().unwrap();
-            *status = format!("Error: '{dir}' is not a valid directory: {e}");
-            println!("ERROR: Directory detection failed. {}", format!("'{dir}' is not a valid directory: {e}"))
+            *status = format!("Idling");
         }
     }
 }
@@ -342,10 +340,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                 println!("ERROR: Directory detection failed.")
             }
         }
-        Err(e) => {
-            let mut status = STATUS.lock().unwrap();
-            *status = format!("Error: '{dir}' is not a valid directory: {e}");
-            println!("ERROR: Directory detection failed. {}", format!("'{dir}' is not a valid directory: {e}"))
+        Err(_) => {
+            update_status("Idling".to_owned())
         }
     }
 }
