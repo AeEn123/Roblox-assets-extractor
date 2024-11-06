@@ -199,7 +199,7 @@ pub fn delete_all_directory_contents(dir: String) {
             }
         }
         Err(e) => {
-            println!("WARN: {}", e);
+            println!("WARN: '{}' {}", dir, e);
             let mut status = STATUS.lock().unwrap();
             *status = format!("Idling");
         }
@@ -346,7 +346,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
             }
         }
         Err(e) => {
-            println!("WARN: {}", e);
+            println!("WARN: '{}' {}", dir, e);
             clear_file_list();
             update_file_list("No files to list.".to_owned(), cli_list_mode);
             update_status("Idling".to_owned())
