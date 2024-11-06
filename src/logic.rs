@@ -24,7 +24,7 @@ lazy_static! {
         let mut m = HashMap::new();
         m.insert("Sounds".to_owned(),[
             "OggS".to_owned(),
-            "".to_owned()
+            "ID3".to_owned()
             ]);
         m.insert("Images".to_owned(), [
             "%PNG".to_owned(),
@@ -41,9 +41,17 @@ lazy_static! {
     static ref EXTENTION: Mutex<HashMap<String, String>> = {
         let mut m = HashMap::new();
         m.insert("OggS".to_owned(), ".ogg".to_owned());
+        m.insert("ID3".to_owned(), ".mp3".to_owned());
         m.insert("%PNG".to_owned(), ".png".to_owned());
         m.insert("WEBP".to_owned(), ".webp".to_owned());
         m.insert("<Roblox!".to_owned(), ".rbxm".to_owned());
+        Mutex::new(m)
+    };
+
+    // Header offsets, headers that are not in this HashMap not be offset
+    static ref OFFSET: Mutex<HashMap<String, i8>> = {
+        let mut m = HashMap::new();
+        m.insert("WEBP".to_owned(), -8);
         Mutex::new(m)
     };
 }
