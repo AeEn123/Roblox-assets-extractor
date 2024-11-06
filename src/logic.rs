@@ -242,6 +242,10 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     let total = entries.len();
                     let mut count = 0;
 
+                    if total == 0 {
+                        update_file_list("No files to list.".to_owned(), cli_list_mode);
+                    }
+
                     if mode != "Music" { // Music lists files directly and others filter.
                         // Filter the files out
                         let all_headers = {
@@ -341,6 +345,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
             }
         }
         Err(_) => {
+            clear_file_list();
+            update_file_list("No files to list.".to_owned(), cli_list_mode);
             update_status("Idling".to_owned())
         }
     }
