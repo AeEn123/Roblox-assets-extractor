@@ -53,11 +53,12 @@ lazy_static! {
     };
 
     // Header offsets, headers that are not in this HashMap not be offset
-    static ref OFFSET: Mutex<HashMap<String, i8>> = {
+    // Offset will subtract from the found header.
+    static ref OFFSET: Mutex<HashMap<String, usize>> = {
         let mut m = HashMap::new();
-        m.insert("PNG".to_owned(), -1);
-        m.insert("KTX".to_owned(), -1);
-        m.insert("WEBP".to_owned(), -8);
+        m.insert("PNG".to_owned(), 1);
+        m.insert("KTX".to_owned(), 1);
+        m.insert("WEBP".to_owned(), 8);
         Mutex::new(m)
     };
 }
@@ -102,6 +103,38 @@ fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
 
 fn bytes_contains(haystack: Vec<u8>, needle: &[u8]) -> bool {
     haystack.windows(needle.len()).any(|window| window == needle)
+}
+
+fn extract_bytes(mode: String, bytes: Vec<u8>) -> Vec<u8> {
+    // Get headers and offsets, they will be used later
+    let all_headers = {
+        HEADERS.lock().unwrap().clone()
+    };
+
+    let offsets = {
+        OFFSET.lock().unwrap().clone()
+    };
+
+    // Get the header for the current mode
+    let option_headers = all_headers.get(&mode);
+
+    if let Some(headers) = option_headers {
+        // Itearte through headers to find the correct one for this file.
+        for header in headers {
+            if let Some(mut index) = bytes_search(bytes.clone(), header.as_bytes()) {
+                // Found the correct header, extract from the bytes
+                if let Some(offset) = offsets.get(header) {
+                    // Apply offset to index if the offset exists
+                    index -= *offset;
+                }
+                // Return all the bytes after the found header index
+                return bytes[index..].to_vec()
+            }
+        }
+    }
+    println!("WARN: Failed to extract a file!");
+    // Return bytes instead if this fails
+    return bytes
 }
 
 // Define public functions
@@ -383,8 +416,8 @@ pub fn extract_file(file: String, mode: String, destination: String) {
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
                 let mut status = STATUS.lock().unwrap();
-                *status = format!("Error: Not a file.");
-                println!("ERROR: Not a file.")
+                *status = format!("Error: '{}' Not a file.", file);
+                println!("ERROR: '{}' Not a file.", file)
             }
         }
         Err(e) => {
