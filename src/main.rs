@@ -49,7 +49,7 @@ fn main() {
                 format!("{}/http", cache_dir)
             }
         };
-        logic::refresh(cache_directory, tab, true); // cli_list_mode is set to true, this will print assets to console
+        logic::refresh(cache_directory, tab, true, true); // cli_list_mode is set to true, this will print assets to console
     } else {
         // If nothing passed, run GUI
         match gui::run_gui() {

@@ -1,11 +1,11 @@
 // Used for gui
 use eframe::egui;
-use native_dialog::{MessageDialog, MessageType};
+use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self, extract_file}; // Used for functionality
+use crate::logic::{self, get_list_task_running}; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
@@ -21,8 +21,10 @@ fn double_click(dir: String, value: String, mode: String) {
     let temp_dir = logic::get_temp_dir(true);
     let destination = format!("{}/{}", temp_dir, value); // Join both paths
     let origin = format!("{}/{}", dir, value);
-    let new_destination = extract_file(origin, mode, destination.clone(), true);
-    let _ = open::that(new_destination); // Open when finished
+    let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
+    if new_destination != "None" {
+        let _ = open::that(new_destination); // Open when finished
+    }
 }
 
 
@@ -52,11 +54,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             if let Some(current_tab) = self.current_tab {
                 if current_tab.to_owned() != tab.to_owned() {
                     *self.current_tab = Some(tab.to_owned());
-                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
+                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
                 }
             } else {
                 *self.current_tab = Some(tab.to_owned());
-                logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
+                logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
             }
             
             // GUI logic below here
@@ -77,10 +79,33 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     }                    
                 }
                 if ui.button("Extract all of this type <F3>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                    println!("Extract");
+                    let mut no = get_list_task_running();
+
+                    // Confirmation dialog, the program is still listing files
+                    if no {
+                        // NOT result, will become false if user clicks yes
+                        no = !MessageDialog::new()
+                        .set_type(MessageType::Info)
+                        .set_title("Files are still being filtered.")
+                        .set_text("Are you sure you want to extract all the files while the program is still filtering the files? This will result in an unfinished extraction.")
+                        .show_confirm()
+                        .unwrap();
+                    }
+
+                    // The user either agreed or the program is not listing files
+                    if !no {
+                        let option_path = FileDialog::new()
+                        .show_open_single_dir()
+                        .unwrap();
+
+                        if let Some(path) = option_path {
+                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), false);
+                        }
+                    }
+
                 }
                 if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
-                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false);
+                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
                 }
             });
 
@@ -204,7 +229,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 if yes {
                     logic::delete_all_directory_contents(logic::get_cache_directory().to_owned());
                 }                    
-            }     
+            }
+            // TODO: Make extract all assets to directory button
         }
 
     }

@@ -14,9 +14,10 @@ lazy_static! {
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
-    static ref DELETE_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
+    
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
+    static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false); // Delete/extract
 
 
     // File headers for each catagory
@@ -49,7 +50,7 @@ lazy_static! {
         m.insert("PNG".to_owned(), ".png".to_owned());
         m.insert("WEBP".to_owned(), ".webp".to_owned());
         m.insert("KTX".to_owned(), ".ktx".to_owned());
-        m.insert("<Roblox!".to_owned(), ".rbxm".to_owned());
+        m.insert("<roblox!".to_owned(), ".rbxm".to_owned());
         Mutex::new(m)
     };
 
@@ -123,7 +124,6 @@ fn find_header(mode: String, bytes: Vec<u8>) -> String {
             }
         }
     }
-    println!("WARN: Invalid header");
     return "INVALID".to_owned()
 }
 
@@ -227,14 +227,14 @@ pub fn delete_all_directory_contents(dir: String) {
         Ok(metadata) => {
             if metadata.is_dir() {
                 let running = {
-                    let task = DELETE_TASK_RUNNING.lock().unwrap();
+                    let task = TASK_RUNNING.lock().unwrap();
                     task.clone()
                 };
                 // Stop multiple threads from running
                 if running == false {
                     thread::spawn(|| {
                         { 
-                            let mut task = DELETE_TASK_RUNNING.lock().unwrap();
+                            let mut task = TASK_RUNNING.lock().unwrap();
                             *task = true; // Stop other threads from running
                         }
                         
@@ -276,7 +276,7 @@ pub fn delete_all_directory_contents(dir: String) {
                             
                         }
                         { 
-                            let mut task = DELETE_TASK_RUNNING.lock().unwrap();
+                            let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
                         }
                         update_status("Idling".to_owned()); // Set the status back
@@ -297,7 +297,7 @@ pub fn delete_all_directory_contents(dir: String) {
     }
 }
 
-pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
+pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread: bool) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -427,8 +427,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
                     update_status("Idling".to_owned()); // Set the status back
                 });
 
-                if cli_list_mode {
-                    // If it is in cli_list_mode, wait for the thread to stop, as if it doesn't wait, the program stops before the thread stops.
+                if yield_for_thread {
+                    // Will wait for the thread instead of quitting immediately
                     let _ = handle.join();
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
@@ -457,6 +457,9 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                     // Remove the error result so the extract_bytes function can read it
                     Ok(bytes) => {
                         let header = find_header(mode, bytes.clone());
+                        if header == "INVALID" {
+                            return header;
+                        }
                         let extracted_bytes = extract_bytes(header.clone(), bytes.clone());
                         let mut new_destination = destination.clone();
 
@@ -496,6 +499,71 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
     }
 }
 
+pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thread: bool) {
+    let file_list = get_file_list();
+    // Bunch of error checking to check if it's a valid directory
+    match fs::metadata(dir.clone()) {
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                let running = {
+                    let task = TASK_RUNNING.lock().unwrap();
+                    task.clone()
+                };
+                // Stop multiple threads from running
+                if running == false {
+                    let handle = thread::spawn(move || {
+                        { 
+                            let mut task = TASK_RUNNING.lock().unwrap();
+                            *task = true; // Stop other threads from running
+                        }
+
+                        // Get amount and initlilize counter for progress
+                        let total = file_list.len();
+                        let mut count = 0;
+
+                        for entry in file_list {
+                            count += 1; // Increase counter for progress
+                            update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
+                            let origin = format!("{}/{}", dir, entry);
+                            let dest = format!("{}/{}", destination, entry); // Local destination
+                            let result = extract_file(origin, mode.clone(), dest, true);
+                            if result == "None" {
+                                update_status(format!("ERROR: Failed to extract ({count}/{total})"));
+                            } else {
+                                update_status(format!("Extracting files ({count}/{total})"))
+                            }
+                        
+                            
+                        }
+                        { 
+                            let mut task = TASK_RUNNING.lock().unwrap();
+                            *task = false; // Allow other threads to run again
+                        }
+                        update_status("All files extracted".to_owned()); // Set the status back
+                    });
+                    
+                    if yield_for_thread {
+                        // Will wait for the thread instead of quitting immediately
+                        let _ = handle.join();
+                    }
+                }
+            // Error handling just so the program doesn't crash for seemingly no reason
+            } else {
+                let mut status = STATUS.lock().unwrap();
+                *status = format!("Error: check logs for more details.");
+                println!("ERROR: Directory detection failed.")
+            }
+        }
+        Err(e) => {
+            println!("WARN: '{}' {}", dir, e);
+            let mut status = STATUS.lock().unwrap();
+            *status = format!("Idling");
+        }
+    }
+}
+
+// TODO: Make extract_all function (extract all assets)
+
 pub fn get_file_list() -> Vec<String> {
     FILE_LIST.lock().unwrap().clone()
 }
@@ -512,6 +580,10 @@ pub fn get_progress() -> f32 {
     PROGRESS.lock().unwrap().clone()
 }
 
+pub fn get_list_task_running() -> bool {
+    LIST_TASK_RUNNING.lock().unwrap().clone()
+}
+
 
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
@@ -526,6 +598,6 @@ pub fn clean_up() {
     // Just in case if it somehow resolves to "/"
     if temp_dir != "" && temp_dir != "/" {
         println!("Cleaning up {}", temp_dir);
-        let _ = fs::remove_dir_all(temp_dir); // Not too important, and the last thing the program will run
+        let _ = fs::remove_dir_all(temp_dir); // Not too important, ignore value, and the last thing the program will run
     }
 }
