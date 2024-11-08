@@ -448,7 +448,6 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
 }
 
 pub fn extract_file(file: String, mode: String, destination: String, add_extention: bool) -> String {
-    // TODO: Make music work
     match fs::metadata(file.clone()) {
         Ok(metadata) => {
             if metadata.is_file() {
@@ -458,10 +457,12 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                     // Remove the error result so the extract_bytes function can read it
                     Ok(bytes) => {
                         let header = find_header(mode, bytes.clone());
-                        if header == "INVALID" {
-                            return header;
-                        }
-                        let extracted_bytes = extract_bytes(header.clone(), bytes.clone());
+                        let extracted_bytes = if header != "INVALID" {
+                            extract_bytes(header.clone(), bytes.clone())
+                        } else {
+                            bytes.clone()
+                        };
+
                         let mut new_destination = destination.clone();
 
                         // Add the extention if needed
