@@ -46,6 +46,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             }
         };
 
+        let file_list = logic::get_file_list(); // Get the file list as it is used throughout the GUI
 
         if tab != "Settings" {
             // This is only shown on tabs other than settings (Extracting assets)
@@ -98,11 +99,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         .show_open_single_dir()
                         .unwrap();
 
+                        // If the user provides a directory, the program will extract the assets to that directory
                         if let Some(path) = option_path {
-                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), false);
+                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), file_list.clone(), false);
                         }
                     }
-
                 }
                 if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
                     logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
@@ -123,8 +124,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     *self.selected = Some(0);  // Start at the first label if nothing is selected
                 }
             }
-
-            let file_list = logic::get_file_list(); // Get file list here since it is used in file list and down arrow
 
             // If the user presses down, increment the selected value
             if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
@@ -217,7 +216,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             ui.label("If it is taking too long to list files and extracting all from a directory, you can clear your roblox cache with the button below. This removes all files from your cache and your roblox client will automatically re-create these files when these assets are needed again.");
             
             // Clear cache button
-            if ui.button("Clear roblox cache").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+            if ui.button("Clear roblox cache <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
                 // Confirmation dialog
                 let yes = MessageDialog::new()
                 .set_type(MessageType::Info)
@@ -230,7 +229,39 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     logic::delete_all_directory_contents(logic::get_cache_directory().to_owned());
                 }                    
             }
-            // TODO: Make extract all assets to directory button
+
+            ui.separator();
+
+            // Extract all description
+            ui.label("The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.");
+
+            // Extract all button
+            if ui.button("Extract all <F3>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
+                let mut no = get_list_task_running();
+            
+                // Confirmation dialog, the program is still listing files
+                if no {
+                    // NOT result, will become false if user clicks yes
+                    no = !MessageDialog::new()
+                    .set_type(MessageType::Info)
+                    .set_title("Files are still being filtered.")
+                    .set_text("Are you sure you want to extract all the files while the program is still filtering the files? This will result in an unfinished extraction.")
+                    .show_confirm()
+                    .unwrap();
+                }
+            
+                // The user either agreed or the program is not listing files
+                if !no {
+                    let option_path = FileDialog::new()
+                    .show_open_single_dir()
+                    .unwrap();
+            
+                    // If the user provides a directory, the program will extract the assets to that directory
+                    if let Some(path) = option_path {
+                        logic::extract_all( path.to_string_lossy().to_string(), file_list.clone(), false)
+                    }
+                }
+            }
         }
 
     }

@@ -66,8 +66,9 @@ lazy_static! {
 }
 
 
-const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"];
-// For windows and linux (sober)
+const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
+const MODES: [&str; 5] = ["Music","Sounds","Images","KTX files","RBXM files"];
+
 
 // Define local functions
 fn update_status(value: String) {
@@ -275,6 +276,9 @@ pub fn delete_all_directory_contents(dir: String) {
                         
                             
                         }
+                        // Clear the file list for visual feedback to the user that the files are actually deleted
+                        clear_file_list();
+                        update_file_list("No files to list.".to_owned(), false);
                         { 
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
@@ -368,6 +372,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                         update_status(format!("ERROR: couldn't open ({count}/{total})"));
                                     },
                                     Ok(file) => {
+                                        // Reading the first 2048 bytes
                                         let mut buffer = vec![0; 2048];
                                         match file.read(&mut buffer) {
                                             Err(why) => {
@@ -470,6 +475,8 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                             let extentions = {EXTENTION.lock().unwrap().clone()};
                             if let Some(extention) = extentions.get(&header.clone()) {
                                 new_destination = destination.clone() + &extention.clone()
+                            } else {
+                                new_destination = destination.clone() + ".ogg" // Music tab
                             }
                         }
 
@@ -501,8 +508,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
     }
 }
 
-pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thread: bool) {
-    let file_list = get_file_list();
+pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -564,7 +570,67 @@ pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thr
     }
 }
 
-// TODO: Make extract_all function (extract all assets)
+pub fn extract_all(destination: String, file_list: Vec<String>, yield_for_thread: bool) {
+    let running = {
+        let task = TASK_RUNNING.lock().unwrap();
+        task.clone()
+    };
+    // Stop multiple threads from running
+    if running == false {
+        let handle = thread::spawn(move || {
+            { 
+                let mut task = TASK_RUNNING.lock().unwrap();
+                *task = true; // Stop other threads from running
+            }
+
+            let headers = {HEADERS.lock().unwrap().clone()};
+
+            let mut all_headers: Vec<(String, String)> = Vec::new();
+
+            for key in headers.keys() {
+                if let Some(mode_headers) = headers.get(key) {
+                    for single_header in mode_headers {
+                        all_headers.push((single_header.to_string(), key.to_string()));
+                    }
+                }
+            }
+
+            let cache_directory = get_cache_directory();
+            let music_directory = format!("{}/sounds", cache_directory);
+            let http_directory = format!("{}/http", cache_directory);
+
+            // Stage 1: Read and extract music directory
+            let entries: Vec<_> = fs::read_dir(music_directory.clone()).unwrap().collect();
+
+            // Get amount and initlilize counter for progress
+            let total = entries.len();
+            let mut count = 0;
+            for entry in entries {                            
+                count += 1; // Increase counter for progress
+                update_progress((count as f32/total as f32) / 3.0);
+                let path = entry.unwrap().path();
+                if let Some(filename) = path.file_name() {
+                    let origin = format!("{}/{}", music_directory.clone(), filename.to_string_lossy().to_string());
+                    let dest = format!("{}/Music/{}", destination, filename.to_string_lossy().to_string()); // Local destination
+
+                    extract_file(origin, "Music".to_string(), dest, true);
+                    update_status(format!("Stage 1: Extracting files ({count}/{total})"));
+                }
+            }
+
+            { 
+                let mut task = TASK_RUNNING.lock().unwrap();
+                *task = false; // Allow other threads to run again
+            }
+            update_status("All files extracted".to_owned()); // Set the status back
+        });
+        
+        if yield_for_thread {
+            // Will wait for the thread instead of quitting immediately
+            let _ = handle.join();
+        }
+    }
+}
 
 pub fn get_file_list() -> Vec<String> {
     FILE_LIST.lock().unwrap().clone()
