@@ -6,7 +6,8 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 // Define static values
-lazy_static! {    
+lazy_static! {
+    static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(String::new());
     static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
@@ -105,14 +106,10 @@ fn bytes_contains(haystack: Vec<u8>, needle: &[u8]) -> bool {
     haystack.windows(needle.len()).any(|window| window == needle)
 }
 
-fn extract_bytes(mode: String, bytes: Vec<u8>) -> Vec<u8> {
+fn find_header(mode: String, bytes: Vec<u8>) -> String {
     // Get headers and offsets, they will be used later
     let all_headers = {
         HEADERS.lock().unwrap().clone()
-    };
-
-    let offsets = {
-        OFFSET.lock().unwrap().clone()
     };
 
     // Get the header for the current mode
@@ -121,16 +118,30 @@ fn extract_bytes(mode: String, bytes: Vec<u8>) -> Vec<u8> {
     if let Some(headers) = option_headers {
         // Itearte through headers to find the correct one for this file.
         for header in headers {
-            if let Some(mut index) = bytes_search(bytes.clone(), header.as_bytes()) {
-                // Found the correct header, extract from the bytes
-                if let Some(offset) = offsets.get(header) {
-                    // Apply offset to index if the offset exists
-                    index -= *offset;
-                }
-                // Return all the bytes after the found header index
-                return bytes[index..].to_vec()
+            if bytes_contains(bytes.clone(), header.as_bytes()) {
+                return header.to_owned()
             }
         }
+    }
+    println!("WARN: Invalid header");
+    return "INVALID".to_owned()
+}
+
+fn extract_bytes(header: String, bytes: Vec<u8>) -> Vec<u8> {
+    // Get offsets for headers
+    let offsets = {
+        OFFSET.lock().unwrap().clone()
+    };
+
+    // Find the header in the file
+    if let Some(mut index) = bytes_search(bytes.clone(), header.as_bytes()) {
+        // Found the header, extract from the bytes
+        if let Some(offset) = offsets.get(&header) {
+            // Apply offset to index if the offset exists
+            index -= *offset;
+        }
+        // Return all the bytes after the found header index
+        return bytes[index..].to_vec()
     }
     println!("WARN: Failed to extract a file!");
     // Return bytes instead if this fails
@@ -178,6 +189,34 @@ pub fn detect_directory() {
     }
 
 }
+
+// Function to get temp directory, create it if it doesn't exist
+pub fn get_temp_dir(create_directory: bool) -> String {
+    let mut option_temp_dir = TEMP_DIRECTORY.lock().unwrap();
+    if let Some(temp_dir) = option_temp_dir.as_ref() {
+        return temp_dir.path().to_string_lossy().to_string();
+    } else if create_directory  {
+        match tempfile::tempdir() {
+            Ok(temp_dir) => {
+                let path = temp_dir.path().to_string_lossy().to_string();
+                *option_temp_dir = Some(temp_dir);
+                return path;
+            }
+            Err(e) => {
+                // Have a visual dialog to show the user what actually went wrong
+                let _ = native_dialog::MessageDialog::new()
+                .set_type(native_dialog::MessageType::Error)
+                .set_title("Failed to create a temporary directory!")
+                .set_text("Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator")
+                .show_alert();
+                panic!("Failed to create a temporary directory! {}", e)
+            }
+        }
+    } else {
+        return "".to_string();
+    }
+}
+
 
 pub fn delete_all_directory_contents(dir: String) {
     if dir == "" {
@@ -408,21 +447,51 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool) {
     }
 }
 
-pub fn extract_file(file: String, mode: String, destination: String) {
+pub fn extract_file(file: String, mode: String, destination: String, add_extention: bool) -> String {
         match fs::metadata(file.clone()) {
         Ok(metadata) => {
             if metadata.is_file() {
-                // TODO: Extraction logic
+                // This can return an error result
+                let bytes_error = fs::read(file);
+                match bytes_error {
+                    // Remove the error result so the extract_bytes function can read it
+                    Ok(bytes) => {
+                        let header = find_header(mode, bytes.clone());
+                        let extracted_bytes = extract_bytes(header.clone(), bytes.clone());
+                        let mut new_destination = destination.clone();
+
+                        // Add the extention if needed
+                        if add_extention {
+                            let extentions = {EXTENTION.lock().unwrap().clone()};
+                            if let Some(extention) = extentions.get(&header.clone()) {
+                                new_destination = destination.clone() + &extention.clone()
+                            }
+                        }
+
+                        // Ignore result, errors won't cause any further issues
+                        let _ = fs::write(new_destination.clone(), extracted_bytes);
+                        return new_destination;
+
+
+                    }
+                    Err(e) => {
+                        update_status(format!("Failed to open file: {}", e));
+                        println!("ERROR: Failed to open file: {}", e);
+                        return "None".to_string();
+                    }
+                }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
                 let mut status = STATUS.lock().unwrap();
                 *status = format!("Error: '{}' Not a file.", file);
-                println!("ERROR: '{}' Not a file.", file)
+                println!("ERROR: '{}' Not a file.", file);
+                return "None".to_string();
             }
         }
         Err(e) => {
             println!("Error extracting file: '{}' {}", file, e);
-            update_status(format!("Error extracting file: {}", e))
+            update_status(format!("Error extracting file: {}", e));
+            return "None".to_string();
         }
     }
 }
@@ -451,7 +520,12 @@ pub fn get_request_repaint() -> bool {
     return old_request_repaint
 }
 
-pub fn double_click(value: String) {
-    let mut status = STATUS.lock().unwrap();
-    *status = format!("Double clicked {}", value);
+// Delete the temp directory
+pub fn clean_up() {
+    let temp_dir = get_temp_dir(false);
+    // Just in case if it somehow resolves to "/"
+    if temp_dir != "" && temp_dir != "/" {
+        println!("Cleaning up {}", temp_dir);
+        let _ = fs::remove_dir_all(temp_dir); // Not too important, and the last thing the program will run
+    }
 }

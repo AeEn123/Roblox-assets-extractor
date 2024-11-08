@@ -30,7 +30,7 @@ struct Cli {
     list: Option<Category>,
 }
 
-fn main() -> eframe::Result<()> {
+fn main() {
     let args = Cli::parse();
 
     // Every command after this needs to have the directory detected.
@@ -50,9 +50,12 @@ fn main() -> eframe::Result<()> {
             }
         };
         logic::refresh(cache_directory, tab, true); // cli_list_mode is set to true, this will print assets to console
-        Ok(())
     } else {
-        // If nothing passed, run GUI        
-        gui::run_gui()
+        // If nothing passed, run GUI
+        match gui::run_gui() {
+            Ok(_) => println!("GUI Stopped, exiting program..."),
+            Err(e) => println!("GUI failed: {}", e) // Error handling, so the clean up function can still run after the GUI fails
+        }
     }
+    logic::clean_up(); // Remove the temporary directory if one has been created
 }

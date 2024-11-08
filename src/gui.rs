@@ -5,7 +5,7 @@ use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self}; // Used for functionality
+use crate::logic::{self, extract_file}; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
@@ -15,6 +15,14 @@ struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
     current_tab: &'a mut Option<String>
+}
+
+fn double_click(dir: String, value: String, mode: String) {
+    let temp_dir = logic::get_temp_dir(true);
+    let destination = format!("{}/{}", temp_dir, value); // Join both paths
+    let origin = format!("{}/{}", dir, value);
+    let new_destination = extract_file(origin, mode, destination.clone(), true);
+    let _ = open::that(new_destination); // Open when finished
 }
 
 
@@ -110,7 +118,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 if let Some(selected) = *self.selected {
                     // Get file name after getting the selected value
                     if let Some(file_name) = file_list.get(selected) {
-                        logic::double_click(file_name.to_string());
+                        double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
                     }                   
                 }
             }
@@ -162,7 +170,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                         // Handle the click/double click
                         if response.clicked() && is_selected {
-                            logic::double_click(file_name.to_string());
+                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
                         } else if response.clicked() {
                             *self.selected = Some(i);
                         }
