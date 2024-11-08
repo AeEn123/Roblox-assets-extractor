@@ -76,7 +76,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         logic::delete_all_directory_contents(cache_directory.to_owned());
                     }                    
                 }
-                if ui.button("Extract all of this type <F2>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
+                if ui.button("Extract all of this type <F3>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
                     println!("Extract");
                 }
                 if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
