@@ -275,13 +275,16 @@ impl eframe::App for MyApp {
         });
 
         // Switch tabs with keyboard input (num keys)
-        for i in 1..=self.tab_map.len() as u32 {
-            if ctx.input(|input| input.key_pressed(egui::Key::from_name(&i.to_string()).expect("Invalid key"))) {
-                if let Some(&(surface, node, tab)) = self.tab_map.get(&i) {
-                    self.tree.set_active_tab((surface, node, egui_dock::TabIndex(tab)));
+        if ctx.input(|input| input.modifiers.ctrl || input.modifiers.alt) {
+            for i in 1..=self.tab_map.len() as u32 {
+                if ctx.input(|input| input.key_pressed(egui::Key::from_name(&i.to_string()).expect("Invalid key"))) {
+                    if let Some(&(surface, node, tab)) = self.tab_map.get(&i) {
+                        self.tree.set_active_tab((surface, node, egui_dock::TabIndex(tab)));
+                    }
                 }
             }
         }
+
 
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
