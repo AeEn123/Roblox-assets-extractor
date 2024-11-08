@@ -448,7 +448,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
 }
 
 pub fn extract_file(file: String, mode: String, destination: String, add_extention: bool) -> String {
-        match fs::metadata(file.clone()) {
+    // TODO: Make music work
+    match fs::metadata(file.clone()) {
         Ok(metadata) => {
             if metadata.is_file() {
                 // This can return an error result
