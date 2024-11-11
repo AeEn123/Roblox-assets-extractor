@@ -35,17 +35,20 @@ Yes, the theme of the program automatically syncs to your system theme.
 ### Why is KTX files in a different tab? Shouldn't it be in the Textures tab?
 Technically it should, but most image viewers don't support KTX files, so it is best to move this aside to a different tab to avoid compatability issues, this tab should be used for more advanced users.
 
-## Usage
-### Tabs
+# Usage
+## Tabs
 You can see multiple tabs. Roblox Assets Extractor catagorises the files into multiple catagories. You can filter them by clicking on the tab.
-### Delete this directory
+## Delete this directory
 If you click delete this directory, it will delete the files within the directory where the tab is shown. This makes easy to extract assets from specific games, by clicking this button before joining into the game you want to extract from.
-### Extract all assets
+## Extract all assets
 There is also an extract all assets of this type button, you can use this button to extract all the assets of that type and put that into a folder of your liking.<br>
-### Settings menu
+## Settings menu
 There are similar buttons in the settings menu, where you can delete your cache or extract all assets, where it will automatically create folders within a folder you choose.
 
-## More Info
+# CLI mode
+See [docs/CLI.md](./docs/CLI.md)
+
+# More Info
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
 
 > [!IMPORTANT]
