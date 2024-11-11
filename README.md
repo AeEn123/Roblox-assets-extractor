@@ -8,7 +8,7 @@
 > If you are using version 0.4 or earlier, autoupdate functionality will be broken. In such cases, please download from here instead.
 
 # Roblox Assets Extractor
-This tool is designed to extract cached data from your Roblox installation by inspecting the headers of cached files.
+This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
 
 # FAQ
 ### Does this interfere with the roblox client?
@@ -36,9 +36,14 @@ Yes, the theme of the program automatically syncs to your system theme.
 Technically it should, but most image viewers don't support KTX files, so it is best to move this aside to a different tab to avoid compatability issues, this tab should be used for more advanced users.
 
 ## Usage
-You can extract Roblox music, sounds, and textures from your Roblox cache (ensure your client is open for music).
-
-Use the "Delete All" button to clear the currently selected cache folder. This is useful for extracting assets from a specific game.
+### Tabs
+You can see multiple tabs. Roblox Assets Extractor catagorises the files into multiple catagories. You can filter them by clicking on the tab.
+### Delete this directory
+If you click delete this directory, it will delete the files within the directory where the tab is shown. This makes easy to extract assets from specific games, by clicking this button before joining into the game you want to extract from.
+### Extract all assets
+There is also an extract all assets of this type button, you can use this button to extract all the assets of that type and put that into a folder of your liking.<br>
+### Settings menu
+There are similar buttons in the settings menu, where you can delete your cache or extract all assets, where it will automatically create folders within a folder you choose.
 
 ## More Info
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
@@ -84,9 +89,7 @@ Info below here is about the python version, and would not apply if you are usin
 ![Screenshot of the python version](https://img.guildedcdn.com/ContentMediaGenericFiles/d64200649953156687eb159ea5efcb25-Full.webp?w=1920&h=1040)
 
 ## More Info
-I am relatively new to Tkinter, so please be aware that the UI may appear a bit messy.
+I am quite new to Tkinter, so the UI looks pretty bad messy.
 
 > [!TIP]
-> If file listing becomes too slow, consider clearing your Roblox cache. You can do this by navigating to your cache folder (%Temp%\Roblox) and deleting all the files.
-
-*I admit. This readme is AI generated. I am really bad at writing up documents. Sorry.*
+> If file listing becomes too slow, try clearing your Roblox cache. You can do this by going to your cache folder (%Temp%\Roblox) and deleting all the files.
