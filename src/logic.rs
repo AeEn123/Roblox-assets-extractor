@@ -104,7 +104,6 @@ fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
 }
 
 fn bytes_contains(haystack: &[u8], needle: &[u8]) -> bool {
-    // !!! VERY SLOW, NEEDS OPTIMIZATION !!!
     haystack.windows(needle.len()).any(|window| window == needle)
 }
 
