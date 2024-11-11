@@ -631,6 +631,9 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
             // Stage 2: Filter the files
             let entries: Vec<_> = fs::read_dir(http_directory.clone()).unwrap().collect();
 
+            // Initilize the Vec for the filtered files to go in
+            let mut filtered_files: Vec<(String, String)> = Vec::new();
+
             // Get amount and initlilize counter for progress
             let total = entries.len();
             let mut count = 0;
@@ -660,19 +663,25 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                                         if header.0 != "" {
                                             // Extract the file if the file contains the header
                                             if bytes_contains(&buffer, header.0.as_bytes()) {                                        
-                                                
+                                                filtered_files.push((filename.to_string_lossy().to_string(), header.1))
                                             }
                                         }
 
                                     }
 
-                                    update_status(format!("Stage 2: Extracting files ({count}/{total})"));
+                                    update_status(format!("Stage 2: Filtering files ({count}/{total})"));
                                 }
                             }
                             
                         },
                     };
                 }
+            }
+
+            // Stage 3: Extract the files
+
+            for file in filtered_files {
+
             }
 
             { 

@@ -17,3 +17,11 @@ whoami = "1.5.2"
 
 [build-dependencies]
 winresource = "0.1.17"
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = "fat"
+debug = false
+panic = "abort"
+overflow-checks = false
