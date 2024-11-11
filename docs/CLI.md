@@ -23,5 +23,5 @@ Usage:
 ./Roblox-assets-extractor --list <catagory>
 ```
 Will list files within that catagory.
-`<catagory>` is not optional
-`<catagory>` must be either `music`, `sounds`, `images`, `ktx`, or `rbxm`
+`<catagory>` is not optional.
+`<catagory>` must be either `music`, `sounds`, `images`, `ktx`, or `rbxm`.

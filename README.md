@@ -23,9 +23,6 @@ If Windows detects a program from an unverified publisher, this popup will appea
 ### Can this get me banned?
 No, unlike cheats, this **does not** inject into roblox. Making this an anti-cheat friendly way of extracting assets. I have been using this myself for years and I have not got any account warnings because of it.
 
-### Are you sure this won't get me banned?
-Take a look at the source code and see for yourself, this does not inject into applications, it doesn't even require admin rights. It **only reads** cache files from your %temp%\Roblox directory, **which roblox themselves** recommends to **modify** if something goes wrong.
-
 ### My extracted assets don’t play in my media player, what can I do?
 Some media players may not support the format that the file is in. If that is the case, please try another media player that supports all of the formats this supports, e.g VLC. **If the file is really broken, please [create an issue.](https://github.com/AeEn123/Roblox-assets-extractor/issues)**
 
@@ -46,7 +43,7 @@ There is also an extract all assets of this type button, you can use this button
 There are similar buttons in the settings menu, where you can delete your cache or extract all assets, where it will automatically create folders within a folder you choose.
 
 # CLI mode
-See [docs/CLI.md](./docs/CLI.md)
+See [CLI.md](./docs/CLI.md)
 
 # More Info
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
