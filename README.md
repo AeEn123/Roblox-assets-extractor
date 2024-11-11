@@ -15,7 +15,7 @@ This tool extracts cached data from your Roblox installation by looking at the h
 No, it is opening files that your client has already created. You can see them yourself in %Temp%\Roblox
 
 ### Is this malware?
-No, this is not malware, similar to other Free and Open Source Software, the code is available for everyone to see. It would be impossible for me to hide malware in here, if you are still not confident, you can always check the source code and [build it yourself!](https://github.com/AeEn123/Roblox-assets-extractor/tree/rust-rewrite?tab=readme-ov-file#building-from-source)
+No, this is not malware, similar to other Free and Open Source Software, the code is available for everyone to see. It would be impossible for me to hide malware in here, if you are still not confident, you can always check the source code and [build it yourself!](#building-from-source)
 
 ### Windows says "Windows protected your PC" What do I do?
 If Windows detects a program from an unverified publisher, this popup will appear. If this popup does appear, click "More info" and click "Run anyway".
@@ -85,8 +85,8 @@ Info below here is about the python version, and would not apply if you are usin
   ```bash
   pip install requests
   ```
-
-![Screenshot of the python version](https://img.guildedcdn.com/ContentMediaGenericFiles/d64200649953156687eb159ea5efcb25-Full.webp?w=1920&h=1040)
+Screenshot of the python version
+![Screenshot of the python version](./assets/python-screenshot.png)
 
 ## More Info
 I am quite new to Tkinter, so the UI looks pretty bad messy.
