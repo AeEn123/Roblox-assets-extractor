@@ -258,7 +258,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
                     // If the user provides a directory, the program will extract the assets to that directory
                     if let Some(path) = option_path {
-                        logic::extract_all( path.to_string_lossy().to_string(), file_list.clone(), false)
+                        logic::extract_all( path.to_string_lossy().to_string(), false)
                     }
                 }
             }

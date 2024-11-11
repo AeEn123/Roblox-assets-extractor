@@ -67,7 +67,6 @@ lazy_static! {
 
 
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
-const MODES: [&str; 5] = ["Music","Sounds","Images","KTX files","RBXM files"];
 
 
 // Define local functions
@@ -104,7 +103,8 @@ fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
     haystack.windows(needle.len()).position(|window| window == needle)
 }
 
-fn bytes_contains(haystack: Vec<u8>, needle: &[u8]) -> bool {
+fn bytes_contains(haystack: &[u8], needle: &[u8]) -> bool {
+    // !!! VERY SLOW, NEEDS OPTIMIZATION !!!
     haystack.windows(needle.len()).any(|window| window == needle)
 }
 
@@ -120,7 +120,7 @@ fn find_header(mode: String, bytes: Vec<u8>) -> String {
     if let Some(headers) = option_headers {
         // Itearte through headers to find the correct one for this file.
         for header in headers {
-            if bytes_contains(bytes.clone(), header.as_bytes()) {
+            if bytes_contains(&bytes, header.as_bytes()) {
                 return header.to_owned()
             }
         }
@@ -349,7 +349,11 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             HEADERS.lock().unwrap().clone()
                         };
                         
-                        let option_headers = all_headers.get(&mode);
+                        let headers = if let Some(value) = all_headers.get(&mode) {
+                            value
+                        } else {
+                            return
+                        };
 
                         for entry in entries {
                             let stop = {
@@ -381,17 +385,15 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                             },
                                             Ok(bytes_read) => {
                                                 buffer.truncate(bytes_read);
-                                                if let Some(headers) = option_headers {
-                                                    for header in headers {
-                                                        // Check if header is empty before actually checking file
-                                                        if header != "" {
-                                                            // Add the file if the file contains the header
-                                                            if bytes_contains(buffer.clone(), header.as_bytes()) {
-                                                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
-                                                            }
+                                                for header in headers {
+                                                    // Check if header is empty before actually checking file
+                                                    if header != "" {
+                                                        // Add the file if the file contains the header
+                                                        if bytes_contains(&buffer, header.as_bytes()) {
+                                                            update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
                                                         }
-      
                                                     }
+      
                                                 }
 
                                                 update_status(format!("Reading files ({count}/{total})"));
@@ -570,7 +572,7 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
     }
 }
 
-pub fn extract_all(destination: String, file_list: Vec<String>, yield_for_thread: bool) {
+pub fn extract_all(destination: String, yield_for_thread: bool) {
     let running = {
         let task = TASK_RUNNING.lock().unwrap();
         task.clone()
@@ -584,6 +586,7 @@ pub fn extract_all(destination: String, file_list: Vec<String>, yield_for_thread
             }
 
             let headers = {HEADERS.lock().unwrap().clone()};
+            let extentions = {EXTENTION.lock().unwrap().clone()};
 
             let mut all_headers: Vec<(String, String)> = Vec::new();
 
@@ -599,6 +602,15 @@ pub fn extract_all(destination: String, file_list: Vec<String>, yield_for_thread
             let music_directory = format!("{}/sounds", cache_directory);
             let http_directory = format!("{}/http", cache_directory);
 
+            // Attempt to create directories
+            let _ = fs::create_dir(destination.clone());
+            let _ = fs::create_dir(format!("{}/Music", destination.clone()));
+            
+            // Loop through all types and create directories for them
+            for key in headers.keys() {
+                let _ = fs::create_dir(format!("{}/{}", destination.clone(), key));
+            }
+
             // Stage 1: Read and extract music directory
             let entries: Vec<_> = fs::read_dir(music_directory.clone()).unwrap().collect();
 
@@ -607,14 +619,60 @@ pub fn extract_all(destination: String, file_list: Vec<String>, yield_for_thread
             let mut count = 0;
             for entry in entries {                            
                 count += 1; // Increase counter for progress
-                update_progress((count as f32/total as f32) / 3.0);
+                update_progress((count as f32/total as f32)/ 3.0);
                 let path = entry.unwrap().path();
                 if let Some(filename) = path.file_name() {
                     let origin = format!("{}/{}", music_directory.clone(), filename.to_string_lossy().to_string());
                     let dest = format!("{}/Music/{}", destination, filename.to_string_lossy().to_string()); // Local destination
-
                     extract_file(origin, "Music".to_string(), dest, true);
                     update_status(format!("Stage 1: Extracting files ({count}/{total})"));
+                }
+            }
+
+            // Stage 2: Filter the files
+            let entries: Vec<_> = fs::read_dir(http_directory.clone()).unwrap().collect();
+
+            // Get amount and initlilize counter for progress
+            let total = entries.len();
+            let mut count = 0;
+            for entry in entries {                            
+                count += 1; // Increase counter for progress
+                update_progress(((count as f32/total as f32) +1.0) /3.0); // 2nd stage, will fill up the bar from 1/3 to 2/3
+                let path = entry.unwrap().path();
+                if let Some(filename) = path.file_name() {
+                    match &mut fs::File::open(&path) {
+                        Err(why) => {
+                            println!("ERROR: couldn't open file: {}", why);
+                            update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                        },
+                        Ok(file) => {
+                            // Reading the first 2048 bytes
+                            let mut buffer = vec![0; 2048];
+                            match file.read(&mut buffer) {
+                                Err(why) => {
+                                    println!("ERROR: couldn't open file: {}", why);
+                                    update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                },
+                                Ok(bytes_read) => {
+                                    buffer.truncate(bytes_read);
+                                    // header.0 = header, header.1 = mode
+                                    for header in all_headers.clone() {
+                                        // Check if header is not empty before actually checking file
+                                        if header.0 != "" {
+                                            // Extract the file if the file contains the header
+                                            if bytes_contains(&buffer, header.0.as_bytes()) {                                        
+                                                
+                                            }
+                                        }
+
+                                    }
+
+                                    update_status(format!("Stage 2: Extracting files ({count}/{total})"));
+                                }
+                            }
+                            
+                        },
+                    };
                 }
             }
 
