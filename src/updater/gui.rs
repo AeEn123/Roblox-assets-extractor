@@ -7,11 +7,9 @@ const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the f
 pub struct MyApp {}
 
 impl eframe::App for MyApp {
-
-    /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            
+            ui.heading("An update is available, but the automatic updater is not implemented yet!")
         });
     }
 }
