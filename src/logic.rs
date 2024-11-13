@@ -585,7 +585,6 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
             }
 
             let headers = {HEADERS.lock().unwrap().clone()};
-            let extentions = {EXTENTION.lock().unwrap().clone()};
 
             let mut all_headers: Vec<(String, String)> = Vec::new();
 
@@ -624,7 +623,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                     let origin = format!("{}/{}", music_directory.clone(), filename.to_string_lossy().to_string());
                     let dest = format!("{}/Music/{}", destination, filename.to_string_lossy().to_string()); // Local destination
                     extract_file(origin, "Music".to_string(), dest, true);
-                    update_status(format!("Stage 1: Extracting files ({count}/{total})"));
+                    update_status(format!("Stage 1/3: Extracting files ({count}/{total})"));
                 }
             }
 
@@ -661,7 +660,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                                     for header in all_headers.clone() {
                                         // Check if header is not empty before actually checking file
                                         if header.0 != "" {
-                                            // Extract the file if the file contains the header
+                                            // Add it to the list if the header is inside of the file.
                                             if bytes_contains(&buffer, header.0.as_bytes()) {                                        
                                                 filtered_files.push((filename.to_string_lossy().to_string(), header.1))
                                             }
@@ -669,7 +668,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
 
                                     }
 
-                                    update_status(format!("Stage 2: Filtering files ({count}/{total})"));
+                                    update_status(format!("Stage 2/3: Filtering files ({count}/{total})"));
                                 }
                             }
                             
@@ -680,8 +679,18 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
 
             // Stage 3: Extract the files
 
+            // Get amount and initlilize counter for progress
+            let total = filtered_files.len();
+            let mut count = 0;
             for file in filtered_files {
+                count += 1; // Increase counter for progress
+                update_progress(((count as f32/total as f32) +2.0) /3.0); // 3rd stage, will fill up the bar from 2/3 to 3/3
 
+                let origin = format!("{}/{}", http_directory.clone(), file.0);
+                let dest = format!("{}/{}/{}", destination, file.1, file.0); // Local destination, stores in (destination/type/name)
+                extract_file(origin, file.1, dest, true);
+
+                update_status(format!("Stage 3/3: Extracting files ({count}/{total})"));
             }
 
             { 

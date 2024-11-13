@@ -113,7 +113,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             let mut scroll_to: Option<usize> = None; // This is reset every frame, so it doesn't constantly scroll to the same label
             let mut none_selected: bool = false; // Used to scroll to the first value shown when none is selected
-
             // If the user presses up, decrement the selected value
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
                 if let Some(selected) = *self.selected {
@@ -148,6 +147,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
             }
 
+            let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
+            let mut first_iterated: bool = false; // Used to track if the first entry iterated.
             
             // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
@@ -158,7 +159,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 for i in row_range {
                     if let Some(file_name) = file_list.get(i) {
 
-                        let is_selected  = if none_selected {
+                        let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
                             *self.selected = Some(i); // If there is none selected, Set selected and return true
                             none_selected = false; // Will select everything if this is not set to false immediately
                             true
@@ -209,12 +210,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                         // Handle keyboard scrolling
                         if scroll_to == Some(i) {
+                            navigation_accepted = true;
                             response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
                         }
+
+                        first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                     }
                 }
             });
             
+            if !navigation_accepted && scroll_to.is_some() {
+                // If the keyboard navigation wasn't accepted and there is keyboard navigation then...
+                *self.selected = None; // Set the selected to none, so it selects something on-screen
+            }
 
         } else {
             // This is only shown in the settings tab
