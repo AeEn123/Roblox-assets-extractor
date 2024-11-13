@@ -9,19 +9,23 @@ This mode is useful when you want to use the tool remotely (no display) and/or y
 
 # Commands and Usage
 ## --help
-Usage:
+### Usage:
 ```
 ./Roblox-assets-extractor --help <command>
 ```
-Outputs a help page showing a list of commands<br>
+### Description:
+Outputs a help page showing a list of commands
+### Arguments:
 The `<command>` argument is optional.
 When `<command>` is provided, it will show help for that commands.
 
 ## --list
-Usage:
+### Usage:
 ```
 ./Roblox-assets-extractor --list <catagory>
 ```
+### Description:
 Will list files within that catagory.
+### Arguments:
 `<catagory>` is not optional.
 `<catagory>` must be either `music`, `sounds`, `images`, `ktx`, or `rbxm`.

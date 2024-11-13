@@ -112,6 +112,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             
             let mut scroll_to: Option<usize> = None; // This is reset every frame, so it doesn't constantly scroll to the same label
+            let mut none_selected: bool = false; // Used to scroll to the first value shown when none is selected
 
             // If the user presses up, decrement the selected value
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
@@ -121,7 +122,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         scroll_to = Some(selected - 1); // This is also set to the same number, allowing for auto scrolling
                     }
                 } else {
-                    *self.selected = Some(0);  // Start at the first label if nothing is selected
+                    none_selected = true // Select the first visible entry
                 }
             }
 
@@ -133,7 +134,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         scroll_to = Some(selected + 1); // This is also set to the same number, allowing for auto scrolling
                     }
                 } else {
-                    *self.selected = Some(1);  // Start at the first label if nothing is selected
+                    none_selected = true // Select the first visible entry
                 }
             }
 
@@ -155,8 +156,15 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 file_list.len(),
                 |ui, row_range| {
                 for i in row_range {
-                    if let Some(file_name) = file_list.get(i) {                        
-                        let is_selected = *self.selected == Some(i); // Check if this current one is selected
+                    if let Some(file_name) = file_list.get(i) {
+
+                        let is_selected  = if none_selected {
+                            *self.selected = Some(i); // If there is none selected, Set selected and return true
+                            none_selected = false; // Will select everything if this is not set to false immediately
+                            true
+                        } else {
+                            *self.selected == Some(i) // Check if this current one is selected
+                        };
 
                         let visuals = ui.visuals();
 
