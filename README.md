@@ -64,9 +64,14 @@ git clone -b rust-rewrite https://github.com/AeEn123/Roblox-assets-extractor
 cd Roblox-assets-extractor
 ```
 ## 2. Build with cargo, the command you run depends on your use-case
+If you want a finished build which runs fast but compiles slowly (recommended for normal use)
 ```bash
-cargo build --release # If you are not developing the program and you want a finished build
-cargo build # If you are developing the program and you want a debug build (compiles faster)
+cargo build --release
+```
+
+If you want a development build which runs slowly but compiles fast (recommended for development)
+```bash
+cargo build
 ```
 Wait for it to build all the dependencies and the application. After that you should find it in the `target` folder.
 
