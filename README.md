@@ -63,33 +63,12 @@ Building from source requires cargo, [which can be installed from rustup.](https
 git clone -b rust-rewrite https://github.com/AeEn123/Roblox-assets-extractor
 cd Roblox-assets-extractor
 ```
-## 2. Build with cargo
+## 2. Build with cargo, the command you run depends on your use-case
 ```bash
-cargo build --release
+cargo build --release # If you are not developing the program and you want a finished build
+cargo build # If you are developing the program and you want a debug build (compiles faster)
 ```
 Wait for it to build all the dependencies and the application. After that you should find it in the `target` folder.
 
 # Python version
-Info below here is about the python version, and would not apply if you are using the rust version.
-
-
-
-## Requirements
-- **Tkinter:** Tkinter is required to run this tool. On Windows, ensure that Tkinter is selected during the Python installation, or you can install it via pip. On Linux, you can install it using your package manager or download it via pip.
-  To install it via pip:
-  ```bash
-  pip install tkinter
-  ```
-- *(Optional)* **Pip:** Pip can be used for auto-downloading modules. On Windows, ensure that the corresponding option is checked during the Python installation. On Linux, you can install it using your package manager.
-- *(Optional)* **Requests:** This will be downloaded automatically via pip (with your consent) for the ability to check for updates. If automatic download fails, you can install it through pip:
-  ```bash
-  pip install requests
-  ```
-Screenshot of the python version
-![Screenshot of the python version](./assets/python-screenshot.png)
-
-## More Info
-I am quite new to Tkinter, so the UI looks pretty bad messy.
-
-> [!TIP]
-> If file listing becomes too slow, try clearing your Roblox cache. You can do this by going to your cache folder (%Temp%\Roblox) and deleting all the files.
+See [python.md](./docs/python.md)
