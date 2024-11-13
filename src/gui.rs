@@ -218,7 +218,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     }
                 }
             });
-            
+
             if !navigation_accepted && scroll_to.is_some() {
                 // If the keyboard navigation wasn't accepted and there is keyboard navigation then...
                 *self.selected = None; // Set the selected to none, so it selects something on-screen
@@ -226,7 +226,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         } else {
             // This is only shown in the settings tab
-            ui.heading("Settings");
+            ui.heading("Actions");
 
             // Clear cache description
             ui.label("If it is taking too long to list files and extracting all from a directory, you can clear your roblox cache with the button below. This removes all files from your cache and your roblox client will automatically re-create these files when these assets are needed again.");
@@ -278,6 +278,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     }
                 }
             }
+
+            ui.separator();
+            
+            ui.heading("Updates (these settings don't work rn lol auto update not implemented yet)");
+            ui.checkbox(&mut false, "Check for updates");
+            ui.checkbox(&mut false, "Automatically install updates");
         }
 
     }

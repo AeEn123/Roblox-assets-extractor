@@ -2,6 +2,7 @@
 
 mod gui;
 mod logic;
+mod updater;
 
 use clap::{Parser, ValueEnum};
 
