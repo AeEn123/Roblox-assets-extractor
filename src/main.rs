@@ -6,6 +6,7 @@ mod updater;
 
 use clap::{Parser, ValueEnum};
 
+// CLI stuff
 #[derive(ValueEnum, Clone, Debug)]
 enum Category {
     Music,

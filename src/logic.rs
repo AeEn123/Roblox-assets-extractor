@@ -5,6 +5,8 @@ use std::thread;
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
+include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources
+
 // Define static values
 lazy_static! {
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
@@ -188,6 +190,10 @@ pub fn detect_directory() {
         panic!("Directory detection failed!{}", errors)
     }
 
+}
+
+pub fn get_locale(force_refresh: bool, lang: &str) {
+    // TODO: get the locale and return it, store it in mutex for faster access times across, and allow to be refreshed with force_refresh
 }
 
 // Function to get temp directory, create it if it doesn't exist
