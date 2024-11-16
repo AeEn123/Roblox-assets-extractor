@@ -2,19 +2,24 @@
 use eframe::egui;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
+use fluent_bundle::{FluentArgs, FluentBundle, FluentResource};
+use std::sync::Arc;
+
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self, get_list_task_running}; // Used for functionality
+use crate::logic::{self, get_list_task_running, get_message}; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
+const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
 
 
 struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
-    current_tab: &'a mut Option<String>
+    current_tab: &'a mut Option<String>,
+    locale: &'a mut FluentBundle<Arc<FluentResource>>,
 }
 
 fn double_click(dir: String, value: String, mode: String) {
@@ -32,14 +37,15 @@ impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = String;
 
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
-        (&*tab).into()
+        get_message(self.locale, &*tab, None).into()
+        
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         let cache_directory = {
             let cache_dir = logic::get_cache_directory();
             // Music tab just adds .ogg while other tabs scrape the header files from HTTP to allow all media players to play it
-            if tab == "Music" {
+            if tab == "music" {
                 format!("{}/sounds", cache_dir)
             } else {
                 format!("{}/http", cache_dir)
@@ -48,7 +54,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         let file_list = logic::get_file_list(); // Get the file list as it is used throughout the GUI
 
-        if tab != "Settings" {
+        if tab != "settings" && tab != "about" {
             // This is only shown on tabs other than settings (Extracting assets)
 
             // Detect if tab changed and do a refresh if so
@@ -61,25 +67,25 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 *self.current_tab = Some(tab.to_owned());
                 logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
             }
-            
+                        
             // GUI logic below here
             
             // Top UI buttons
             ui.horizontal(|ui| {
-                if ui.button("Delete this directory <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
                     // Confirmation dialog
                     let yes = MessageDialog::new()
                     .set_type(MessageType::Info)
-                    .set_title("Confirmation")
-                    .set_text("Are you sure you want to delete all files in this directory?")
+                    .set_title(&logic::get_message(self.locale, "confirmation-delete-confirmation-title", None))
+                    .set_text(&logic::get_message(self.locale, "confirmation-delete-confirmation-description", None))
                     .show_confirm()
                     .unwrap();
-            
+                
                     if yes {
                         logic::delete_all_directory_contents(cache_directory.to_owned());
                     }                    
                 }
-                if ui.button("Extract all of this type <F3>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
+                if ui.button(logic::get_message(self.locale, "button-extract-type", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
                     let mut no = get_list_task_running();
 
                     // Confirmation dialog, the program is still listing files
@@ -87,8 +93,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         // NOT result, will become false if user clicks yes
                         no = !MessageDialog::new()
                         .set_type(MessageType::Info)
-                        .set_title("Files are still being filtered.")
-                        .set_text("Are you sure you want to extract all the files while the program is still filtering the files? This will result in an unfinished extraction.")
+                        .set_title(&logic::get_message(self.locale, "confirmation-filter-confirmation-title", None))
+                        .set_text(&logic::get_message(self.locale, "confirmation-filter-confirmation-description", None))
                         .show_confirm()
                         .unwrap();
                     }
@@ -105,7 +111,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         }
                     }
                 }
-                if ui.button("Refresh <F5>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
+                if ui.button(logic::get_message(self.locale, "button-refresh", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
                     logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
                 }
             });
@@ -149,7 +155,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
             let mut first_iterated: bool = false; // Used to track if the first entry iterated.
-            
+
             // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
                 ui,
@@ -224,20 +230,20 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 *self.selected = None; // Set the selected to none, so it selects something on-screen
             }
 
-        } else {
+        } else if tab == "settings" {
             // This is only shown in the settings tab
-            ui.heading("Actions");
+            ui.heading(logic::get_message(self.locale, "actions", None));
 
             // Clear cache description
-            ui.label("If it is taking too long to list files and extracting all from a directory, you can clear your roblox cache with the button below. This removes all files from your cache and your roblox client will automatically re-create these files when these assets are needed again.");
+            ui.label(logic::get_message(self.locale, "clear-cache-description", None));
             
             // Clear cache button
-            if ui.button("Clear roblox cache <Del>").clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+            if ui.button(logic::get_message(self.locale, "button-clear-cache", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
                 // Confirmation dialog
                 let yes = MessageDialog::new()
                 .set_type(MessageType::Info)
-                .set_title("Confirmation")
-                .set_text("Are you sure you want to clear your roblox cache?")
+                .set_title(&logic::get_message(self.locale, "confirmation-clear-cache-title", None))
+                .set_text(&logic::get_message(self.locale, "confirmation-clear-cache-description", None))
                 .show_confirm()
                 .unwrap();
         
@@ -246,13 +252,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }                    
             }
 
-            ui.separator();
-
             // Extract all description
-            ui.label("The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.");
+            ui.label(logic::get_message(self.locale, "extract-all-description", None));
 
             // Extract all button
-            if ui.button("Extract all <F3>").clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
+            if ui.button(&logic::get_message(self.locale, "button-extract-all", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
                 let mut no = get_list_task_running();
             
                 // Confirmation dialog, the program is still listing files
@@ -260,8 +264,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     // NOT result, will become false if user clicks yes
                     no = !MessageDialog::new()
                     .set_type(MessageType::Info)
-                    .set_title("Files are still being filtered.")
-                    .set_text("Are you sure you want to extract all the files while the program is still filtering the files? This will result in an unfinished extraction.")
+                    .set_title(&logic::get_message(self.locale, "confirmation-filter-confirmation-title", None))
+                    .set_text(&logic::get_message(self.locale, "confirmation-filter-confirmation-description", None))
                     .show_confirm()
                     .unwrap();
                 }
@@ -281,11 +285,18 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.separator();
             
-            ui.heading("Updates (these settings don't work rn lol auto update not implemented yet)");
-            ui.checkbox(&mut false, "Check for updates");
-            ui.checkbox(&mut false, "Automatically install updates");
-        }
+            ui.heading(logic::get_message(self.locale, "updates", None));
+            ui.label(logic::get_message(self.locale, "no-function", None));
+            ui.checkbox(&mut false, logic::get_message(self.locale, "check-for-updates", None));
+            ui.checkbox(&mut false, logic::get_message(self.locale, "automatically-install-updates", None));
 
+            
+        } else {
+            // This is only shown in the about tab
+            ui.heading("Roblox Assets Extractor");
+            
+
+        }
     }
 }
 
@@ -293,12 +304,13 @@ struct MyApp {
     tree: DockState<String>,
     tab_map: HashMap<u32, (SurfaceIndex, NodeIndex, usize)>, // Tab map for keyboard navigation
     selected: Option<usize>, // Used for storing selected state to retain keyboard navigation as seen in the tkinter version
-    current_tab: Option<String> // Allows for detecting when the user changes tabs to refresh automatically
+    current_tab: Option<String>, // Allows for detecting when the user changes tabs to refresh automatically
+    locale: FluentBundle<Arc<FluentResource>>
 }
 
 impl Default for MyApp {
     fn default() -> Self {
-        let tree = DockState::new(vec!["Music".to_owned(), "Sounds".to_owned(), "Images".to_owned(), "RBXM files".to_owned(), "KTX files".to_owned(), "Settings".to_owned()]);
+        let tree = DockState::new(vec!["music".to_owned(), "sounds".to_owned(), "images".to_owned(), "rbxm-files".to_owned(), "ktx-files".to_owned(), "settings".to_owned(), "about".to_owned()]);
 
         // Tab map for keyboard navigation
         let mut tab_map = HashMap::new();
@@ -313,7 +325,8 @@ impl Default for MyApp {
             tree, 
             tab_map,
             selected: None,
-            current_tab: None
+            current_tab: None,
+            locale: logic::get_locale(None),
         }
     }
 }
@@ -347,6 +360,7 @@ impl eframe::App for MyApp {
                 // Pass selected as a mutable referance
                 selected: &mut self.selected,
                 current_tab: &mut self.current_tab,
+                locale: &mut self.locale,
             });
         
         {
@@ -362,7 +376,7 @@ pub fn run_gui() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_icon(
-                eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon.png")[..])
+                eframe::icon_data::from_png_bytes(&ICON[..])
                     .expect("Failed to load icon"),
             ),
         ..Default::default()

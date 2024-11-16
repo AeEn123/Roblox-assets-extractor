@@ -35,9 +35,6 @@ struct Cli {
 fn main() {
     let args = Cli::parse();
 
-    // Every command after this needs to have the directory detected.
-    logic::detect_directory();
-
     if let Some(category) = args.list {
         // User passed --list
         let tab = category.to_string();

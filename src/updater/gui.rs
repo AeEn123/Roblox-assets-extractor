@@ -1,6 +1,6 @@
 // Used for gui
 use eframe::egui;
-use native_dialog::{MessageDialog, FileDialog, MessageType};
+use native_dialog::{MessageDialog, MessageType};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 

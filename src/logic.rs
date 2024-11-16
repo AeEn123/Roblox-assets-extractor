@@ -1,17 +1,19 @@
-use std::fs;
+use std::{fs, sync::Arc};
 use std::collections::HashMap;
 use std::io::Read;
 use std::thread;
 use std::sync::Mutex;
+use fluent_bundle::{FluentBundle, FluentResource, FluentArgs};
+use unic_langid::LanguageIdentifier;
 use lazy_static::lazy_static;
 
 include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources
 
-// Define static values
+// Define mutable static values
 lazy_static! {
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
-    static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(String::new());
-    static ref STATUS: Mutex<String> = Mutex::new("Idling".to_owned());
+    static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(detect_directory());
+    static ref STATUS: Mutex<String> = Mutex::new(get_message(&get_locale(None), "idling", None));
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
@@ -25,19 +27,19 @@ lazy_static! {
     // File headers for each catagory
     static ref HEADERS: Mutex<HashMap<String,[String;2]>> = {
         let mut m = HashMap::new();
-        m.insert("Sounds".to_owned(),[
+        m.insert("sounds".to_owned(),[
             "OggS".to_owned(),
             "ID3".to_owned()
             ]);
-        m.insert("Images".to_owned(), [
+        m.insert("images".to_owned(), [
             "PNG".to_owned(),
             "WEBP".to_owned()
             ]);
-        m.insert("KTX files".to_owned(), [
+        m.insert("ktx-files".to_owned(), [
             "KTX".to_owned(),
             "".to_owned()
             ]);
-        m.insert("RBXM files".to_owned(), [
+        m.insert("rbxm-files".to_owned(), [
             "<roblox!".to_owned(),
             "".to_owned()
             ]);
@@ -72,6 +74,40 @@ const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinega
 
 
 // Define local functions
+fn detect_directory() -> String {
+    let mut errors = "".to_owned();
+    // Directory detection
+    for directory in DEFAULT_DIRECTORIES {
+        let resolved_directory = directory
+        .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
+        .replace("~", &format!("/home/{}", whoami::username()));
+        // There's probably a better way of doing this... It works though :D
+
+        match fs::metadata(&resolved_directory) { // Directory detection
+            Ok(metadata) => {
+                if metadata.is_dir() {
+                    // Successfully detected a directory, we can stop this loop
+                    return resolved_directory;
+                }
+            }
+            Err(e) => {
+                errors.push_str(&format!("\n{}: {}",directory, e.to_string()));
+            }
+        }
+        
+
+    }
+
+    // If it was unable to detect any directory, tell the user and panic the program
+    let _ = native_dialog::MessageDialog::new()
+    .set_type(native_dialog::MessageType::Error)
+    .set_title("Directory detection failed!")
+    .set_text("Directory detection failed! Is Roblox installed and you ran it at least once?")
+    .show_alert();
+    panic!("Directory detection failed!{}", errors);
+
+}
+
 fn update_status(value: String) {
     let mut status = STATUS.lock().unwrap();
     *status = value;
@@ -151,49 +187,41 @@ fn extract_bytes(header: String, bytes: Vec<u8>) -> Vec<u8> {
 }
 
 // Define public functions
-pub fn detect_directory() {
-    let mut errors = "".to_owned();
-    let mut success = false;
-    // Directory detection
-    for directory in DEFAULT_DIRECTORIES {
-        let resolved_directory = directory
-        .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
-        .replace("~", &format!("/home/{}", whoami::username()));
-        // There's probably a better way of doing this... It works though :D
+pub fn get_locale(lang: Option<&str>) -> FluentBundle<Arc<FluentResource>> {
+    let locale = if let Some(locale) = lang {
+        locale
+    } else {
+        // If language is not provided, load the resources for the system locale
+        &sys_locale::get_locale().unwrap_or_else(|| "en-GB".to_string()) // If locale cannot be identified, default to English
+    };
+    
+    let resource_data = if let Some(resources) = get_locale_resources(&locale) {
+        resources
+    } else {
+        get_locale_resources("en-GB").unwrap() // Use English if the locale is not supported
+    };
 
-        match fs::metadata(&resolved_directory) { // Directory detection
-            Ok(metadata) => {
-                if metadata.is_dir() {
-                    let mut cache_dir = CACHE_DIRECTORY.lock().unwrap();
-                    *cache_dir = resolved_directory;
+    let resource = FluentResource::try_new(resource_data).expect("Failed to parse FTL string.");
+    
+    let lang_id: LanguageIdentifier = locale.parse().unwrap_or_else(|_| "en-GB".parse().unwrap());
+    let mut bundle = FluentBundle::new(vec![lang_id]);
 
-                    // Successfully detected a directory, we can stop this loop
-                    success = true; // Program will panic! if this is set to true due to the error handling
-                    break;
-                }
-            }
-            Err(e) => {
-                errors.push_str(&format!("\n{}: {}",directory, e.to_string()));
-            }
-        }
-        
-
-    }
-
-    if !success {
-        // If it was unable to detect any directory, tell the user and panic the program
-        let _ = native_dialog::MessageDialog::new()
-        .set_type(native_dialog::MessageType::Error)
-        .set_title("Directory detection failed!")
-        .set_text("Directory detection failed! Is Roblox installed and you ran it at least once?")
-        .show_alert();
-        panic!("Directory detection failed!{}", errors)
-    }
-
+    bundle.add_resource_overriding(resource.into());
+    bundle
 }
 
-pub fn get_locale(force_refresh: bool, lang: &str) {
-    // TODO: get the locale and return it, store it in mutex for faster access times across, and allow to be refreshed with force_refresh
+pub fn get_message(locale: &FluentBundle<Arc<FluentResource>>, id: &str, args: Option<& FluentArgs<'_>>) -> String {
+    if let Some(message) = locale.get_message(id) {
+        if let Some(value) = message.value() {
+            let mut err = vec![];
+            return locale.format_pattern(value, args, &mut err).to_string();
+        } else {
+            return id.to_owned() // Return id if it is not available
+        }
+    } else {
+        return id.to_owned(); // Return id if it is not available
+    }
+    // if let Some(value)
 }
 
 // Function to get temp directory, create it if it doesn't exist
@@ -243,6 +271,8 @@ pub fn delete_all_directory_contents(dir: String) {
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = true; // Stop other threads from running
                         }
+                        // Get locale for localised status messages
+                        let locale = get_locale(None);
                         
                         // Read directory
                         let entries: Vec<_> = fs::read_dir(dir).unwrap().collect();
@@ -255,26 +285,31 @@ pub fn delete_all_directory_contents(dir: String) {
                             count += 1; // Increase counter for progress
                             update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                             let path = entry.unwrap().path();
+
+                            // Args for formatting
+                            let mut args = FluentArgs::new();
+                            args.set("item", count);
+                            args.set("total", total);
                             if path.is_dir() {
                                 match fs::remove_dir_all(path) {
                                     // Error handling and update status
-                                    Ok(_) => update_status(format!("Deleting files ({count}/{total})")),
+                                    Ok(_) => update_status(get_message(&locale, "deleting-files", Some(&args))),
 
                                     // If it's an error, log it and show on GUI
                                     Err(e) => {
                                         println!("ERROR: Failed to delete file: {}: {}", count, e);
-                                        update_status(format!("ERROR: Failed to delete ({count}/{total})"));
+                                        update_status(get_message(&locale, "failed-deleting-file", Some(&args)));
                                     }
                                 }
                             } else {
                                 match fs::remove_file(path) {
                                     // Error handling and update status
-                                    Ok(_) => update_status(format!("Deleting files ({count}/{total})")),
+                                    Ok(_) => update_status(get_message(&locale, "deleting-files", Some(&args))),
     
                                     // If it's an error, log it and show on GUI
                                     Err(e) => {
                                         println!("ERROR: Failed to delete file: {}: {}", count, e);
-                                        update_status(format!("ERROR: Failed to delete ({count}/{total})"));
+                                        update_status(get_message(&locale, "failed-deleting-file", Some(&args)));
                                     }
                                 }    
                             }
@@ -288,7 +323,7 @@ pub fn delete_all_directory_contents(dir: String) {
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
                         }
-                        update_status("Idling".to_owned()); // Set the status back
+                        update_status(get_message(&locale, "idling", None)); // Set the status back
                     });
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
@@ -300,8 +335,8 @@ pub fn delete_all_directory_contents(dir: String) {
         }
         Err(e) => {
             println!("WARN: '{}' {}", dir, e);
-            let mut status = STATUS.lock().unwrap();
-            *status = format!("Idling");
+            let locale = get_locale(None);
+            update_status(get_message(&locale, "idling", None));
         }
     }
 }
@@ -348,7 +383,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                         update_file_list("No files to list.".to_owned(), cli_list_mode);
                     }
 
-                    if mode != "Music" { // Music lists files directly and others filter.
+                    if mode != "music" { // Music lists files directly and others filter.
                         // Filter the files out
                         let all_headers = {
                             HEADERS.lock().unwrap().clone()
@@ -494,7 +529,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 
                     }
                     Err(e) => {
-                        update_status(format!("Failed to open file: {}", e));
+                        //update_status(get_message(&get_locale(None), "failed-opening-file", args));
                         println!("ERROR: Failed to open file: {}", e);
                         return "None".to_string();
                     }
