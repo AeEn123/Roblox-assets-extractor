@@ -1,3 +1,4 @@
+# Translated to German by @Vonercent
 # Language info
 language-name = 🇩🇪 Deutsch
 
