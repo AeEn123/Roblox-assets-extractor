@@ -27,8 +27,11 @@ confirmation-clear-cache-title = Clearing roblox cache
 confirmation-clear-cache-description = Are you sure you want to clear your roblox cache? The files will be regenerated when the roblox client is loaded.
 
 # Errors
-error-directory-detection = Directory detection failed.
 no-files = No files to list.
+error-directory-detection-title = Directory detection failed!
+error-directory-detection-description = Directory detection failed! Is Roblox installed and you ran it at least once?
+error-temporary-directory-title = Failed to create a temporary directory!
+error-temporary-directory-description = Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator
 
 # Headings
 actions = Actions
@@ -49,12 +52,17 @@ extract-all-description = The button below will copy all assets and create folde
 idling = Idling
 deleting-files = Deleting files ({ $item }/{ $total })
 reading-files = Reading files ({ $item }/{ $total })
+extracting-files = Extracting files ({ $item }/{ $total })
+filtering-files = Filtering files ({ $item }/{ $total })
+all-extracted = All files extracted
+stage = Stage { $stage }/{ $max }: { $status }
 
 # Error Statuses
 failed-deleting-file = ERROR: Failed to delete ({ $item }/{ $total })
 failed-opening-file = ERROR: Failed to open file: { $error }
 failed-not-file = ERROR: '{ $file }' Not a file
-error-extracting-file ERROR: Extracting file failed: { $error }
+error-extracting-file = ERROR: Failed to extract: { $error }
+error-check-logs = ERROR: Check logs for more details.
 
 # Misc
 no-function = (Not functional yet)

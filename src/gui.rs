@@ -2,7 +2,7 @@
 use eframe::egui;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
-use fluent_bundle::{FluentArgs, FluentBundle, FluentResource};
+use fluent_bundle::{FluentBundle, FluentResource};
 use std::sync::Arc;
 
 

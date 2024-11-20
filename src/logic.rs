@@ -101,8 +101,8 @@ fn detect_directory() -> String {
     // If it was unable to detect any directory, tell the user and panic the program
     let _ = native_dialog::MessageDialog::new()
     .set_type(native_dialog::MessageType::Error)
-    .set_title("Directory detection failed!")
-    .set_text("Directory detection failed! Is Roblox installed and you ran it at least once?")
+    .set_title(&get_message(&get_locale(None), "error-directory-detection-title", None))
+    .set_text(&get_message(&get_locale(None), "error-directory-detection-description", None))
     .show_alert();
     panic!("Directory detection failed!{}", errors);
 
@@ -240,8 +240,8 @@ pub fn get_temp_dir(create_directory: bool) -> String {
                 // Have a visual dialog to show the user what actually went wrong
                 let _ = native_dialog::MessageDialog::new()
                 .set_type(native_dialog::MessageType::Error)
-                .set_title("Failed to create a temporary directory!")
-                .set_text("Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator")
+                .set_title(&get_message(&get_locale(None), "error-temporary-directory-title", None))
+                .set_text(&get_message(&get_locale(None), "error-temporary-directory-description", None))
                 .show_alert();
                 panic!("Failed to create a temporary directory! {}", e)
             }
@@ -318,7 +318,7 @@ pub fn delete_all_directory_contents(dir: String) {
                         }
                         // Clear the file list for visual feedback to the user that the files are actually deleted
                         clear_file_list();
-                        update_file_list("No files to list.".to_owned(), false);
+                        update_file_list(get_message(&locale, "no-files", None), false);
                         { 
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
@@ -328,15 +328,13 @@ pub fn delete_all_directory_contents(dir: String) {
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
-                let mut status = STATUS.lock().unwrap();
-                *status = format!("Error: check logs for more details.");
+                update_status(get_message(&get_locale(None), "error-check-logs", None)); 
                 println!("ERROR: Directory detection failed.")
             }
         }
         Err(e) => {
             println!("WARN: '{}' {}", dir, e);
-            let locale = get_locale(None);
-            update_status(get_message(&locale, "idling", None));
+            update_status(get_message(&get_locale(None), "idling", None)); 
         }
     }
 }
@@ -420,7 +418,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                 match &mut fs::File::open(&path) {
                                     Err(why) => {
                                         println!("ERROR: couldn't open {}: {}", display, why);
-                                        update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                        args.set("error", why.to_string());
+                                        update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                     },
                                     Ok(file) => {
                                         // Reading the first 2048 bytes
@@ -478,7 +477,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                         let mut task = LIST_TASK_RUNNING.lock().unwrap();
                         *task = false; // Allow other threads to run again
                     }
-                    update_status("Idling".to_owned()); // Set the status back
+                    update_status(get_message(&locale, "idling", None)); // Set the status back
                 });
 
                 if yield_for_thread {
@@ -496,7 +495,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
             println!("WARN: '{}' {}", dir, e);
             clear_file_list();
             update_file_list("No files to list.".to_owned(), cli_list_mode);
-            update_status("Idling".to_owned())
+            update_status(get_message(&get_locale(None), "idling", None));
         }
     }
 }
@@ -558,7 +557,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
             args.set("error", e.to_string());
 
             println!("Error extracting file: '{}' {}", file, e);
-            update_status(format!("Error extracting file: {}", e));
+            update_status(get_message(&get_locale(None), "idling", Some(&args)));
             return "None".to_string();
         }
     }
@@ -581,6 +580,9 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                             *task = true; // Stop other threads from running
                         }
 
+                        // Get locale for localised status messages
+                        let locale = get_locale(None);
+
                         // Get amount and initlilize counter for progress
                         let total = file_list.len();
                         let mut count = 0;
@@ -589,12 +591,18 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                             count += 1; // Increase counter for progress
                             update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                             let origin = format!("{}/{}", dir, entry);
-                            let dest = format!("{}/{}", destination, entry); // Local destination
+                            let dest = format!("{}/{}", destination, entry); // Local variable destination
+
+                            // Args for formatting
+                            let mut args = FluentArgs::new();
+                            args.set("item", count);
+                            args.set("total", total);
+
                             let result = extract_file(origin, mode.clone(), dest, true);
                             if result == "None" {
-                                update_status(format!("ERROR: Failed to extract ({count}/{total})"));
+                                update_status(get_message(&locale, "failed-extracting-file", Some(&args)));
                             } else {
-                                update_status(format!("Extracting files ({count}/{total})"))
+                                update_status(get_message(&locale, "extracting-files", Some(&args)));
                             }
                         
                             
@@ -603,7 +611,7 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
                         }
-                        update_status("All files extracted".to_owned()); // Set the status back
+                        update_status(get_message(&locale, "all-extracted", None)); // Set the status to confirm to the user that all has finished
                     });
                     
                     if yield_for_thread {
@@ -613,15 +621,13 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
-                let mut status = STATUS.lock().unwrap();
-                *status = format!("Error: check logs for more details.");
+                update_status(get_message(&get_locale(None), "error-check-logs", None)); 
                 println!("ERROR: Directory detection failed.")
             }
         }
         Err(e) => {
             println!("WARN: '{}' {}", dir, e);
-            let mut status = STATUS.lock().unwrap();
-            *status = format!("Idling");
+            update_status(get_message(&get_locale(None), "idling", None));
         }
     }
 }
@@ -638,6 +644,9 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                 let mut task = TASK_RUNNING.lock().unwrap();
                 *task = true; // Stop other threads from running
             }
+
+            // Get locale for localised status messages
+            let locale = get_locale(None);
 
             let headers = {HEADERS.lock().unwrap().clone()};
 
@@ -673,12 +682,24 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
             for entry in entries {                            
                 count += 1; // Increase counter for progress
                 update_progress((count as f32/total as f32)/ 3.0);
+
+                // Args for formatting
+                let mut args = FluentArgs::new();
+                args.set("item", count);
+                args.set("total", total);
+
                 let path = entry.unwrap().path();
                 if let Some(filename) = path.file_name() {
                     let origin = format!("{}/{}", music_directory.clone(), filename.to_string_lossy().to_string());
                     let dest = format!("{}/Music/{}", destination, filename.to_string_lossy().to_string()); // Local destination
                     extract_file(origin, "Music".to_string(), dest, true);
-                    update_status(format!("Stage 1/3: Extracting files ({count}/{total})"));
+
+                    // More formatting to show "Stage 1/3: Extracting files"
+                    args.set("status", get_message(&locale, "extracting-files", Some(&args)));
+                    args.set("stage", "1");
+                    args.set("max", "3");
+
+                    update_status(get_message(&locale, "stage", Some(&args)));
                 }
             }
 
@@ -694,12 +715,18 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
             for entry in entries {                            
                 count += 1; // Increase counter for progress
                 update_progress(((count as f32/total as f32) +1.0) /3.0); // 2nd stage, will fill up the bar from 1/3 to 2/3
+
+                // Args for formatting
+                let mut args = FluentArgs::new();
+                args.set("item", count);
+                args.set("total", total);
+
                 let path = entry.unwrap().path();
                 if let Some(filename) = path.file_name() {
                     match &mut fs::File::open(&path) {
                         Err(why) => {
                             println!("ERROR: couldn't open file: {}", why);
-                            update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                         },
                         Ok(file) => {
                             // Reading the first 2048 bytes
@@ -707,7 +734,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                             match file.read(&mut buffer) {
                                 Err(why) => {
                                     println!("ERROR: couldn't open file: {}", why);
-                                    update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                    update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                 },
                                 Ok(bytes_read) => {
                                     buffer.truncate(bytes_read);
@@ -723,7 +750,12 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
 
                                     }
 
-                                    update_status(format!("Stage 2/3: Filtering files ({count}/{total})"));
+                                    // More formatting to show "Stage 2/3: Filtering files"
+                                    args.set("status", get_message(&locale, "filtering-files", Some(&args)));
+                                    args.set("stage", "2");
+                                    args.set("max", "3");
+
+                                    update_status(get_message(&locale, "stage", Some(&args)));
                                 }
                             }
                             
@@ -741,18 +773,28 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                 count += 1; // Increase counter for progress
                 update_progress(((count as f32/total as f32) +2.0) /3.0); // 3rd stage, will fill up the bar from 2/3 to 3/3
 
+                // Args for formatting
+                let mut args = FluentArgs::new();
+                args.set("item", count);
+                args.set("total", total);
+
                 let origin = format!("{}/{}", http_directory.clone(), file.0);
                 let dest = format!("{}/{}/{}", destination, file.1, file.0); // Local destination, stores in (destination/type/name)
                 extract_file(origin, file.1, dest, true);
 
-                update_status(format!("Stage 3/3: Extracting files ({count}/{total})"));
+                // More formatting to show "Stage 3/3: Extracting files"
+                args.set("status", get_message(&locale, "extracting-files", Some(&args)));
+                args.set("stage", "3");
+                args.set("max", "3");
+
+                update_status(get_message(&locale, "stage", Some(&args)));
             }
 
             { 
                 let mut task = TASK_RUNNING.lock().unwrap();
                 *task = false; // Allow other threads to run again
             }
-            update_status("All files extracted".to_owned()); // Set the status back
+            update_status(get_message(&locale, "all-extracted", None)); // Set the status to confirm to the user that all has finished
         });
         
         if yield_for_thread {
