@@ -28,6 +28,7 @@ confirmation-clear-cache-description = Are you sure you want to clear your roblo
 
 # Errors
 error-directory-detection = Directory detection failed.
+no-files = No files to list.
 
 # Headings
 actions = Actions
@@ -47,10 +48,13 @@ extract-all-description = The button below will copy all assets and create folde
 # Statuses
 idling = Idling
 deleting-files = Deleting files ({ $item }/{ $total })
+reading-files = Reading files ({ $item }/{ $total })
 
 # Error Statuses
 failed-deleting-file = ERROR: Failed to delete ({ $item }/{ $total })
-failed-opening-file = ERROR: Failed to open file { $error }
+failed-opening-file = ERROR: Failed to open file: { $error }
+failed-not-file = ERROR: '{ $file }' Not a file
+error-extracting-file ERROR: Extracting file failed: { $error }
 
 # Misc
 no-function = (Not functional yet)

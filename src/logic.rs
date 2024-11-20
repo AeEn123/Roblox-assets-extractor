@@ -348,6 +348,8 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
             if metadata.is_dir() {
                 
                 let handle = thread::spawn(move || {
+                    // Get locale for localised status messages
+                    let locale = get_locale(None);
                     // This loop here is to make it wait until it is not running, and to set the STOP_LIST_RUNNING to true if it is running to make the other thread
                     loop {
                         let running = {
@@ -380,7 +382,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
 
                     // Tell the user that there is no files to list to make it easy to tell that the program is working and it isn't broken
                     if total == 0 {
-                        update_file_list("No files to list.".to_owned(), cli_list_mode);
+                        update_file_list(get_message(&locale, "no-files", None).to_owned(), cli_list_mode);
                     }
 
                     if mode != "music" { // Music lists files directly and others filter.
@@ -408,6 +410,11 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                             let path = entry.unwrap().path();
                             let display = path.display();
+
+                            // Args for formatting
+                            let mut args = FluentArgs::new();
+                            args.set("item", count);
+                            args.set("total", total);
     
                             if let Some(filename) = path.file_name() {
                                 match &mut fs::File::open(&path) {
@@ -421,7 +428,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                         match file.read(&mut buffer) {
                                             Err(why) => {
                                                 println!("ERROR: couldn't open {}: {}", display, why);
-                                                update_status(format!("ERROR: couldn't open ({count}/{total})"));
+                                                update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                             },
                                             Ok(bytes_read) => {
                                                 buffer.truncate(bytes_read);
@@ -436,7 +443,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
       
                                                 }
 
-                                                update_status(format!("Reading files ({count}/{total})"));
+                                                update_status(get_message(&locale, "reading-files", Some(&args)));
                                             }
                                         }
                                         
@@ -529,20 +536,27 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 
                     }
                     Err(e) => {
-                        //update_status(get_message(&get_locale(None), "failed-opening-file", args));
+                        update_status(get_message(&get_locale(None), "failed-opening-file", None));
                         println!("ERROR: Failed to open file: {}", e);
                         return "None".to_string();
                     }
                 }
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
-                let mut status = STATUS.lock().unwrap();
-                *status = format!("Error: '{}' Not a file.", file);
+                // Args for formatting
+                let mut args = FluentArgs::new();
+                args.set("file", &file);
+
+                update_status(get_message(&get_locale(None), "failed-not-file", Some(&args)));
                 println!("ERROR: '{}' Not a file.", file);
                 return "None".to_string();
             }
         }
         Err(e) => {
+            // Args for formatting
+            let mut args = FluentArgs::new();
+            args.set("error", e.to_string());
+
             println!("Error extracting file: '{}' {}", file, e);
             update_status(format!("Error extracting file: {}", e));
             return "None".to_string();

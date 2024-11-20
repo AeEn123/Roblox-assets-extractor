@@ -48,6 +48,7 @@ extract-all-description = Dieser Knopf unten wird alle Assets kopieren und Ordne
 # Statuses
 idling = Warten
 deleting-files = Lösche Dateien ({ $item }/{ $total })
+reading-files = Lesen Dateien ({ $item }/{ $total })
 
 # Error Statuses
 failed-deleting-file = FEHLER: Konnte nicht gelöscht werden ({ $item }/{ $total })
