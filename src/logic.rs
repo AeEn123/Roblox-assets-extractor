@@ -78,23 +78,10 @@ fn detect_directory() -> String {
     let mut errors = "".to_owned();
     // Directory detection
     for directory in DEFAULT_DIRECTORIES {
-        let resolved_directory = directory
-        .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
-        .replace("~", &format!("/home/{}", whoami::username()));
-        // There's probably a better way of doing this... It works though :D
-
-        match fs::metadata(&resolved_directory) { // Directory detection
-            Ok(metadata) => {
-                if metadata.is_dir() {
-                    // Successfully detected a directory, we can stop this loop
-                    return resolved_directory;
-                }
-            }
-            Err(e) => {
-                errors.push_str(&format!("\n{}: {}",directory, e.to_string()));
-            }
-        }
-        
+        match validate_directory(directory) {
+            Ok(resolved_directory) => return resolved_directory,
+            Err(e) => errors.push_str(&e.to_string()),
+        }  
 
     }
 
@@ -187,6 +174,27 @@ fn extract_bytes(header: String, bytes: Vec<u8>) -> Vec<u8> {
 }
 
 // Define public functions
+pub fn validate_directory(directory: &str) -> Result<String, String> {
+    let resolved_directory = directory
+    .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
+    .replace("~", &format!("/home/{}", whoami::username()));
+    // There's probably a better way of doing this... It works though :D
+
+    match fs::metadata(&resolved_directory) { // Directory detection
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                // Successfully detected a directory, we can return it
+                return Ok(resolved_directory);
+            } else {
+                return Err(format!("{}: Not a directory", resolved_directory));
+            }
+        }
+        Err(e) => {
+            return Err(e.to_string()); // Convert to correct data type
+        }
+    }
+}
+
 pub fn get_locale(lang: Option<&str>) -> FluentBundle<Arc<FluentResource>> {
     let locale = if let Some(locale) = lang {
         locale
