@@ -89,8 +89,8 @@ fn read_config_file() -> Value {
             }
         }
 
-        Err(e) => {
-            eprintln!("Error reading config file: {}\nContinuing with default config", e);
+        Err(_e) => {
+            // Most likely no such file or directory
             return json!({});
         }
     }
@@ -182,7 +182,6 @@ pub fn validate_directory(directory: &str) -> Result<String, String> {
     .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
     .replace("~", &format!("/home/{}", whoami::username()));
     // There's probably a better way of doing this... It works though :D
-    println!("{}", &resolved_directory);
 
     match fs::metadata(&resolved_directory) { // Directory detection
         Ok(metadata) => {
@@ -875,10 +874,31 @@ pub fn get_config() -> Value {
     CONFIG.lock().unwrap().clone()
 }
 
-pub fn set_config(key: &str, value: &str) {
+pub fn set_config(value: Value) {
     let mut config = CONFIG.lock().unwrap();
+    if *config != value {
+        match serde_json::to_vec_pretty(&value) {
+            Ok(data) => {
+                println!("Config file updated");
+                let result = fs::write(CONFIG_FILE, data);
+                if result.is_err() {
+                    println!("Failed to write config file: {:?}", result)
+                }
+            },
+            Err(e) => {
+                println!("Failed to write config file: {}", e);
+            }
+        }
+        
+        *config = value;
+    }
+
+}
+
+pub fn set_config_value(key: &str, value: &str) {
+    let mut config = get_config();
     config[key] = value.into();
-    println!("{}", config)
+    set_config(config);
 }
 
 

@@ -34,6 +34,8 @@ error-directory-detection-title = Directory detection failed!
 error-directory-detection-description = Directory detection failed! Is Roblox installed and you ran it at least once?
 error-temporary-directory-title = Failed to create a temporary directory!
 error-temporary-directory-description = Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator
+error-invalid-directory-title = Invalid directory!
+error-invalid-directory-description = Please make sure the path you provided is a directory
 
 # Headings
 actions = Actions
@@ -69,4 +71,5 @@ error-check-logs = ERROR: Check logs for more details.
 
 # Misc
 no-function = (Not functional yet)
-version = Version { $version }
+version = Version: { $version }
+cache-directory = Cache directory: { $directory }

@@ -1,5 +1,6 @@
 // Used for gui
 use eframe::egui;
+use fluent::FluentArgs;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 use fluent_bundle::{FluentBundle, FluentResource};
@@ -8,7 +9,7 @@ use std::sync::Arc;
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self, get_list_task_running, get_message, set_config}; // Used for functionality
+use crate::logic::{self, get_config}; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
@@ -37,7 +38,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = String;
 
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
-        get_message(self.locale, &*tab, None).into()
+        logic::get_message(self.locale, &*tab, None).into()
         
     }
 
@@ -86,7 +87,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     }                    
                 }
                 if ui.button(logic::get_message(self.locale, "button-extract-type", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                    let mut no = get_list_task_running();
+                    let mut no = logic::get_list_task_running();
 
                     // Confirmation dialog, the program is still listing files
                     if no {
@@ -257,7 +258,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             // Extract all button
             if ui.button(&logic::get_message(self.locale, "button-extract-all", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                let mut no = get_list_task_running();
+                let mut no = logic::get_list_task_running();
             
                 // Confirmation dialog, the program is still listing files
                 if no {
@@ -285,13 +286,39 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.label(logic::get_message(self.locale, "custom-cache-dir-description", None));
 
+            let mut args = FluentArgs::new();
+            args.set("directory", logic::get_cache_directory());
+
+            ui.label(logic::get_message(self.locale, "cache-directory", Some(&args)));
+
             ui.horizontal(|ui| {
                 if ui.button(logic::get_message(self.locale, "button-change-cache-dir", None)).clicked() {
-                    // TODO
+                    let option_path = FileDialog::new()
+                    .show_open_single_dir()
+                    .unwrap();
+            
+                    // If the user provides a directory, the program will change the cache directory to the new one
+                    if let Some(path) = option_path {
+                        // Validation checks
+                        match logic::validate_directory(&path.to_string_lossy().to_string()) {
+                            Ok(directory) => {
+                                logic::set_config_value("cache_directory", &directory);
+                                logic::set_cache_directory(logic::detect_directory()); // Set directory to new one
+                            }
+                            Err(_) => {
+                                MessageDialog::new()
+                                .set_type(MessageType::Info)
+                                .set_title(&logic::get_message(self.locale, "error-invalid-directory-title", None))
+                                .set_text(&logic::get_message(self.locale, "error-invalid-directory-description", None))
+                                .show_alert()
+                                .unwrap();
+                            }
+                        }
+                    }
                 }
                 if ui.button(logic::get_message(self.locale, "button-reset-cache-dir", None)).clicked() {
-                    set_config("cache_directory", "no directory set");
-                    logic::set_cache_directory(logic::detect_directory());
+                    logic::set_config_value("cache_directory", "no directory set"); // Clear directory in config
+                    logic::set_cache_directory(logic::detect_directory()); // Set it back to default
                 }
             });
 
@@ -299,8 +326,34 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             ui.heading(logic::get_message(self.locale, "updates", None));
             ui.label(logic::get_message(self.locale, "no-function", None));
-            ui.checkbox(&mut false, logic::get_message(self.locale, "check-for-updates", None));
-            ui.checkbox(&mut false, logic::get_message(self.locale, "automatically-install-updates", None));
+
+
+            // Config will be mutated as part of checkbox user interaction.
+            let mut config = logic::get_config();
+
+            // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
+            let mut check_for_updates = if let Some(result) = config["check_for_updates"].as_bool() {
+                result
+            } else {
+                true
+            };
+
+            let mut automatically_install_updates = if let Some(result) = config["automatically_install_updates"].as_bool() {
+                result
+            } else {
+                false
+            };
+            
+
+            ui.checkbox(&mut check_for_updates, logic::get_message(self.locale, "check-for-updates", None));
+            ui.checkbox(&mut automatically_install_updates, logic::get_message(self.locale, "automatically-install-updates", None));
+
+            // Add them to the config again
+            config["check_for_updates"] = check_for_updates.into();
+            config["automatically_install_updates"] = automatically_install_updates.into();
+
+            logic::set_config(config); // Update config to new one
+
 
             
         } else {
