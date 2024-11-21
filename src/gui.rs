@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self, get_config}; // Used for functionality
+use crate::logic; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
