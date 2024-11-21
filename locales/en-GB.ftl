@@ -16,6 +16,8 @@ button-extract-type = Extract all of this type <F3>
 button-refresh = Refresh <F5>
 button-clear-cache = Clear Roblox cache <Del>
 button-extract-all = Extract all <F3>
+button-change-cache-dir = Change cache directory
+button-reset-cache-dir = Reset cache directory
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -47,6 +49,7 @@ automatically-install-updates = Automatically install updates
 # Descriptions
 clear-cache-description = If it is taking too long to list files and extracting all from a directory, you can clear your Roblox cache with the button below. This removes all files from your cache and your Roblox client will automatically recreate these files when needed.
 extract-all-description = The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.
+custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button.
 
 # Statuses
 idling = Idling

@@ -6,11 +6,14 @@ use std::sync::Mutex;
 use fluent_bundle::{FluentBundle, FluentResource, FluentArgs};
 use unic_langid::LanguageIdentifier;
 use lazy_static::lazy_static;
+use serde_json::{json, Value};
 
 include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources
 
 // Define mutable static values
 lazy_static! {
+    static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
+
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(detect_directory());
     static ref STATUS: Mutex<String> = Mutex::new(get_message(&get_locale(None), "idling", None));
@@ -71,29 +74,29 @@ lazy_static! {
 
 
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
-
+const CONFIG_FILE: &str = "Roblox-assets-extractor-config.json";
 
 // Define local functions
-fn detect_directory() -> String {
-    let mut errors = "".to_owned();
-    // Directory detection
-    for directory in DEFAULT_DIRECTORIES {
-        match validate_directory(directory) {
-            Ok(resolved_directory) => return resolved_directory,
-            Err(e) => errors.push_str(&e.to_string()),
-        }  
+fn read_config_file() -> Value {
+    match fs::read(CONFIG_FILE) {
+        Ok(bytes) => {
+            match serde_json::from_slice(&bytes) {
+                Ok(v) => return v,
+                Err(e) => {
+                    eprintln!("Failed to parse config file! {}", e);
+                    return json!({}); // Blank config by default
+                }
+            }
+        }
 
+        Err(e) => {
+            eprintln!("Error reading config file: {}\nContinuing with default config", e);
+            return json!({});
+        }
     }
-
-    // If it was unable to detect any directory, tell the user and panic the program
-    let _ = native_dialog::MessageDialog::new()
-    .set_type(native_dialog::MessageType::Error)
-    .set_title(&get_message(&get_locale(None), "error-directory-detection-title", None))
-    .set_text(&get_message(&get_locale(None), "error-directory-detection-description", None))
-    .show_alert();
-    panic!("Directory detection failed!{}", errors);
-
 }
+
+
 
 fn update_status(value: String) {
     let mut status = STATUS.lock().unwrap();
@@ -179,6 +182,7 @@ pub fn validate_directory(directory: &str) -> Result<String, String> {
     .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
     .replace("~", &format!("/home/{}", whoami::username()));
     // There's probably a better way of doing this... It works though :D
+    println!("{}", &resolved_directory);
 
     match fs::metadata(&resolved_directory) { // Directory detection
         Ok(metadata) => {
@@ -193,6 +197,37 @@ pub fn validate_directory(directory: &str) -> Result<String, String> {
             return Err(e.to_string()); // Convert to correct data type
         }
     }
+}
+
+pub fn detect_directory() -> String {
+    let mut errors = "".to_owned();
+    if let Some(directory) = get_config().get("cache_directory") {
+        // User-specified directory from config
+        match validate_directory(&directory.to_string().replace('"',"")) { // It kept returning "value" instead of value
+            Ok(resolved_directory) => return resolved_directory,
+            Err(e) => {
+                println!("User-defined directory is invalid: {}", e);
+                errors.push_str(&e.to_string());
+            },
+        }
+    }
+    // Directory detection
+    for directory in DEFAULT_DIRECTORIES {
+        match validate_directory(directory) {
+            Ok(resolved_directory) => return resolved_directory,
+            Err(e) => errors.push_str(&e.to_string()),
+        }  
+
+    }
+
+    // If it was unable to detect any directory, tell the user and panic the program
+    let _ = native_dialog::MessageDialog::new()
+    .set_type(native_dialog::MessageType::Error)
+    .set_title(&get_message(&get_locale(None), "error-directory-detection-title", None))
+    .set_text(&get_message(&get_locale(None), "error-directory-detection-description", None))
+    .show_alert();
+    panic!("Directory detection failed!{}", errors);
+
 }
 
 pub fn get_locale(lang: Option<&str>) -> FluentBundle<Arc<FluentResource>> {
@@ -229,7 +264,6 @@ pub fn get_message(locale: &FluentBundle<Arc<FluentResource>>, id: &str, args: O
     } else {
         return id.to_owned(); // Return id if it is not available
     }
-    // if let Some(value)
 }
 
 // Function to get temp directory, create it if it doesn't exist
@@ -820,6 +854,11 @@ pub fn get_cache_directory() -> String {
     CACHE_DIRECTORY.lock().unwrap().clone()
 }
 
+pub fn set_cache_directory(value: String) {
+    let mut cache_directory = CACHE_DIRECTORY.lock().unwrap();
+    *cache_directory = value;
+}
+
 pub fn get_status() -> String {
     STATUS.lock().unwrap().clone()
 }
@@ -830,6 +869,16 @@ pub fn get_progress() -> f32 {
 
 pub fn get_list_task_running() -> bool {
     LIST_TASK_RUNNING.lock().unwrap().clone()
+}
+
+pub fn get_config() -> Value {
+    CONFIG.lock().unwrap().clone()
+}
+
+pub fn set_config(key: &str, value: &str) {
+    let mut config = CONFIG.lock().unwrap();
+    config[key] = value.into();
+    println!("{}", config)
 }
 
 

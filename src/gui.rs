@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic::{self, get_list_task_running, get_message}; // Used for functionality
+use crate::logic::{self, get_list_task_running, get_message, set_config}; // Used for functionality
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
@@ -282,6 +282,18 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     }
                 }
             }
+
+            ui.label(logic::get_message(self.locale, "custom-cache-dir-description", None));
+
+            ui.horizontal(|ui| {
+                if ui.button(logic::get_message(self.locale, "button-change-cache-dir", None)).clicked() {
+                    // TODO
+                }
+                if ui.button(logic::get_message(self.locale, "button-reset-cache-dir", None)).clicked() {
+                    set_config("cache_directory", "no directory set");
+                    logic::set_cache_directory(logic::detect_directory());
+                }
+            });
 
             ui.separator();
             
