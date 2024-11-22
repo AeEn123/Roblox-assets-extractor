@@ -124,8 +124,10 @@ pub fn updates(ui: &mut egui::Ui, config: &mut Value, locale: &FluentBundle<Arc<
     config["automatically_install_updates"] = automatically_install_updates.into();
 }
 
-pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -> bool {
     ui.heading(logic::get_message(locale, "language-settings", None));
+
+    let mut user_clicked = false;
 
     let languages = logic::get_language_list();
     let language_keys: Vec<&String> = languages.keys().collect();
@@ -174,10 +176,10 @@ pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
 
             // Handle the click/double click
             if response.clicked() {
-                logic::get_locale(Some(lang));
+                logic::set_config_string("language", lang);
+                user_clicked = true; // Refresh locales
             }
-
-    
         }
     });
+    return user_clicked; // Refresh depending on if the user clicked or not
 }

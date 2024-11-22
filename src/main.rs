@@ -51,10 +51,7 @@ fn main() {
         logic::refresh(cache_directory, tab, true, true); // cli_list_mode is set to true, this will print assets to console
     } else {
         // If nothing passed, run GUI
-        match gui::run_gui() {
-            Ok(_) => println!("GUI Stopped, exiting program..."),
-            Err(e) => println!("GUI failed: {}", e) // Error handling, so the clean up function can still run after the GUI fails
-        }
+        gui::run_gui();
     }
     logic::clean_up(); // Remove the temporary directory if one has been created
 }

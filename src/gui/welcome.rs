@@ -15,14 +15,24 @@ impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading(logic::get_message(&self.locale, "welcome", None));
-            settings::language(ui, &self.locale);
-            ui.separator();
 
+            if settings::language(ui, &self.locale) {
+                // This returns true if the locales need to be refreshed
+                self.locale = logic::get_locale(None);
+            }
+
+            ui.separator();
 
             // Config will be mutated as part of checkbox user interaction.
             let mut config = logic::get_config();
             settings::updates(ui, &mut config, &self.locale);
+
             logic::set_config(config); // Update config to new one
+
+            if ui.button(logic::get_message(&self.locale, "button-finish", None)).clicked() {
+                logic::set_config_bool("welcomed", true);
+            }
+
         });
     }
 }

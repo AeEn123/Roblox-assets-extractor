@@ -251,8 +251,15 @@ pub fn get_locale(lang: Option<&str>) -> FluentBundle<Arc<FluentResource>> {
     let locale = if let Some(locale) = lang {
         locale
     } else {
-        // If language is not provided, load the resources for the system locale
-        &sys_locale::get_locale().unwrap_or_else(|| "en-GB".to_string()) // If locale cannot be identified, default to English
+        // If language is not provided, get language from config
+        if let Some(language) = get_config_string("language") {
+            &language.clone()
+        } else {
+            // The language is not in the config file.
+            &sys_locale::get_locale().unwrap_or_else(|| "en-GB".to_string()) // If locale cannot be identified, default to English
+        }
+        
+        
     };
     
     let resource_data = if let Some(resources) = get_locale_resources(&locale) {
@@ -919,7 +926,6 @@ pub fn set_config(value: Value) {
     if *config != value {
         match serde_json::to_vec_pretty(&value) {
             Ok(data) => {
-                println!("Config file updated");
                 let result = fs::write(CONFIG_FILE, data);
                 if result.is_err() {
                     println!("Failed to write config file: {:?}", result)

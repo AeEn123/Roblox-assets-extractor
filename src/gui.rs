@@ -237,7 +237,9 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // This is only shown in the settings tab
 
             settings::actions(ui, self.locale);
+            ui.separator();
 
+            settings::cache_dir_management(ui, self.locale);
             ui.separator();
             
 
@@ -248,7 +250,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.separator();
 
-            settings::language(ui, self.locale);
+            if settings::language(ui, self.locale) {
+                // This returns true if the locales need to be refreshed
+                *self.locale = logic::get_locale(None);
+            }
 
             logic::set_config(config); // Update config to new one
 
@@ -335,21 +340,28 @@ impl eframe::App for MyApp {
     }
 }
 
-pub fn run_gui() -> eframe::Result {
-    // Before running this GUI, display a welcome screen
-    let _ = welcome::run_gui();
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_icon(
-                eframe::icon_data::from_png_bytes(&ICON[..])
-                    .expect("Failed to load icon"),
-            ),
-        ..Default::default()
-    };
+pub fn run_gui() {
+    // If the user is not welcomed before, welcome them
+    if !logic::get_config_bool("welcomed").unwrap_or(false) {
+        let _ = welcome::run_gui();
+    }
     
-    eframe::run_native(
-        &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
-        options,
-        Box::new(|_cc| Ok(Box::<MyApp>::default())),
-    )
+    // Only run GUI after user has been welcomed
+    if logic::get_config_bool("welcomed").unwrap_or(false) {
+        let options = eframe::NativeOptions {
+            viewport: egui::ViewportBuilder::default()
+                .with_icon(
+                    eframe::icon_data::from_png_bytes(&ICON[..])
+                        .expect("Failed to load icon"),
+                ),
+            ..Default::default()
+        };
+        
+        let _ = eframe::run_native(
+            &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
+            options,
+            Box::new(|_cc| Ok(Box::<MyApp>::default())),
+        );
+    }
+
 }

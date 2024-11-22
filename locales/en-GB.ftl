@@ -18,8 +18,7 @@ button-clear-cache = Clear Roblox cache <Del>
 button-extract-all = Extract all <F3>
 button-change-cache-dir = Change cache directory
 button-reset-cache-dir = Reset cache directory
-button-previous = Previous
-button-next = Next
+button-finish = Finish
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
