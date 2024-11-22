@@ -8,10 +8,12 @@ use unic_langid::LanguageIdentifier;
 use lazy_static::lazy_static;
 use serde_json::{json, Value};
 
-include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources
+include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources and LANGUAGE_LIST
 
 // Define mutable static values
 lazy_static! {
+    static ref LANGUAGE_LIST: Mutex<HashMap<String,String>> = Mutex::new(init_language_list());
+
     static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
 
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
@@ -96,7 +98,23 @@ fn read_config_file() -> Value {
     }
 }
 
+fn init_language_list() -> HashMap<String,String> {
+    let mut languages = LOCALES.to_vec();
 
+    // Move the default language to the top of the language list
+    let default_language = &sys_locale::get_locale().unwrap_or_else(|| "en-GB".to_string());
+    if let Some(pos) = languages.iter().position(|lang| lang == &default_language) {
+        let default_lang = languages.remove(pos);
+        languages.insert(0, default_lang);
+    }
+
+    let mut m = HashMap::new();
+    for lang in languages {
+        m.insert(lang.to_owned(), get_message(&get_locale(Some(lang)), "language-name", None));
+    }
+    return m
+    
+}
 
 fn update_status(value: String) {
     let mut status = STATUS.lock().unwrap();
@@ -874,6 +892,28 @@ pub fn get_config() -> Value {
     CONFIG.lock().unwrap().clone()
 }
 
+pub fn get_language_list() -> HashMap<String,String> {
+    LANGUAGE_LIST.lock().unwrap().clone()
+}
+
+pub fn get_config_string(key: &str) -> Option<String> {
+    if let Some(value) = get_config().get(key) {
+        return Some(value.as_str()?.to_owned().replace('"',""));
+    } else {
+        return None;
+    }
+   
+}
+
+pub fn get_config_bool(key: &str) -> Option<bool> {
+    if let Some(value) = get_config().get(key) {
+        return Some(value.as_bool()?);
+    } else {
+        return None;
+    }
+   
+}
+
 pub fn set_config(value: Value) {
     let mut config = CONFIG.lock().unwrap();
     if *config != value {
@@ -895,12 +935,17 @@ pub fn set_config(value: Value) {
 
 }
 
-pub fn set_config_value(key: &str, value: &str) {
+pub fn set_config_string(key: &str, value: &str) {
     let mut config = get_config();
     config[key] = value.into();
     set_config(config);
 }
 
+pub fn set_config_bool(key: &str, value: bool) {
+    let mut config = get_config();
+    config[key] = value.into();
+    set_config(config);
+}
 
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();

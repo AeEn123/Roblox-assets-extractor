@@ -32,11 +32,15 @@ fn get_locale_resources(locale: &str) -> Option<String> {
     // locales discovered by build.rs are put here
 "#);
 
+    let mut amount = 0;
+
     for entry in fs::read_dir(locale_dir).expect("Failed to read locales directory") {
         let path = entry.expect("Failed to read file entry").path();
-        if let Some(lang) = path.file_stem().and_then(|s| s.to_str()) {
+        if let Some(lang ) = path.file_stem().and_then(|s| s.to_str()) {
+            amount += 1; // Increase amount, needs to be known for static locale list
             let content = fs::read_to_string(&path).expect("Failed to read locale file");
             output.push_str(&format!("  m.insert(\"{}\".to_owned(), r#\"{}\"#.to_owned());", lang, content));
+            
 
             println!("cargo:rerun-if-changed={}", path.display());
         }
@@ -46,7 +50,28 @@ fn get_locale_resources(locale: &str) -> Option<String> {
     output.push_str(r#"
     return m.get(locale).cloned()
 }
-"#);
+
+const LOCALES: [&str; "#);
+
+    output.push_str(&format!("{} ] = [", amount));
+
+    let mut first = true;
+
+    // Static list for all locales
+    for entry in fs::read_dir(locale_dir).expect("Failed to read locales directory") {
+        let path = entry.expect("Failed to read file entry").path();
+        if let Some(lang ) = path.file_stem().and_then(|s| s.to_str()) {
+            if first {
+                first = false;
+                output.push_str(&format!("\"{}\"", lang)); // First one doesn't have a comma
+            } else {
+                output.push_str(&format!(",\"{}\"", lang));
+            }
+            
+        }
+    }
+
+    output.push_str("];");
 
     fs::write(dest_path, output).expect("Failed to write generated locale data");
 

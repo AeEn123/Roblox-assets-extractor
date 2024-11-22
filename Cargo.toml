@@ -23,8 +23,15 @@ whoami = "1.5.2"
 [build-dependencies]
 winresource = "0.1.17"
 
+# Minimize executable size (Target size < 10MB)
+[profile.release.package."*"]
+opt-level = "z"
+codegen-units = 1
+debug = false
+overflow-checks = false
+
 [profile.release]
-opt-level = 3
+opt-level = 3 # Main search logic in this project, opt-level 3 for speed
 codegen-units = 1
 lto = "fat"
 debug = false

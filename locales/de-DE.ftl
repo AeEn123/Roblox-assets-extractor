@@ -1,6 +1,6 @@
 # Translated to German by @Vonercent
 # Language info
-language-name = 🇩🇪 Deutsch
+language-name = Deutsch
 
 # Tabs
 music = Musik

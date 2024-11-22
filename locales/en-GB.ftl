@@ -1,5 +1,5 @@
 # Language info
-language-name = 🇬🇧 English
+language-name = English
 
 # Tabs
 music = Music
@@ -18,6 +18,8 @@ button-clear-cache = Clear Roblox cache <Del>
 button-extract-all = Extract all <F3>
 button-change-cache-dir = Change cache directory
 button-reset-cache-dir = Reset cache directory
+button-previous = Previous
+button-next = Next
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -73,3 +75,4 @@ error-check-logs = ERROR: Check logs for more details.
 no-function = (Not functional yet)
 version = Version: { $version }
 cache-directory = Cache directory: { $directory }
+welcome = Welcome

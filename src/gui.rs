@@ -1,6 +1,5 @@
 // Used for gui
 use eframe::egui;
-use fluent::FluentArgs;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 use fluent_bundle::{FluentBundle, FluentResource};
@@ -10,6 +9,9 @@ use std::sync::Arc;
 
 use std::collections::HashMap; // Used for input
 use crate::logic; // Used for functionality
+
+mod welcome;
+mod settings;
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
@@ -233,124 +235,20 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         } else if tab == "settings" {
             // This is only shown in the settings tab
-            ui.heading(logic::get_message(self.locale, "actions", None));
 
-            // Clear cache description
-            ui.label(logic::get_message(self.locale, "clear-cache-description", None));
-            
-            // Clear cache button
-            if ui.button(logic::get_message(self.locale, "button-clear-cache", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
-                // Confirmation dialog
-                let yes = MessageDialog::new()
-                .set_type(MessageType::Info)
-                .set_title(&logic::get_message(self.locale, "confirmation-clear-cache-title", None))
-                .set_text(&logic::get_message(self.locale, "confirmation-clear-cache-description", None))
-                .show_confirm()
-                .unwrap();
-        
-                if yes {
-                    logic::delete_all_directory_contents(logic::get_cache_directory().to_owned());
-                }                    
-            }
-
-            // Extract all description
-            ui.label(logic::get_message(self.locale, "extract-all-description", None));
-
-            // Extract all button
-            if ui.button(&logic::get_message(self.locale, "button-extract-all", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                let mut no = logic::get_list_task_running();
-            
-                // Confirmation dialog, the program is still listing files
-                if no {
-                    // NOT result, will become false if user clicks yes
-                    no = !MessageDialog::new()
-                    .set_type(MessageType::Info)
-                    .set_title(&logic::get_message(self.locale, "confirmation-filter-confirmation-title", None))
-                    .set_text(&logic::get_message(self.locale, "confirmation-filter-confirmation-description", None))
-                    .show_confirm()
-                    .unwrap();
-                }
-            
-                // The user either agreed or the program is not listing files
-                if !no {
-                    let option_path = FileDialog::new()
-                    .show_open_single_dir()
-                    .unwrap();
-            
-                    // If the user provides a directory, the program will extract the assets to that directory
-                    if let Some(path) = option_path {
-                        logic::extract_all( path.to_string_lossy().to_string(), false)
-                    }
-                }
-            }
-
-            ui.label(logic::get_message(self.locale, "custom-cache-dir-description", None));
-
-            let mut args = FluentArgs::new();
-            args.set("directory", logic::get_cache_directory());
-
-            ui.label(logic::get_message(self.locale, "cache-directory", Some(&args)));
-
-            ui.horizontal(|ui| {
-                if ui.button(logic::get_message(self.locale, "button-change-cache-dir", None)).clicked() {
-                    let option_path = FileDialog::new()
-                    .show_open_single_dir()
-                    .unwrap();
-            
-                    // If the user provides a directory, the program will change the cache directory to the new one
-                    if let Some(path) = option_path {
-                        // Validation checks
-                        match logic::validate_directory(&path.to_string_lossy().to_string()) {
-                            Ok(directory) => {
-                                logic::set_config_value("cache_directory", &directory);
-                                logic::set_cache_directory(logic::detect_directory()); // Set directory to new one
-                            }
-                            Err(_) => {
-                                MessageDialog::new()
-                                .set_type(MessageType::Info)
-                                .set_title(&logic::get_message(self.locale, "error-invalid-directory-title", None))
-                                .set_text(&logic::get_message(self.locale, "error-invalid-directory-description", None))
-                                .show_alert()
-                                .unwrap();
-                            }
-                        }
-                    }
-                }
-                if ui.button(logic::get_message(self.locale, "button-reset-cache-dir", None)).clicked() {
-                    logic::set_config_value("cache_directory", "no directory set"); // Clear directory in config
-                    logic::set_cache_directory(logic::detect_directory()); // Set it back to default
-                }
-            });
+            settings::actions(ui, self.locale);
 
             ui.separator();
             
-            ui.heading(logic::get_message(self.locale, "updates", None));
-            ui.label(logic::get_message(self.locale, "no-function", None));
-
 
             // Config will be mutated as part of checkbox user interaction.
             let mut config = logic::get_config();
 
-            // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
-            let mut check_for_updates = if let Some(result) = config["check_for_updates"].as_bool() {
-                result
-            } else {
-                true
-            };
+            settings::updates(ui, &mut config, self.locale);
 
-            let mut automatically_install_updates = if let Some(result) = config["automatically_install_updates"].as_bool() {
-                result
-            } else {
-                false
-            };
-            
+            ui.separator();
 
-            ui.checkbox(&mut check_for_updates, logic::get_message(self.locale, "check-for-updates", None));
-            ui.checkbox(&mut automatically_install_updates, logic::get_message(self.locale, "automatically-install-updates", None));
-
-            // Add them to the config again
-            config["check_for_updates"] = check_for_updates.into();
-            config["automatically_install_updates"] = automatically_install_updates.into();
+            settings::language(ui, self.locale);
 
             logic::set_config(config); // Update config to new one
 
@@ -438,6 +336,8 @@ impl eframe::App for MyApp {
 }
 
 pub fn run_gui() -> eframe::Result {
+    // Before running this GUI, display a welcome screen
+    let _ = welcome::run_gui();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_icon(
