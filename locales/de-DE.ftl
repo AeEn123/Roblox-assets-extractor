@@ -28,6 +28,7 @@ confirmation-clear-cache-title = Lösche Roblox Cache
 confirmation-clear-cache-description = Bist du dir sicher das du deinen Roblox Cache löschen willst? Die Dateien werden neugeneriert wenn der Roblox Client geladen wurde.
 
 # Errors
+no-files = Keine Dateien zum Anzeigen
 error-directory-detection = Ordnererkennung fehlgeschlagen.
 
 # Headings

@@ -248,6 +248,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             settings::updates(ui, &mut config, self.locale);
 
+            logic::set_config(config); // Update config to new one
+
             ui.separator();
 
             if settings::language(ui, self.locale) {
@@ -255,7 +257,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 *self.locale = logic::get_locale(None);
             }
 
-            logic::set_config(config); // Update config to new one
+ 
 
 
             
