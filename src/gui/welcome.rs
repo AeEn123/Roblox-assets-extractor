@@ -31,6 +31,7 @@ impl eframe::App for MyApp {
 
             if ui.button(logic::get_message(&self.locale, "button-finish", None)).clicked() {
                 logic::set_config_bool("welcomed", true);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
 
         });
