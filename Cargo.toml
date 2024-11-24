@@ -8,7 +8,6 @@ clap = { version = "4.5.20", features = ["derive"] }
 eframe = "0.28.1"
 egui = "0.28.1"
 egui_dock = "0.13.0"
-fluent = "0.16.1"
 fluent-bundle = "0.15.3"
 image = "0.25.5"
 lazy_static = "1.5.0"

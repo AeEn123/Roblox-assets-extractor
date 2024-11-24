@@ -10,7 +10,6 @@ dependencies = [
  "eframe",
  "egui",
  "egui_dock",
- "fluent",
  "fluent-bundle",
  "image",
  "lazy_static",
@@ -1467,16 +1466,6 @@ checksum = "324a1be68054ef05ad64b861cc9eaf1d623d2d8cb25b4bf2cb9cdd902b4bf253"
 dependencies = [
  "crc32fast",
  "miniz_oxide 0.8.0",
-]
-
-[[package]]
-name = "fluent"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb74634707bebd0ce645a981148e8fb8c7bccd4c33c652aeffd28bf2f96d555a"
-dependencies = [
- "fluent-bundle",
- "unic-langid",
 ]
 
 [[package]]

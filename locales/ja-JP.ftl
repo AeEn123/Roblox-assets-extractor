@@ -75,3 +75,7 @@ no-function = （まだ機能していません）
 version = バージョン: { $version }
 cache-directory = キャッシュディレクトリ: { $directory }
 welcome = ようこそ
+
+
+# TODO: Translate these values:
+button-finish = Finish

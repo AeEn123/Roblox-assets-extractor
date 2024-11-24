@@ -57,3 +57,26 @@ failed-deleting-file = FEHLER: Konnte nicht gelöscht werden ({ $item }/{ $total
 # Misc
 no-function = (Funktioniert noch nicht)
 version = Version { $version }
+
+
+# TODO: Translate these values:
+button-finish = Finish
+button-change-cache-dir = Change cache directory
+failed-not-file = ERROR: '{ $file }' Not a file
+filtering-files = Filtering files ({ $item }/{ $total })
+error-directory-detection-description = Directory detection failed! Is Roblox installed and you ran it at least once?
+failed-opening-file = ERROR: Failed to open file: { $error }
+error-temporary-directory-title = Failed to create a temporary directory!
+button-reset-cache-dir = Reset cache directory
+error-check-logs = ERROR: Check logs for more details.
+cache-directory = Cache directory: { $directory }
+welcome = Welcome
+error-temporary-directory-description = Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator
+all-extracted = All files extracted
+error-invalid-directory-title = Invalid directory!
+custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button.
+error-extracting-file = ERROR: Failed to extract: { $error }
+error-invalid-directory-description = Please make sure the path you provided is a directory
+extracting-files = Extracting files ({ $item }/{ $total })
+stage = Stage { $stage }/{ $max }: { $status }
+error-directory-detection-title = Directory detection failed!
