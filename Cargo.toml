@@ -24,7 +24,7 @@ whoami = "1.5.2"
 winresource = "0.1.17"
 
 # Minimize executable size (Target size < 10MB)
-[target.'cfg(not(windows))'.profile.release.package."*"] # Exclude this on Windows as this somehow false-triggers Windows Defender...
+[profile.release.package."*"] # Exclude this on Windows as this somehow false-triggers Windows Defender...
 opt-level = "z"
 codegen-units = 1
 debug = false
