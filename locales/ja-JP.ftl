@@ -76,6 +76,4 @@ version = バージョン: { $version }
 cache-directory = キャッシュディレクトリ: { $directory }
 welcome = ようこそ
 
-
-# TODO: Translate these values:
-button-finish = Finish
+button-finish = Finish # TODO: Translate

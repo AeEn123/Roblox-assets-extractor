@@ -7,11 +7,15 @@ MAIN_LOCALE_FILE = "en-GB.ftl"
 
 def parse_locale(raw_text):
     messages = {}
+    current_heading = ""
     for line in raw_text.splitlines():
-        line = line.split("#")[0] # Ignore comments
         if len(line) > 0:
-            key, value = line.split(" = ")
-            messages[key] = value
+            if line[0] == "#": # Treat individual comments as headings
+                current_heading = line
+            else:
+                line = line.split("#")[0] # Ignore comments
+                key, value = line.split(" = ")
+                messages[key] = [value, current_heading]
 
     return messages
     
@@ -34,8 +38,20 @@ for file in os.listdir(LOCALE_DIRECTORY):
         diff = set(refrence_messages) - set(new_messages) # Subtract the new messages from the refrence messages
 
 
-        if diff != {}:
-            with open(os.path.join(LOCALE_DIRECTORY, file), "a") as f:
-                f.write("\n\n# TODO: Translate these values:\n")
-                for value in diff:
-                    f.write(f"{value} = {refrence_messages[value]}\n")
+        if len(diff) != 0:
+            for value in diff:
+                header = refrence_messages[value][1]
+                header_pos = text.find(header)
+
+                if header_pos == -1:
+                    header_pos = len(text)
+                else:
+                    header_pos = header_pos + len(header)
+                
+                new_value = f"\n{value} = {refrence_messages[value][0]} # TODO: Translate"
+
+                text = text[:header_pos] + new_value + text[header_pos:]
+
+            print(f"{file} +{len(diff)}")
+            with open(os.path.join(LOCALE_DIRECTORY, file), "w") as f:
+                f.write(text)
