@@ -1,5 +1,5 @@
-# Translated to German by @Vonercent
-# Language info
+# Übersetzt von @Vonercent
+# Spracheninfo
 language-name = Deutsch
 
 # Tabs
@@ -12,9 +12,9 @@ settings = Einstellungen
 about = Über
 
 # Buttons
-button-reset-cache-dir = Reset cache directory # TODO: Translate
-button-change-cache-dir = Change cache directory # TODO: Translate
-button-finish = Finish # TODO: Translate
+button-reset-cache-dir = Cacheordner zurücksetzen
+button-change-cache-dir = Cacheordner ändern
+button-finish = Fertig # TODO: Translate
 button-delete-this-dir = Lösche diesen Ordner <Del>
 button-extract-type = Extrahiere alle von diesen Typen <F3>
 button-refresh = Neuladen <F5>
@@ -31,12 +31,12 @@ confirmation-clear-cache-title = Lösche Roblox Cache
 confirmation-clear-cache-description = Bist du dir sicher das du deinen Roblox Cache löschen willst? Die Dateien werden neugeneriert wenn der Roblox Client geladen wurde.
 
 # Errors
-error-invalid-directory-description = Please make sure the path you provided is a directory # TODO: Translate
-error-invalid-directory-title = Invalid directory! # TODO: Translate
-error-temporary-directory-description = Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator # TODO: Translate
-error-directory-detection-title = Directory detection failed! # TODO: Translate
-error-temporary-directory-title = Failed to create a temporary directory! # TODO: Translate
-error-directory-detection-description = Directory detection failed! Is Roblox installed and you ran it at least once? # TODO: Translate
+error-invalid-directory-description = Bitte stelle sicher dass der Pfad den du angegeben hast ein Ordner ist!
+error-invalid-directory-title = Ungültiger Ordner! # TODO: Translate
+error-temporary-directory-description = Fehler: Konnte keinen temporären Ordner erstellen! Hast du lese/schreib Rechte zu den temporären Ordner? Wenn dieser Fehler bestehen bleibt, versuche es im Administratormodus auszuführen
+error-directory-detection-title = Ordnererkennung fehlgeschlagen!
+error-temporary-directory-title = Konnte keinen temporären Ordner erstellen! # TODO: Translate
+error-directory-detection-description = Ordnererkennung fehlgeschlagen! Ist Roblox installiert und hast du es einmal ausgeführt? #
 no-files = Keine Dateien zum Anzeigen
 error-directory-detection = Ordnererkennung fehlgeschlagen.
 
@@ -52,18 +52,18 @@ automatically-install-updates = Automatisch Aktualisierungen installieren
 
 
 # Descriptions
-custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button. # TODO: Translate
+custom-cache-dir-description = Wenn du den Cache in einer anderen Roblox Installation zugreifen willst, änder den Cacheordner unten, du kannst ihn mit den anderen Knopf zum Standart zurücksetzen.
 clear-cache-description = Wenn es zu lange brauch um alle Dateien anzuzeigen und zuextrahieren, kannst du deinen Roblox Cache mit den Knopf unten löschen. Das Entfernt alle Dateien von deinen Cache und der Roblox Client wird sie automatisch neu erstellen wenn benötigt.
 extract-all-description = Dieser Knopf unten wird alle Assets kopieren und Ordner für diese erstellen z.B /sounds, /images um diese zu Kategorisieren. Du kannst den Root Ordner beim Starten auswählen.
 
 # Statuses
 stage = Stage { $stage }/{ $max }: { $status } # TODO: Translate
-filtering-files = Filtering files ({ $item }/{ $total }) # TODO: Translate
-extracting-files = Extracting files ({ $item }/{ $total }) # TODO: Translate
-all-extracted = All files extracted # TODO: Translate
+filtering-files = Dateien werden gefiltert ({ $item }/{ $total })
+extracting-files = Extrahiere Dateien ({ $item }/{ $total })
+all-extracted = Alle Dateien extrahiert
 idling = Warten
 deleting-files = Lösche Dateien ({ $item }/{ $total })
-reading-files = Lesen Dateien ({ $item }/{ $total })
+reading-files = Lese Dateien ({ $item }/{ $total })
 
 # Error Statuses
 failed-not-file = ERROR: '{ $file }' Not a file # TODO: Translate
@@ -73,7 +73,7 @@ error-extracting-file = ERROR: Failed to extract: { $error } # TODO: Translate
 failed-deleting-file = FEHLER: Konnte nicht gelöscht werden ({ $item }/{ $total })
 
 # Misc
-welcome = Welcome # TODO: Translate
-cache-directory = Cache directory: { $directory } # TODO: Translate
+welcome = Wilkommen # TODO: Translate
+cache-directory = Cacheordner: { $directory }
 no-function = (Funktioniert noch nicht)
 version = Version { $version }
