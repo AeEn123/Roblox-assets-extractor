@@ -905,7 +905,7 @@ pub fn get_language_list() -> HashMap<String,String> {
 
 pub fn get_config_string(key: &str) -> Option<String> {
     if let Some(value) = get_config().get(key) {
-        return Some(value.as_str()?.to_owned().replace('"',""));
+        return Some(value.as_str()?.to_owned().replace('"',"")); // For some reason returns in quotes, remove the quotes
     } else {
         return None;
     }
@@ -923,6 +923,7 @@ pub fn get_config_bool(key: &str) -> Option<bool> {
 
 pub fn set_config(value: Value) {
     let mut config = CONFIG.lock().unwrap();
+    // Write config file only if config changes
     if *config != value {
         match serde_json::to_vec_pretty(&value) {
             Ok(data) => {
