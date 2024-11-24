@@ -32,10 +32,10 @@ confirmation-clear-cache-description = Bist du dir sicher das du deinen Roblox C
 
 # Fehler
 error-invalid-directory-description = Bitte stelle sicher dass der Pfad den du angegeben hast ein Ordner ist!
-error-invalid-directory-title = Ungültiger Ordner! # TODO: Translate
+error-invalid-directory-title = Ungültiger Ordner!
 error-temporary-directory-description = Fehler: Konnte keinen temporären Ordner erstellen! Hast du lese/schreib Rechte zu den temporären Ordner? Wenn dieser Fehler bestehen bleibt, versuche es im Administratormodus auszuführen
 error-directory-detection-title = Ordnererkennung fehlgeschlagen!
-error-temporary-directory-title = Konnte keinen temporären Ordner erstellen! # TODO: Translate
+error-temporary-directory-title = Konnte keinen temporären Ordner erstellen!
 error-directory-detection-description = Ordnererkennung fehlgeschlagen! Ist Roblox installiert und hast du es einmal ausgeführt? #
 no-files = Keine Dateien zum Anzeigen
 error-directory-detection = Ordnererkennung fehlgeschlagen.
@@ -57,7 +57,7 @@ clear-cache-description = Wenn es zu lange brauch um alle Dateien anzuzeigen und
 extract-all-description = Dieser Knopf unten wird alle Assets kopieren und Ordner für diese erstellen z.B /sounds, /images um diese zu Kategorisieren. Du kannst den Root Ordner beim Starten auswählen.
 
 # Status
-stage = Stage { $stage }/{ $max }: { $status } # TODO: Translate
+stage = Etappe { $stage }/{ $max }: { $status }
 filtering-files = Dateien werden gefiltert ({ $item }/{ $total })
 extracting-files = Extrahiere Dateien ({ $item }/{ $total })
 all-extracted = Alle Dateien extrahiert
@@ -69,7 +69,7 @@ reading-files = Lese Dateien ({ $item }/{ $total })
 failed-not-file = FEHLER: '{ $file }' Keine Datei
 failed-opening-file = FEHLER: Konnte Datei nicht öffnen: { $error }
 error-check-logs = FEHLER: Überprüfe die Logs für mehr Informationen.
-error-extracting-file = FEHLER: Konnte nicht extrahieren: { $error } # TODO: Translate
+error-extracting-file = FEHLER: Konnte nicht extrahieren: { $error }
 failed-deleting-file = FEHLER: Konnte nicht gelöscht werden ({ $item }/{ $total })
 
 # Sonstiges
