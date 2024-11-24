@@ -66,14 +66,14 @@ deleting-files = Lösche Dateien ({ $item }/{ $total })
 reading-files = Lese Dateien ({ $item }/{ $total })
 
 # Fehler Status
-failed-not-file = ERROR: '{ $file }' Not a file # TODO: Translate
-failed-opening-file = ERROR: Failed to open file: { $error } # TODO: Translate
-error-check-logs = ERROR: Check logs for more details. # TODO: Translate
-error-extracting-file = ERROR: Failed to extract: { $error } # TODO: Translate
+failed-not-file = FEHLER: '{ $file }' Keine Datei
+failed-opening-file = FEHLER: Konnte Datei nicht öffnen: { $error }
+error-check-logs = FEHLER: Überprüfe die Logs für mehr Informationen.
+error-extracting-file = FEHLER: Konnte nicht extrahieren: { $error } # TODO: Translate
 failed-deleting-file = FEHLER: Konnte nicht gelöscht werden ({ $item }/{ $total })
 
 # Sonstiges
-welcome = Wilkommen # TODO: Translate
+welcome = Wilkommen
 cache-directory = Cacheordner: { $directory }
 no-function = (Funktioniert noch nicht)
 version = Version { $version }
