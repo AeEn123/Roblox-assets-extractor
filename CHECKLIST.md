@@ -6,6 +6,7 @@
 - [] - Builds using GitHub Actions
 - [] - German locale needs updating
 - [] - Release of program
+- [] - Copy/swap assets around
 - [] - Fix display of japanese locale
 - [] - Docs available in different languages
 - [] - Multithreaded file handling
