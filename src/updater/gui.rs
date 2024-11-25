@@ -19,14 +19,14 @@ impl eframe::App for MyApp {
             ui.separator();
 
             // Render the changelog using egui_commonmark
-            let mut viewer = CommonMarkViewer::default();
-            let mut cache = CommonMarkCache::default();
-            CommonMarkViewer::new()
-            .show(
-                ui,
-                &mut self.cache,
-                &self.pages[self.curr_tab.unwrap_or(0)].content,
-            );
+            // let mut viewer = CommonMarkViewer::default();
+            // let mut cache = CommonMarkCache::default();
+            // CommonMarkViewer::new()
+            // .show(
+            //     ui,
+            //     &mut self.cache,
+            //     &self.pages[self.curr_tab.unwrap_or(0)].content,
+            // );
 
             ui.separator();
         });
