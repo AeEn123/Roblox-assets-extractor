@@ -78,3 +78,4 @@ no-function = (Not functional yet)
 version = Version: { $version }
 cache-directory = Cache directory: { $directory }
 welcome = Welcome
+download-update-question = Would you like to download the update?

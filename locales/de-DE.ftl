@@ -81,3 +81,4 @@ version = Version { $version }
 button-no = No # TODO: Translate
 button-yes = Yes # TODO: Translate
 new-updates = New updates available # TODO: Translate
+download-update-question = Would you like to download the update? # TODO: Translate
