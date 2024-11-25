@@ -1,37 +1,45 @@
-// Used for gui
 use eframe::egui;
-use native_dialog::{MessageDialog, MessageType};
+use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
 
-const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
+pub struct MyApp {
+    changelog: String,
+}
 
-pub struct MyApp {}
+impl MyApp {
+    pub fn new(changelog: String) -> Self {
+        Self { changelog }
+    }
+}
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("An update is available, but the automatic updater is not implemented yet!")
+            ui.heading("Changelog");
+
+            ui.separator();
+
+            // Render the changelog using egui_commonmark
+            let mut viewer = CommonMarkViewer::default();
+            let mut cache = CommonMarkCache::default();
+            CommonMarkViewer::new()
+            .show(
+                ui,
+                &mut self.cache,
+                &self.pages[self.curr_tab.unwrap_or(0)].content,
+            );
+
+            ui.separator();
         });
     }
 }
 
-impl Default for MyApp {
-    fn default() -> Self {
-        Self {}
-    }
-}
-pub fn run_gui() -> eframe::Result {
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default()
-            .with_icon(
-                eframe::icon_data::from_png_bytes(&include_bytes!("../../assets/icon.png")[..])
-                    .expect("Failed to load icon"),
-            ),
-        ..Default::default()
-    };
-    
+// Run the application with the changelog
+pub fn run(changelog: String) -> eframe::Result<()> {
+    let options = eframe::NativeOptions::default();
+
     eframe::run_native(
-        &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
+        "Changelog Viewer",
         options,
-        Box::new(|_cc| Ok(Box::<MyApp>::default())),
+        Box::new(|_cc| Ok(Box::new(MyApp::new(changelog)))),
     )
 }

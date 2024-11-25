@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 
 use std::collections::HashMap; // Used for input
-use crate::logic; // Used for functionality
+use crate::{logic, updater}; // Used for functionality
 
 mod welcome;
 mod settings;
@@ -349,7 +349,12 @@ pub fn run_gui() {
     }
     
     // Only run GUI after user has been welcomed
-    if logic::get_config_bool("welcomed").unwrap_or(false) {
+    if logic::get_config_bool("welcomed").unwrap_or(true) {
+        // Check for updates when running GUI
+        if logic::get_config_bool("check_for_updates").unwrap_or(false) {
+            updater::check_for_updates(true);
+        }
+
         let options = eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default()
                 .with_icon(

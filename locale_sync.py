@@ -20,13 +20,12 @@ def parse_locale(raw_text):
     return messages
     
 
-
-
 with open(os.path.join(LOCALE_DIRECTORY, MAIN_LOCALE_FILE)) as f:
     text = f.read()
 
 refrence_messages = parse_locale(text)
 
+changes_were_made = False # Keep track if changes were made
 
 # Iterate through all locale files to sync them
 for file in os.listdir(LOCALE_DIRECTORY):
@@ -54,4 +53,8 @@ for file in os.listdir(LOCALE_DIRECTORY):
 
             print(f"{file} +{len(diff)}")
             with open(os.path.join(LOCALE_DIRECTORY, file), "w") as f:
+                changes_were_made = True
                 f.write(text)
+
+if not changes_were_made:
+    print("No changes were made.")

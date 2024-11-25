@@ -12,7 +12,7 @@ enum Category {
     Music,
     Sounds,
     Images,
-    KTX,
+    Ktx,
     Rbxm,
 }
 
@@ -37,12 +37,12 @@ fn main() {
 
     if let Some(category) = args.list {
         // User passed --list
-        let tab = category.to_string();
+        let tab = category.to_string().to_lowercase();
 
         let cache_directory = {
             let cache_dir = logic::get_cache_directory();
             // Music tab just adds .ogg while other tabs scrape the header files from HTTP to allow all media players to play it
-            if tab == "Music" {
+            if tab == "music" {
                 format!("{}/sounds", cache_dir)
             } else {
                 format!("{}/http", cache_dir)
