@@ -34,7 +34,7 @@ impl eframe::App for MyApp {
 }
 
 // Run the application with the changelog
-pub fn run(changelog: String) -> eframe::Result<()> {
+pub fn run_gui(changelog: String) -> eframe::Result<()> {
     let options = eframe::NativeOptions::default();
 
     eframe::run_native(

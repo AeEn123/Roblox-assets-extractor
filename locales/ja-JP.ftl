@@ -77,3 +77,6 @@ cache-directory = キャッシュディレクトリ: { $directory }
 welcome = ようこそ
 
 button-finish = Finish # TODO: Translate
+button-no = No # TODO: Translate
+button-yes = Yes # TODO: Translate
+new-updates = New updates available # TODO: Translate

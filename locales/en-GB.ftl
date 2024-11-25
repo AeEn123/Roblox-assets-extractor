@@ -19,6 +19,8 @@ button-extract-all = Extract all <F3>
 button-change-cache-dir = Change cache directory
 button-reset-cache-dir = Reset cache directory
 button-finish = Finish
+button-yes = Yes
+button-no = No
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -42,6 +44,7 @@ error-invalid-directory-description = Please make sure the path you provided is 
 actions = Actions
 updates = Updates
 language-settings = Language settings
+new-updates = New updates available
 
 
 # Checkboxes

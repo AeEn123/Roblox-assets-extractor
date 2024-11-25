@@ -77,3 +77,7 @@ welcome = Wilkommen
 cache-directory = Cacheordner: { $directory }
 no-function = (Funktioniert noch nicht)
 version = Version { $version }
+
+button-no = No # TODO: Translate
+button-yes = Yes # TODO: Translate
+new-updates = New updates available # TODO: Translate

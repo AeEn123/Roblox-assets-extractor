@@ -43,7 +43,7 @@ pub fn check_for_updates(run_gui: bool) {
                             println!("An update is available.");
                             println!("{}", json.body);
                             if run_gui {
-
+                                gui::run_gui(json.body);
                             }
                         }
                     }
