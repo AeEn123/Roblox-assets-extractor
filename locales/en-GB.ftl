@@ -46,7 +46,6 @@ updates = Updates
 language-settings = Language settings
 new-updates = New updates available
 
-
 # Checkboxes
 check-for-updates = Check for updates
 automatically-install-updates = Automatically install updates
@@ -79,3 +78,4 @@ version = Version: { $version }
 cache-directory = Cache directory: { $directory }
 welcome = Welcome
 download-update-question = Would you like to download the update?
+update-changelog = Update changelog below

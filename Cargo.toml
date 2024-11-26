@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.21", features = ["derive","std"], default-features = false }
-eframe = "0.29"
+clap = { version = "4.5.21", features = ["derive"] }
+eframe = { features = ["glow"], default-features = false, version = "0.29" }
 egui = "0.29"
 egui_commonmark = "0.18.0"
 egui_dock = "0.14.0"
@@ -26,11 +26,12 @@ whoami = { version = "1.5.2", default-features = false }
 winresource = "0.1.17"
 
 # Minimize executable size (Target size < 10MB)
-[profile.release.package."*"] # Exclude this on Windows as this somehow false-triggers Windows Defender...
-opt-level = "z"
+[profile.release.package."*"]
+opt-level = 3
 codegen-units = 1
 debug = false
 overflow-checks = false
+strip = true
 
 [profile.release]
 opt-level = 3 # Main search logic in this project, opt-level 3 for speed
@@ -39,3 +40,4 @@ lto = "fat"
 debug = false
 panic = "abort"
 overflow-checks = false
+strip = true

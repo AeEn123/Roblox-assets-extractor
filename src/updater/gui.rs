@@ -1,45 +1,73 @@
 use eframe::egui;
-use egui_commonmark::{CommonMarkCache, CommonMarkViewer};
+use crate::logic;
+use egui_commonmark::*;
+use fluent_bundle::{FluentBundle, FluentResource};
+use std::sync::Arc;
 
-pub struct MyApp {
+struct App {
+    locale: FluentBundle<Arc<FluentResource>>,
+    cache: CommonMarkCache,
     changelog: String,
 }
 
-impl MyApp {
-    pub fn new(changelog: String) -> Self {
-        Self { changelog }
-    }
-}
-
-impl eframe::App for MyApp {
+impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Changelog");
+
+            ui.heading(logic::get_message(&self.locale, "new-updates", None));
+            ui.label(logic::get_message(&self.locale, "update-changelog", None));
 
             ui.separator();
 
-            // Render the changelog using egui_commonmark
-            // let mut viewer = CommonMarkViewer::default();
-            // let mut cache = CommonMarkCache::default();
-            // CommonMarkViewer::new()
-            // .show(
-            //     ui,
-            //     &mut self.cache,
-            //     &self.pages[self.curr_tab.unwrap_or(0)].content,
-            // );
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                CommonMarkViewer::new()
+                    .max_image_width(Some(512))
+                    .show(ui, &mut self.cache, &self.changelog);
+            });
+        });
+        egui::TopBottomPanel::bottom("buttons").show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.heading("Do you want to install the new update?");
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
+                    if ui.button(logic::get_message(&self.locale, "button-no", None)).clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                    if ui.button(logic::get_message(&self.locale, "button-yes", None)).clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                })
+            });
 
-            ui.separator();
         });
     }
 }
 
-// Run the application with the changelog
-pub fn run_gui(changelog: String) -> eframe::Result<()> {
-    let options = eframe::NativeOptions::default();
+pub fn run_gui(text: String) -> eframe::Result {
+    let mut args = std::env::args();
+    args.next();
 
     eframe::run_native(
-        "Changelog Viewer",
-        options,
-        Box::new(|_cc| Ok(Box::new(MyApp::new(changelog)))),
+        "Roblox Assets Extractor Updater",
+        eframe::NativeOptions::default(),
+        Box::new(move |cc| {
+            if let Some(theme) = args.next() {
+                if theme == "light" {
+                    cc.egui_ctx.set_theme(egui::Theme::Light);
+                } else if theme == "dark" {
+                    cc.egui_ctx.set_theme(egui::Theme::Dark);
+                }
+            }
+
+            cc.egui_ctx.style_mut(|style| {
+                // Show the url of a hyperlink on hover
+                style.url_in_tooltip = true;
+            });
+
+            Ok(Box::new(App {
+                cache: CommonMarkCache::default(),
+                changelog: text,
+                locale: logic::get_locale(None)
+            }))
+        }),
     )
 }
