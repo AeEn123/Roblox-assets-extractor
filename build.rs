@@ -37,12 +37,15 @@ fn get_locale_resources(locale: &str) -> Option<String> {
     for entry in fs::read_dir(locale_dir).expect("Failed to read locales directory") {
         let path = entry.expect("Failed to read file entry").path();
         if let Some(lang ) = path.file_stem().and_then(|s| s.to_str()) {
-            amount += 1; // Increase amount, needs to be known for static locale list
-            let content = fs::read_to_string(&path).expect("Failed to read locale file");
-            output.push_str(&format!("  m.insert(\"{}\".to_owned(), r#\"{}\"#.to_owned());", lang, content));
-            
+            if !path.metadata().unwrap().is_dir() {
+                amount += 1; // Increase amount, needs to be known for static locale list
+                let content = fs::read_to_string(&path).expect("Failed to read locale file");
+                output.push_str(&format!("  m.insert(\"{}\".to_owned(), r#\"{}\"#.to_owned());", lang, content));
+                
+    
+                println!("cargo:rerun-if-changed={}", path.display());
+            }
 
-            println!("cargo:rerun-if-changed={}", path.display());
         }
     }
 
@@ -61,11 +64,13 @@ const LOCALES: [&str; "#);
     for entry in fs::read_dir(locale_dir).expect("Failed to read locales directory") {
         let path = entry.expect("Failed to read file entry").path();
         if let Some(lang ) = path.file_stem().and_then(|s| s.to_str()) {
-            if first {
-                first = false;
-                output.push_str(&format!("\"{}\"", lang)); // First one doesn't have a comma
-            } else {
-                output.push_str(&format!(",\"{}\"", lang));
+            if !path.metadata().unwrap().is_dir() {
+                if first {
+                    first = false;
+                    output.push_str(&format!("\"{}\"", lang)); // First one doesn't have a comma
+                } else {
+                    output.push_str(&format!(",\"{}\"", lang));
+                }
             }
             
         }
