@@ -1,6 +1,8 @@
 > [!IMPORTANT]
 > Info below here is about the python version, and would not apply if you are using the rust version.
 
+The python version is no longer getting feature updates. Important updates may take place but all features are directed towards the Rust rewrite.
+
 ## Requirements
 - **Tkinter:** Tkinter is required to run this tool. On Windows, ensure that Tkinter is selected during the Python installation, or you can install it via pip. On Linux, you can install it using your package manager or download it via pip.
   To install it via pip:

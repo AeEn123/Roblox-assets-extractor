@@ -1,7 +1,7 @@
 [🇬🇧 English](/docs/en-GB/README.md) |
 *Can you speak English and any other language? Help translate by creating a pull request!*
 > [!NOTE]
-> Roblox Assets Extractor has been rewritten in Rust with egui. The python version is kept for updating to the rust version.
+> Running on Windows requires Microsoft Visual C++ Redistributable. You can download that from [here](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
 
 # Roblox Assets Extractor
 This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
