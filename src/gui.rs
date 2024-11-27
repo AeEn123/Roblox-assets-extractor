@@ -364,11 +364,15 @@ pub fn run_gui() {
             ..Default::default()
         };
         
-        let _ = eframe::run_native(
+        let result = eframe::run_native(
             &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
             options,
             Box::new(|_cc| Ok(Box::<MyApp>::default())),
         );
+
+        if result.is_err() {
+            eprintln!("GUI failed: {}", result.unwrap_err())
+        }
     }
 
 }
