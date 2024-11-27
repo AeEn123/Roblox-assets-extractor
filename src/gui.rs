@@ -352,7 +352,7 @@ pub fn run_gui() {
     if logic::get_config_bool("welcomed").unwrap_or(true) {
         // Check for updates when running GUI
         if logic::get_config_bool("check_for_updates").unwrap_or(false) {
-            updater::check_for_updates(true);
+            updater::check_for_updates(true, logic::get_config_bool("automatically_install_updates").unwrap_or(false));
         }
 
         let options = eframe::NativeOptions {

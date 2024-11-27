@@ -53,5 +53,10 @@ fn main() {
         // If nothing passed, run GUI
         gui::run_gui();
     }
-    logic::clean_up(); // Remove the temporary directory if one has been created
+    
+    if !logic::run_install_script() {
+        // Only run if the install script hasn't ran
+        logic::clean_up(); // Remove the temporary directory if one has been created
+    }
+    
 }

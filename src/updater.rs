@@ -1,5 +1,9 @@
+use std::fs;
+
 use reqwest::blocking::Client;
 use serde::Deserialize;
+
+use crate::logic;
 
 mod gui;
 
@@ -22,7 +26,46 @@ fn clean_version_number(version: &str) -> String {
     version.chars().filter(|c| c.is_digit(10) || *c == '.').collect()
 }
 
-pub fn check_for_updates(run_gui: bool) {
+fn detect_download_binary(json: &Release) -> &Asset {
+    let os = std::env::consts::OS; // Get the user's operating system to download the correct binary    
+
+    for asset in &json.assets {
+        if asset.name.to_lowercase().contains(os) {
+            return asset // Return the correct binary based on OS
+        }
+    }
+
+    eprintln!("Failed to find asset, going for first asset listed.");
+    return &json.assets[0];
+}
+
+pub fn download_update(url: &str) {
+    let client = Client::new();
+    let filename = std::env::current_exe().unwrap().file_name().unwrap().to_string_lossy().to_string();
+    let temp_dir = logic::get_temp_dir(true);
+
+    let response = client
+        .get(url)
+        .header("User-Agent", "Roblox-assets-extractor (Rust)") // Set a User-Agent otherwise it returns 403
+        .send();
+
+    match response {
+        Ok(data) => {
+            match data.bytes() {
+                Ok(bytes) => {
+                    match fs::write(format!("{}/{}", temp_dir, filename), bytes) {
+                        Ok(_) => logic::set_update_file(format!("{}/{}", temp_dir, filename)),
+                        Err(e) => eprintln!("Failed to write file: {}", e)
+                    }
+                }
+                Err(e) => eprintln!("Failed to parse: {}", e)
+            }
+        }
+        Err(e) => eprintln!("Failed to download: {}", e),
+    }
+}
+
+pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
     let client = Client::new();
 
     let response = client
@@ -40,7 +83,12 @@ pub fn check_for_updates(run_gui: bool) {
                     if clean_tag_name != clean_version {
                         println!("An update is available.");
                         println!("{}", json.body);
-                        if run_gui {
+
+                        let correct_asset = detect_download_binary(&json);
+
+                        if auto_download_update {
+                            download_update(&correct_asset.browser_download_url);
+                        } else if run_gui {
                             match gui::run_gui(json.body) {
                                 Ok(_) => println!("User exited GUI"),
                                 Err(e) => println!("GUI failed: {}",e)

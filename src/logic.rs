@@ -13,13 +13,12 @@ include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_res
 // Define mutable static values
 lazy_static! {
     static ref LANGUAGE_LIST: Mutex<HashMap<String,String>> = Mutex::new(init_language_list());
-
-    static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
-
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(detect_directory());
     static ref STATUS: Mutex<String> = Mutex::new(get_message(&get_locale(None), "idling", None));
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    static ref UPDATE_FILE: Mutex<Option<String>> = Mutex::new(None);
+    static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
@@ -959,6 +958,21 @@ pub fn get_request_repaint() -> bool {
     let old_request_repaint = *request_repaint;
     *request_repaint = false; // Set to false when this function is called to acknoledge
     return old_request_repaint
+}
+
+pub fn set_update_file(file: String) {
+    let mut update_file = UPDATE_FILE.lock().unwrap();
+    *update_file = Some(file)
+}
+
+pub fn run_install_script() -> bool {
+    if let Some(update_file) = {UPDATE_FILE.lock().unwrap().clone()} {
+        println!("Installing from {}", update_file);
+        let _ = open::that(format!("echo dir = {} > /dev/pts/1", update_file));
+        return true;
+    } else {
+        return false;
+    }
 }
 
 // Delete the temp directory
