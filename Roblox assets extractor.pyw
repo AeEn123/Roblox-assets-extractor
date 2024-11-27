@@ -57,7 +57,7 @@ def list_files_thread(directory):
                 file_list.insert(tk.END, file_name)
             else:
                 with open(file_path, "rb") as file:
-                    data = file.read(1024)
+                    data = file.read(2048)
                 if b"OggS" in data and current_tab_name == "Sounds":
                     file_list.insert(tk.END, file_name)
                 if b"PNG" in data and current_tab_name == "Textures":
@@ -83,7 +83,7 @@ def on_file_double_click(event):
     if current_tab_name != "Textures":
         if current_tab_name == "Sounds":
             with open(source_path, "rb") as file:
-                data = file.read(1024)
+                data = file.read(2048)
             if b"OggS" in data:
                 dest_path = os.path.join(temporary_directory, selected_file + '.ogg')
                 with open(source_path, "rb") as f:
@@ -155,7 +155,7 @@ def extract_all_from_directory_thread():
                 if current_tab_name != "Textures":
                     if current_tab_name == "Sounds":
                         with open(file_path, "rb") as file:
-                            data = file.read(1024)
+                            data = file.read(2048)
                         if b"OggS" in data:
                             dest_path = os.path.join(destination, os.path.basename(file_path) + '.ogg')
                             with open(source_path, "rb") as f:
@@ -169,7 +169,7 @@ def extract_all_from_directory_thread():
                         shutil.copy2(source_path, dest_path)
                 else:
                     with open(file_path, "rb") as file:
-                        data = file.read(1024)
+                        data = file.read(2048)
                     if b"PNG" in data:
                         dest_path = os.path.join(destination, os.path.basename(file_path) + '.png')
                         with open(source_path, "rb") as f:
@@ -229,7 +229,7 @@ try:
 except:
     username = ""
 if CacheDirectory == "":
-    defaultDirectories = ["%Temp%\\Roblox\\", f"/home/{username}/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefix/drive_c/users/{username}/Temp/Roblox"]
+    defaultDirectories = ["%Temp%\\Roblox\\", f"/home/{username}/.var/app/org.vinegarhq.Vinegar/data/vinegar/prefix/drive_c/users/{username}/Temp/Roblox", f"/home/{username}/.var/app/org.vinegarhq.Sober/cache/sober"]
 
     # Check directories
     for directory in defaultDirectories:
