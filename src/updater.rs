@@ -53,8 +53,12 @@ pub fn download_update(url: &str) {
         Ok(data) => {
             match data.bytes() {
                 Ok(bytes) => {
-                    match fs::write(format!("{}/{}", temp_dir, filename), bytes) {
-                        Ok(_) => logic::set_update_file(format!("{}/{}", temp_dir, filename)),
+                    #[cfg(target_os = "windows")]
+                    let path = format!("{}\\{}", temp_dir, filename);
+                    #[cfg(target_family = "unix")]
+                    let path = format!("{}/{}", temp_dir, filename);
+                    match fs::write(path.clone(), bytes) {
+                        Ok(_) => logic::set_update_file(path),
                         Err(e) => eprintln!("Failed to write file: {}", e)
                     }
                 }
