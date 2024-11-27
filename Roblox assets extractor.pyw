@@ -1,8 +1,9 @@
 # Settings
+rust_version = True
 CacheDirectory = "" # Leave blank for default
 
 # Version
-ver = 0.06
+ver = 0.07
 
 # Import modules
 import os
@@ -246,7 +247,26 @@ else:
 root = tk.Tk()
 root.title(f"Roblox assets extractor v{ver}")
 
+if rust_version:
+    
+    yes = messagebox.askyesno("The code has been rewritten", """Roblox Assets Extractor has been rewritten in Rust. Do you want to download the new Rust version?
+It includes many new features such as:
++ Faster speed
++ New GUI library
++ More flexability
++ User consent (asks for update check)
++ Markdown changelog view
++ Language localisation
 
+Note: Clicking yes will open the link to download the new version.""")
+    if yes:
+        link = "https://github.com/AeEn123/Roblox-assets-extractor/releases/latest"
+        if os.name == "nt":
+            subprocess.Popen(["explorer", link])
+        else:
+            subprocess.Popen(["xdg-open", link])
+    else:
+        messagebox.showinfo("You can turn off this popup", "You can turn off this popup by editing this script and changing the first value from True to False")
 
 # Create temporary directory
 temporary_directory_object = tempfile.TemporaryDirectory()

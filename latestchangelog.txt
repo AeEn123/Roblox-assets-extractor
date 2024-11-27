@@ -1,5 +1,3 @@
-⚠Note: If you're below v0.05 then please download from github
-v0.06--------------------
+v0.07--------------------
 + Added Linux support
-+ Added custom directory support
-⚠Note: If you're below v0.05 then please download from github.
++ Added option to download new Rust rewrite
