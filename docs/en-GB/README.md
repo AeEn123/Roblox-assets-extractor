@@ -1,6 +1,3 @@
-> [!CAUTION]
-> # The rust rewrite is unfinished, please use the python version for now
-
 > [!NOTE]
 > Roblox Assets Extractor has been rewritten in Rust with egui. The python version is kept for updating to the rust version.
 
@@ -40,6 +37,7 @@ There is also an extract all assets of this type button, you can use this button
 There are similar buttons in the settings menu, where you can delete your cache or extract all assets, where it will automatically create folders within a folder you choose.
 
 # CLI mode
+CLI is work-in-progress.
 See [CLI.md](/docs/en-GB/CLI.md)
 
 # More Info
@@ -57,7 +55,7 @@ Building from source requires cargo, [which can be installed from rustup.](https
 
 ## 1. Clone the repository
 ```bash
-git clone -b rust-rewrite https://github.com/AeEn123/Roblox-assets-extractor
+git clone https://github.com/AeEn123/Roblox-assets-extractor
 cd Roblox-assets-extractor
 ```
 ## 2. Build with cargo, the command you run depends on your use-case
