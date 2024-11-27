@@ -2,7 +2,7 @@
 ### (ordered in priority)
 
 - [x] - Welcome GUI (Allow user to set settings)
-- [ ] - Auto updates
+- [x] - Auto updates
 - [x] - German locale needs updating
 - [ ] - Release of program
 - [ ] - Copy/swap assets around

@@ -1012,9 +1012,7 @@ pub fn run_install_script(run_afterwards: bool) -> bool {
             let mut command = std::process::Command::new("sh");
 
             let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
-
-            println!("{}, {}, {}", install_script.clone(), update_file.clone(), program_path.clone());
-
+            
             #[cfg(target_family = "unix")]
             if run_afterwards {
                 command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
