@@ -26,17 +26,17 @@ fn clean_version_number(version: &str) -> String {
     version.chars().filter(|c| c.is_digit(10) || *c == '.').collect()
 }
 
-fn detect_download_binary(json: &Release) -> &Asset {
+fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
     let os = std::env::consts::OS; // Get the user's operating system to download the correct binary    
 
-    for asset in &json.assets {
+    for asset in assets {
         if asset.name.to_lowercase().contains(os) {
             return asset // Return the correct binary based on OS
         }
     }
 
     eprintln!("Failed to find asset, going for first asset listed.");
-    return &json.assets[0];
+    return &assets[0];
 }
 
 pub fn download_update(url: &str) {
@@ -84,12 +84,12 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                         println!("An update is available.");
                         println!("{}", json.body);
 
-                        let correct_asset = detect_download_binary(&json);
+                        let correct_asset = detect_download_binary(&json.assets);
 
                         if auto_download_update {
                             download_update(&correct_asset.browser_download_url);
                         } else if run_gui {
-                            match gui::run_gui(json.body) {
+                            match gui::run_gui(json.body, correct_asset.browser_download_url.clone()) {
                                 Ok(_) => println!("User exited GUI"),
                                 Err(e) => println!("GUI failed: {}",e)
                             }

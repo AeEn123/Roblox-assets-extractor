@@ -54,7 +54,7 @@ fn main() {
         gui::run_gui();
     }
     
-    if !logic::run_install_script() {
+    if !logic::run_install_script(false) {
         // Only run if the install script hasn't ran
         logic::clean_up(); // Remove the temporary directory if one has been created
     }

@@ -193,6 +193,42 @@ fn extract_bytes(header: String, bytes: Vec<u8>) -> Vec<u8> {
     return bytes
 }
 
+#[cfg(target_family = "unix")]
+fn save_install_script() -> String {
+    let temp_dir = get_temp_dir(false);
+    let path = format!("{}/installer.sh", temp_dir);
+
+    if temp_dir != "" {
+        match fs::write(&path, include_str!("installer/installer.sh")) {
+            Ok(_) => println!("File written to {}", path),
+            Err(e) => println!("Failed to write to {}: {}", path, e)
+        }
+        
+        return path;
+    } else {
+        return "".to_string();
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn save_install_script() -> String {
+    let temp_dir = get_temp_dir(false);
+    let path = format!("{}\\installer.bat", temp_dir);
+
+    if temp_dir != "" {
+        match fs::write(&path, include_str!("installer/installer.bat")) {
+            Ok(_) => println!("File written to {}", path),
+            Err(e) => println!("Failed to write to {}: {}", path, e)
+        }
+        
+        return path;
+    } else {
+        return "".to_string();
+    }
+    
+
+}
+
 // Define public functions
 pub fn validate_directory(directory: &str) -> Result<String, String> {
     let resolved_directory = directory
@@ -965,10 +1001,27 @@ pub fn set_update_file(file: String) {
     *update_file = Some(file)
 }
 
-pub fn run_install_script() -> bool {
+pub fn run_install_script(run_afterwards: bool) -> bool {
     if let Some(update_file) = {UPDATE_FILE.lock().unwrap().clone()} {
         println!("Installing from {}", update_file);
-        let _ = open::that(format!("echo dir = {} > /dev/pts/1", update_file));
+        let install_script = save_install_script();
+        if install_script != "" {
+            #[cfg(target_os = "windows")]
+            let mut command = std::process::Command::new("cmd");
+            #[cfg(target_family = "unix")]
+            let mut command = std::process::Command::new("sh");
+
+            let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
+
+            if run_afterwards {
+                command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
+            } else {
+                command.args([install_script, update_file, program_path]).spawn().expect("failed to start update script");
+            }
+
+            std::process::exit(0);
+        }
+
         return true;
     } else {
         return false;

@@ -1,5 +1,6 @@
 use eframe::egui;
 use crate::logic;
+use crate::updater;
 use egui_commonmark::*;
 use fluent_bundle::{FluentBundle, FluentResource};
 use std::sync::Arc;
@@ -8,6 +9,7 @@ struct App {
     locale: FluentBundle<Arc<FluentResource>>,
     cache: CommonMarkCache,
     changelog: String,
+    url: String,
 }
 
 impl eframe::App for App {
@@ -33,7 +35,8 @@ impl eframe::App for App {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                     if ui.button(logic::get_message(&self.locale, "button-yes", None)).clicked() {
-                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        updater::download_update(&self.url);
+                        logic::run_install_script(true);
                     }
                 })
             });
@@ -42,7 +45,7 @@ impl eframe::App for App {
     }
 }
 
-pub fn run_gui(text: String) -> eframe::Result {
+pub fn run_gui(text: String, url: String) -> eframe::Result {
     let mut args = std::env::args();
     args.next();
 
@@ -66,7 +69,8 @@ pub fn run_gui(text: String) -> eframe::Result {
             Ok(Box::new(App {
                 cache: CommonMarkCache::default(),
                 changelog: text,
-                locale: logic::get_locale(None)
+                locale: logic::get_locale(None),
+                url: url
             }))
         }),
     )
