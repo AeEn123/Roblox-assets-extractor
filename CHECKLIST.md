@@ -16,7 +16,7 @@
 
 - [ ] - Copy/swap assets around
 - [ ] - Fix display of japanese locale #2
-- [ ] - Builds using GitHub Actions (might not be possible)
+- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
 - [ ] - Multithreaded file handling
 - [ ] - Finish CLI mode
 - [ ] - Docs available in different languages
