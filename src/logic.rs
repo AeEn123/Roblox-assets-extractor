@@ -1024,7 +1024,8 @@ pub fn run_install_script(run_afterwards: bool) -> bool {
             if run_afterwards {
                 command.args(["/c".to_owned(), install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
             } else {
-                command.args(["/c".to_owned(), install_script, update_file, program_path]).spawn().expect("failed to start update script");
+                // Run exit afterwards, otherwise it'll open a blank cmd window
+                command.args(["/c".to_owned(), install_script, update_file, program_path, "exit".to_owned()]).spawn().expect("failed to start update script");
             }
 
             std::process::exit(0);
