@@ -8,8 +8,7 @@
 
 ## 0.1.1
 
-- [ ] - Fill in information on the blank about screen
-- [ ] - See issue of Japanese locale and attempt to fix if simple
+- [x] - Fill in information on the blank about screen
 - [ ] - Release of 0.1.1
 
 ## Future releases
