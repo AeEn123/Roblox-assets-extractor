@@ -12,11 +12,11 @@
 - [ ] - See issue of Japanese locale and attempt to fix if simple
 - [ ] - Release of 0.1.1
 
-## 0.1.2+
+## Future releases
 
+- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
 - [ ] - Copy/swap assets around
 - [ ] - Fix display of japanese locale #2
-- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
 - [ ] - Multithreaded file handling
 - [ ] - Finish CLI mode
 - [ ] - Docs available in different languages
