@@ -45,6 +45,8 @@ actions = Actions
 updates = Updates
 language-settings = Language settings
 new-updates = New updates available
+contributers = Contributers
+dependencies = Dependencies
 
 # Checkboxes
 check-for-updates = Check for updates

@@ -83,3 +83,5 @@ button-yes = Yes # TODO: Translate
 new-updates = New updates available # TODO: Translate
 download-update-question = Would you like to download the update? # TODO: Translate
 update-changelog = Update changelog below # TODO: Translate
+dependencies = Dependencies # TODO: Translate
+contributers = Contributers # TODO: Translate

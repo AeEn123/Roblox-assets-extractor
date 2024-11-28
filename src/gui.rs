@@ -16,6 +16,21 @@ mod settings;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
+const DEPENDENCIES: [&str; 13] = [
+    "https://github.com/emilk/egui",
+    "https://github.com/Adanos020/egui_dock",
+    "https://github.com/lampsitter/egui_commonmark",
+    "https://github.com/native-dialog-rs/native-dialog-rs",
+    "https://github.com/rust-lang-nursery/lazy-static.rs",
+    "https://github.com/projectfluent/fluent-rs",
+    "https://github.com/1Password/sys-locale",
+    "https://github.com/zbraniecki/unic-locale",
+    "https://github.com/Stebalien/tempfile",
+    "https://github.com/clap-rs/clap",
+    "https://github.com/ardaku/whoami",
+    "https://github.com/seanmonstar/reqwest",
+    "https://github.com/serde-rs/json",
+];
 
 
 struct TabViewer<'a> {
@@ -35,6 +50,9 @@ fn double_click(dir: String, value: String, mode: String) {
     }
 }
 
+fn add_dependency_credit(dependency: &str, ui: &mut egui::Ui) {
+    ui.hyperlink_to(dependency.replace("https://github.com/", ""), dependency);
+}
 
 impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = String;
@@ -256,15 +274,25 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 // This returns true if the locales need to be refreshed
                 *self.locale = logic::get_locale(None);
             }
-
- 
-
-
             
         } else {
             // This is only shown in the about tab
             ui.heading("Roblox Assets Extractor");
-            
+            ui.label(format!("Version: v{VERSION}"));
+
+            ui.separator();
+
+            ui.heading(logic::get_message(self.locale, "contributers", None));
+            ui.hyperlink_to("@AeEn123", "https://github.com/AeEn123");
+            ui.hyperlink_to("@Vonercent", "https://github.com/Vonercent");
+            ui.hyperlink_to("@aaditkumar2009", "https://github.com/aaditkumar2009");
+
+            ui.separator();
+
+            ui.heading(logic::get_message(self.locale, "dependencies", None));
+            for dependency in DEPENDENCIES {
+                add_dependency_credit(dependency, ui);
+            } 
 
         }
     }

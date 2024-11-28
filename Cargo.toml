@@ -10,7 +10,6 @@ egui = "0.29"
 egui_commonmark = "0.18.0"
 egui_dock = "0.14.0"
 fluent-bundle = { version = "0.15.3", default-features = false }
-image = { version = "0.25.5", default-features = false, features = ["png"] }
 lazy_static = "1.5.0"
 native-dialog = "0.7.0"
 open = "5.3.1"

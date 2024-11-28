@@ -30,31 +30,34 @@ changes_were_made = False # Keep track if changes were made
 # Iterate through all locale files to sync them
 for file in os.listdir(LOCALE_DIRECTORY):
     if file != MAIN_LOCALE_FILE:
-        with open(os.path.join(LOCALE_DIRECTORY, file)) as f:
-            text = f.read()
+        try:
+            with open(os.path.join(LOCALE_DIRECTORY, file)) as f:
+                text = f.read()
 
-        new_messages = parse_locale(text)
-        diff = set(refrence_messages) - set(new_messages) # Subtract the new messages from the refrence messages
+            new_messages = parse_locale(text)
+            diff = set(refrence_messages) - set(new_messages) # Subtract the new messages from the refrence messages
 
 
-        if len(diff) != 0:
-            for value in diff:
-                header = refrence_messages[value][1]
-                header_pos = text.find(header)
+            if len(diff) != 0:
+                for value in diff:
+                    header = refrence_messages[value][1]
+                    header_pos = text.find(header)
 
-                if header_pos == -1:
-                    header_pos = len(text)
-                else:
-                    header_pos = header_pos + len(header)
-                
-                new_value = f"\n{value} = {refrence_messages[value][0]} # TODO: Translate"
+                    if header_pos == -1:
+                        header_pos = len(text)
+                    else:
+                        header_pos = header_pos + len(header)
+                    
+                    new_value = f"\n{value} = {refrence_messages[value][0]} # TODO: Translate"
 
-                text = text[:header_pos] + new_value + text[header_pos:]
+                    text = text[:header_pos] + new_value + text[header_pos:]
 
-            print(f"{file} +{len(diff)}")
-            with open(os.path.join(LOCALE_DIRECTORY, file), "w") as f:
-                changes_were_made = True
-                f.write(text)
+                print(f"{file} +{len(diff)}")
+                with open(os.path.join(LOCALE_DIRECTORY, file), "w") as f:
+                    changes_were_made = True
+                    f.write(text)
+        except IsADirectoryError:
+            print(f"Ignoring '{file}' as it is a directory.")
 
 if not changes_were_made:
     print("No changes were made.")
