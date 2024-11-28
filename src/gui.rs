@@ -16,6 +16,11 @@ mod settings;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
+const CONTRIBUTERS: [&str; 3] = [
+    "AeEn123",
+    "Vonercent",
+    "aaditkumar2009",
+];
 const DEPENDENCIES: [&str; 13] = [
     "https://github.com/emilk/egui",
     "https://github.com/Adanos020/egui_dock",
@@ -72,6 +77,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 format!("{}/http", cache_dir)
             }
         };
+
+        
 
         let file_list = logic::get_file_list(); // Get the file list as it is used throughout the GUI
 
@@ -283,9 +290,9 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             ui.separator();
 
             ui.heading(logic::get_message(self.locale, "contributers", None));
-            ui.hyperlink_to("@AeEn123", "https://github.com/AeEn123");
-            ui.hyperlink_to("@Vonercent", "https://github.com/Vonercent");
-            ui.hyperlink_to("@aaditkumar2009", "https://github.com/aaditkumar2009");
+            for contributer in CONTRIBUTERS {
+                ui.hyperlink_to(format!("@{}",contributer), format!("https://github.com/{}", contributer));
+            }
 
             ui.separator();
 

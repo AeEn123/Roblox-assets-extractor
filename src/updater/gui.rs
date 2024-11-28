@@ -12,6 +12,8 @@ struct App {
     url: String,
 }
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -50,7 +52,7 @@ pub fn run_gui(text: String, url: String) -> eframe::Result {
     args.next();
 
     eframe::run_native(
-        "Roblox Assets Extractor Updater",
+        &format!("Roblox Assets Extractor Updater v{}", VERSION),
         eframe::NativeOptions::default(),
         Box::new(move |cc| {
             if let Some(theme) = args.next() {
