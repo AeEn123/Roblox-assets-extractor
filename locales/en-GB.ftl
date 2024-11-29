@@ -31,6 +31,8 @@ confirmation-filter-confirmation-title = Files are still being filtered.
 confirmation-filter-confirmation-description = Are you sure you want to extract all the files while the program is still filtering the files? This will result in an unfinished extraction.
 confirmation-clear-cache-title = Clearing roblox cache
 confirmation-clear-cache-description = Are you sure you want to clear your roblox cache? The files will be regenerated when the roblox client is loaded.
+confirmation-custom-directory-title = Choose a different directory
+confirmation-custom-directory-description = Do you want to choose a different cache directory?
 
 # Errors
 no-files = No files to list.

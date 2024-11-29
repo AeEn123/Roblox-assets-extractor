@@ -258,7 +258,6 @@ pub fn detect_directory() -> String {
         match validate_directory(&directory.to_string().replace('"',"")) { // It kept returning "value" instead of value
             Ok(resolved_directory) => return resolved_directory,
             Err(e) => {
-                println!("User-defined directory is invalid: {}", e);
                 errors.push_str(&e.to_string());
             },
         }
@@ -272,13 +271,36 @@ pub fn detect_directory() -> String {
 
     }
 
-    // If it was unable to detect any directory, tell the user and panic the program
+    // If it was unable to detect any directory, tell the user
     let _ = native_dialog::MessageDialog::new()
     .set_type(native_dialog::MessageType::Error)
     .set_title(&get_message(&get_locale(None), "error-directory-detection-title", None))
     .set_text(&get_message(&get_locale(None), "error-directory-detection-description", None))
     .show_alert();
-    panic!("Directory detection failed!{}", errors);
+
+    let yes = native_dialog::MessageDialog::new()
+    .set_type(native_dialog::MessageType::Error)
+    .set_title(&get_message(&get_locale(None), "confirmation-custom-directory-title", None))
+    .set_text(&get_message(&get_locale(None), "confirmation-custom-directory-description", None))
+    .show_confirm()
+    .unwrap();
+
+    if yes {
+        let option_path = native_dialog::FileDialog::new()
+        .show_open_single_dir()
+        .unwrap();
+        if let Some(path) = option_path {
+            set_config_value("cache_directory", validate_directory(&path.to_string_lossy().to_string()).unwrap().into());
+            return detect_directory();
+        } else {
+            panic!("Directory detection failed!{}", errors);
+        }
+    } else {
+        panic!("Directory detection failed!{}", errors);
+    }
+
+
+    
 
 }
 
