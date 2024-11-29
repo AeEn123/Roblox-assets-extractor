@@ -1,3 +1,6 @@
+[![Windows Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml)
+[![Linux Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml)
+
 [🇬🇧 English](/docs/en-GB/README.md) |
 *Can you speak English and any other language? Help translate by creating a pull request!*
 > [!NOTE]
