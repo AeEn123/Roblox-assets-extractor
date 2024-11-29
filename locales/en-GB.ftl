@@ -21,6 +21,7 @@ button-reset-cache-dir = Reset cache directory
 button-finish = Finish
 button-yes = Yes
 button-no = No
+button-rename = Rename <F2>
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -47,16 +48,19 @@ language-settings = Language settings
 new-updates = New updates available
 contributers = Contributers
 dependencies = Dependencies
+behavior = Behavior
 
 # Checkboxes
 check-for-updates = Check for updates
 automatically-install-updates = Automatically install updates
+use-alias = Export your renamed filenames
 
 
 # Descriptions
 clear-cache-description = If it is taking too long to list files and extracting all from a directory, you can clear your Roblox cache with the button below. This removes all files from your cache and your Roblox client will automatically recreate these files when needed.
 extract-all-description = The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.
 custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button.
+use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself.
 
 # Statuses
 idling = Idling

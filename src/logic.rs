@@ -664,7 +664,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
     }
 }
 
-pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool) {
+pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool, use_alias: bool) {
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -692,7 +692,14 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                             count += 1; // Increase counter for progress
                             update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
                             let origin = format!("{}/{}", dir, entry);
-                            let dest = format!("{}/{}", destination, entry); // Local variable destination
+
+                            let alias = if use_alias {
+                                get_asset_alias(&entry)
+                            } else {
+                                entry
+                            };
+
+                            let dest = format!("{}/{}", destination, alias); // Local variable destination
 
                             // Args for formatting
                             let mut args = FluentArgs::new();
@@ -733,7 +740,7 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
     }
 }
 
-pub fn extract_all(destination: String, yield_for_thread: bool) {
+pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool) {
     let running = {
         let task = TASK_RUNNING.lock().unwrap();
         task.clone()
@@ -791,8 +798,17 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
 
                 let path = entry.unwrap().path();
                 if let Some(filename) = path.file_name() {
-                    let origin = format!("{}/{}", music_directory.clone(), filename.to_string_lossy().to_string());
-                    let dest = format!("{}/Music/{}", destination, filename.to_string_lossy().to_string()); // Local destination
+                    let name = filename.to_string_lossy().to_string();
+                    let origin = format!("{}/{}", music_directory.clone(), name);
+
+                    let alias = if use_alias {
+                        get_asset_alias(&name)
+                    } else {
+                        name
+                    };
+
+
+                    let dest = format!("{}/Music/{}", destination, alias); // Local destination
                     extract_file(origin, "Music".to_string(), dest, true);
 
                     // More formatting to show "Stage 1/3: Extracting files"
@@ -879,8 +895,15 @@ pub fn extract_all(destination: String, yield_for_thread: bool) {
                 args.set("item", count);
                 args.set("total", total);
 
-                let origin = format!("{}/{}", http_directory.clone(), file.0);
-                let dest = format!("{}/{}/{}", destination, file.1, file.0); // Local destination, stores in (destination/type/name)
+                let origin = format!("{}/{}", http_directory, file.0);
+                
+                let alias = if use_alias {
+                    get_asset_alias(&file.0)
+                } else {
+                    file.0
+                };
+
+                let dest = format!("{}/{}/{}", destination, file.1, alias); // Local destination, stores in (destination/type/name)
                 extract_file(origin, file.1, dest, true);
 
                 // More formatting to show "Stage 3/3: Extracting files"
@@ -947,6 +970,19 @@ pub fn get_config_string(key: &str) -> Option<String> {
    
 }
 
+pub fn get_asset_alias(asset: &str) -> String {
+    if let Some(aliases) =  get_config().get("aliases") {
+        if let Some(value) = aliases.get(asset) {
+            return value.as_str().unwrap().to_owned().replace('"',"");
+        } else {
+            return asset.to_string();
+        }
+    } else {
+        return asset.to_string();
+    }
+
+}
+
 pub fn get_config_bool(key: &str) -> Option<bool> {
     if let Some(value) = get_config().get(key) {
         return Some(value.as_bool()?);
@@ -980,6 +1016,16 @@ pub fn set_config(value: Value) {
 pub fn set_config_string(key: &str, value: &str) {
     let mut config = get_config();
     config[key] = value.into();
+    set_config(config);
+}
+
+pub fn set_asset_alias(asset: &str, value: &str) {
+    let mut config = get_config();
+    if config.get("aliases").is_none() {
+        config["aliases"] = json!({});
+    }
+
+    config["aliases"][asset] = value.replace('"', "").into();
     set_config(config);
 }
 

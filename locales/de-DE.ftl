@@ -85,3 +85,7 @@ download-update-question = Would you like to download the update? # TODO: Transl
 update-changelog = Update changelog below # TODO: Translate
 dependencies = Dependencies # TODO: Translate
 contributers = Contributers # TODO: Translate
+button-rename = Rename <F2> # TODO: Translate
+use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself. # TODO: Translate
+behavior = Behavior # TODO: Translate
+use-alias = Export your renamed filenames # TODO: Translate

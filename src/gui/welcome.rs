@@ -25,7 +25,7 @@ impl eframe::App for MyApp {
 
             // Config will be mutated as part of checkbox user interaction.
             let mut config = logic::get_config();
-            settings::updates(ui, &mut config, &self.locale);
+            settings::updates(ui, &self.locale);
 
             logic::set_config(config); // Update config to new one
 

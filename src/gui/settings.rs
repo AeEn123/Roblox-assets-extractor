@@ -52,7 +52,7 @@ pub fn actions(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     
             // If the user provides a directory, the program will extract the assets to that directory
             if let Some(path) = option_path {
-                logic::extract_all( path.to_string_lossy().to_string(), false)
+                logic::extract_all( path.to_string_lossy().to_string(), false, logic::get_config_bool("use_alias").unwrap_or(false))
             }
         }
     }
@@ -98,30 +98,26 @@ pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentR
     });
 }
 
-pub fn updates(ui: &mut egui::Ui, config: &mut Value, locale: &FluentBundle<Arc<FluentResource>>) {
+pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.heading(logic::get_message(locale, "updates", None));
     ui.label(logic::get_message(locale, "no-function", None));
 
     // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
-    let mut check_for_updates = if let Some(result) = config["check_for_updates"].as_bool() {
-        result
-    } else {
-        true
-    };
+    let mut check_for_updates = logic::get_config_bool("check_for_updates").unwrap_or(true);
 
-    let mut automatically_install_updates = if let Some(result) = config["automatically_install_updates"].as_bool() {
-        result
-    } else {
-        false
-    };
-    
+    let mut automatically_install_updates = logic::get_config_bool("automatically_install_updates").unwrap_or(false);
 
     ui.checkbox(&mut check_for_updates, logic::get_message(locale, "check-for-updates", None));
     ui.checkbox(&mut automatically_install_updates, logic::get_message(locale, "automatically-install-updates", None));
 
     // Add them to the config again
-    config["check_for_updates"] = check_for_updates.into();
-    config["automatically_install_updates"] = automatically_install_updates.into();
+    logic::set_config_bool("check_for_updates", check_for_updates); // TODO: FIX
+    logic::set_config_bool("automatically_install_updates", automatically_install_updates);
+}
+
+pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+    ui.heading(logic::get_message(locale, "behavior", None));
+    // TODO: use alias checkbox
 }
 
 pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -> bool {

@@ -9,13 +9,20 @@
 ## 0.1.1
 
 - [x] - Fill in information on the blank about screen
-- [ ] - Release of 0.1.1
+- [x] - Release of 0.1.1
 
-## Future releases
+## 0.1.2
+- [x] - CMD window fixed
 
-- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
+## 0.1.3
+- [ ] - Naming of assets
+- [ ] - Add option to export named assets
+- [ ] - Implement all TODO comments
 - [ ] - Copy/swap assets around
-- [ ] - Fix display of japanese locale #2
 - [ ] - Multithreaded file handling
 - [ ] - Finish CLI mode
+
+## Future releases
+- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
+- [ ] - Fix display of japanese locale #2
 - [ ] - Docs available in different languages

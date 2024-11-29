@@ -42,6 +42,7 @@ struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
     current_tab: &'a mut Option<String>,
+    renaming: &'a mut bool,
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
 }
 
@@ -100,7 +101,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             // Top UI buttons
             ui.horizontal(|ui| {
-                if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) {
+                if ui.button(logic::get_message(self.locale, "button-rename", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
+                    *self.renaming = !*self.renaming;               
+                }
+                if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) && !*self.renaming { // del key used for editing, don't allow during editing
                     // Confirmation dialog
                     let yes = MessageDialog::new()
                     .set_type(MessageType::Info)
@@ -135,7 +139,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                         // If the user provides a directory, the program will extract the assets to that directory
                         if let Some(path) = option_path {
-                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), file_list.clone(), false);
+                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), file_list.clone(), false,logic::get_config_bool("use_alias").unwrap_or(false));
                         }
                     }
                 }
@@ -147,39 +151,44 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             
             let mut scroll_to: Option<usize> = None; // This is reset every frame, so it doesn't constantly scroll to the same label
             let mut none_selected: bool = false; // Used to scroll to the first value shown when none is selected
-            // If the user presses up, decrement the selected value
-            if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
-                if let Some(selected) = *self.selected {
-                    if selected > 0 { // Check if it is larger than 0 otherwise it'll attempt to select non-existant labels
-                        *self.selected = Some(selected - 1);
-                        scroll_to = Some(selected - 1); // This is also set to the same number, allowing for auto scrolling
+            
+            // Only allow navigation of the user is not renaming
+            if !*self.renaming {
+                // If the user presses up, decrement the selected value
+                if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
+                    if let Some(selected) = *self.selected {
+                        if selected > 0 { // Check if it is larger than 0 otherwise it'll attempt to select non-existant labels
+                            *self.selected = Some(selected - 1);
+                            scroll_to = Some(selected - 1); // This is also set to the same number, allowing for auto scrolling
+                        }
+                    } else {
+                        none_selected = true // Select the first visible entry
                     }
-                } else {
-                    none_selected = true // Select the first visible entry
+                }
+
+                // If the user presses down, increment the selected value
+                if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
+                    if let Some(selected) = *self.selected {
+                        if selected < file_list.len()-1 { // Stop it from overflowing otherwise it'll attempt to select non-existant labels
+                            *self.selected = Some(selected + 1);
+                            scroll_to = Some(selected + 1); // This is also set to the same number, allowing for auto scrolling
+                        }
+                    } else {
+                        none_selected = true // Select the first visible entry
+                    }
+                }
+
+                // Allow the user to confirm with enter
+                if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                    if let Some(selected) = *self.selected {
+                        // Get file name after getting the selected value
+                        if let Some(file_name) = file_list.get(selected) {
+                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
+                        }                   
+                    }
                 }
             }
 
-            // If the user presses down, increment the selected value
-            if ui.input(|i| i.key_pressed(egui::Key::ArrowDown)) {
-                if let Some(selected) = *self.selected {
-                    if selected < file_list.len()-1 { // Stop it from overflowing otherwise it'll attempt to select non-existant labels
-                        *self.selected = Some(selected + 1);
-                        scroll_to = Some(selected + 1); // This is also set to the same number, allowing for auto scrolling
-                    }
-                } else {
-                    none_selected = true // Select the first visible entry
-                }
-            }
-
-            // Allow the user to confirm with enter
-            if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                if let Some(selected) = *self.selected {
-                    // Get file name after getting the selected value
-                    if let Some(file_name) = file_list.get(selected) {
-                        double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
-                    }                   
-                }
-            }
 
             let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
             let mut first_iterated: bool = false; // Used to track if the first entry iterated.
@@ -192,6 +201,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 |ui, row_range| {
                 for i in row_range {
                     if let Some(file_name) = file_list.get(i) {
+                        let alias = logic::get_asset_alias(&file_name);
 
                         let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
                             *self.selected = Some(i); // If there is none selected, Set selected and return true
@@ -201,53 +211,70 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             *self.selected == Some(i) // Check if this current one is selected
                         };
 
-                        let visuals = ui.visuals();
-
-                        // Highlight the background when selected
-                        let background_colour = if is_selected {
-                            visuals.selection.bg_fill // Primary colour
-                        } else {
-                            egui::Color32::TRANSPARENT // No background colour
-                        };
-
-                        // Make the text have more contrast when selected
-                        let text_colour = if is_selected {
-                            visuals.strong_text_color() // Brighter
-                        } else {
-                            visuals.text_color() // Normal
-                        };
-
-                
-                        // Using a rect to allow the user to click across the entire list, not just the text
-                        let full_width = ui.available_width();
-                        let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
-                        let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-
-                        // Draw the background colour
-                        ui.painter().rect_filled(rect, 0.0, background_colour);
-
                         // Draw the text
-                        ui.painter().text(
-                            rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
-                            egui::Align2::LEFT_TOP,
-                            file_name, // Text is the file name
-                            egui::TextStyle::Body.resolve(ui.style()),
-                            text_colour,
-                        );
+                        if is_selected && *self.renaming {
+                            let mut mutable_name = alias.to_string();
+                            let response = ui.text_edit_singleline(&mut mutable_name);
 
-                        // Handle the click/double click
-                        if response.clicked() && is_selected {
-                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
-                        } else if response.clicked() {
-                            *self.selected = Some(i);
+                            if mutable_name != *alias {
+                                logic::set_asset_alias(&file_name, &mutable_name);
+                            }
+
+                            if response.lost_focus() {
+                                *self.renaming = false;
+                                if mutable_name == "" {
+                                    logic::set_asset_alias(&file_name, &file_name); // Set it to file name if blank
+                                }
+                            } else {
+                                response.request_focus(); // Request focus if it hasn't lost focus
+                            }
+                        } else {
+                            let visuals = ui.visuals();
+
+                            // Highlight the background when selected
+                            let background_colour = if is_selected {
+                                visuals.selection.bg_fill // Primary colour
+                            } else {
+                                egui::Color32::TRANSPARENT // No background colour
+                            };
+    
+                            // Make the text have more contrast when selected
+                            let text_colour = if is_selected {
+                                visuals.strong_text_color() // Brighter
+                            } else {
+                                visuals.text_color() // Normal
+                            };
+    
+                    
+                            // Using a rect to allow the user to click across the entire list, not just the text
+                            let full_width = ui.available_width();
+                            let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
+                            let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+    
+                            // Draw the background colour
+                            ui.painter().rect_filled(rect, 0.0, background_colour);
+
+                            // Handle the click/double click
+                            if response.clicked() && is_selected {
+                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
+                            } else if response.clicked() && !*self.renaming {
+                                *self.selected = Some(i);
+                            }
+
+                            // Handle keyboard scrolling
+                            if scroll_to == Some(i) {
+                                navigation_accepted = true;
+                                response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
+                            }
+
+                            ui.painter().text(
+                                rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
+                                egui::Align2::LEFT_TOP,
+                                alias, // Text is the file name or the alias. Alias is user-defined
+                                egui::TextStyle::Body.resolve(ui.style()),
+                                text_colour,
+                            );
                         }
-
-                        // Handle keyboard scrolling
-                        if scroll_to == Some(i) {
-                            navigation_accepted = true;
-                            response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
-                        }
-
                         first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                     }
                 }
@@ -271,7 +298,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // Config will be mutated as part of checkbox user interaction.
             let mut config = logic::get_config();
 
-            settings::updates(ui, &mut config, self.locale);
+            settings::updates(ui, self.locale);
 
             logic::set_config(config); // Update config to new one
 
@@ -310,6 +337,7 @@ struct MyApp {
     tab_map: HashMap<u32, (SurfaceIndex, NodeIndex, usize)>, // Tab map for keyboard navigation
     selected: Option<usize>, // Used for storing selected state to retain keyboard navigation as seen in the tkinter version
     current_tab: Option<String>, // Allows for detecting when the user changes tabs to refresh automatically
+    renaming: bool,
     locale: FluentBundle<Arc<FluentResource>>
 }
 
@@ -331,6 +359,7 @@ impl Default for MyApp {
             tab_map,
             selected: None,
             current_tab: None,
+            renaming: false,
             locale: logic::get_locale(None),
         }
     }
@@ -364,6 +393,7 @@ impl eframe::App for MyApp {
             .show(ctx, &mut TabViewer { 
                 // Pass selected as a mutable referance
                 selected: &mut self.selected,
+                renaming: &mut self.renaming,
                 current_tab: &mut self.current_tab,
                 locale: &mut self.locale,
             });
