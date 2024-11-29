@@ -293,14 +293,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             settings::cache_dir_management(ui, self.locale);
             ui.separator();
-            
-
-            // Config will be mutated as part of checkbox user interaction.
-            let mut config = logic::get_config();
 
             settings::updates(ui, self.locale);
-
-            logic::set_config(config); // Update config to new one
 
             ui.separator();
 

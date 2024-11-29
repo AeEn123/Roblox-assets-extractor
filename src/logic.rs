@@ -1010,12 +1010,11 @@ pub fn set_config(value: Value) {
         
         *config = value;
     }
-
 }
 
-pub fn set_config_string(key: &str, value: &str) {
+pub fn set_config_value(key: &str, value: Value) {
     let mut config = get_config();
-    config[key] = value.into();
+    config[key] = value;
     set_config(config);
 }
 
@@ -1029,11 +1028,7 @@ pub fn set_asset_alias(asset: &str, value: &str) {
     set_config(config);
 }
 
-pub fn set_config_bool(key: &str, value: bool) {
-    let mut config = get_config();
-    config[key] = value.into();
-    set_config(config);
-}
+
 
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();

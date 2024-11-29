@@ -8,6 +8,7 @@ use std::sync::Arc;
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 
 pub struct MyApp {
+    first_frame: bool,
     locale: FluentBundle<Arc<FluentResource>>,
 }
 
@@ -22,17 +23,25 @@ impl eframe::App for MyApp {
             }
 
             ui.separator();
+            settings::behavior(ui, &self.locale);
+            
+            ui.separator();
 
             // Config will be mutated as part of checkbox user interaction.
-            let mut config = logic::get_config();
             settings::updates(ui, &self.locale);
 
-            logic::set_config(config); // Update config to new one
+
+            if self.first_frame {
+                logic::set_config_value("welcomed", false.into());
+                self.first_frame = false
+            }
+
 
             if ui.button(logic::get_message(&self.locale, "button-finish", None)).clicked() {
-                logic::set_config_bool("welcomed", true);
+                logic::set_config_value("welcomed", true.into());
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+
 
         });
     }
@@ -41,7 +50,8 @@ impl eframe::App for MyApp {
 impl Default for MyApp {
     fn default() -> Self {
         Self {
-            locale: logic::get_locale(None)
+            first_frame: true,
+            locale: logic::get_locale(None),
         }
     }
 }
@@ -60,4 +70,5 @@ pub fn run_gui() -> eframe::Result {
         options,
         Box::new(|_cc| Ok(Box::<MyApp>::default())),
     )
+    
 }
