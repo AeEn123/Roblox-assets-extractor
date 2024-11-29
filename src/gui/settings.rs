@@ -109,7 +109,7 @@ pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.checkbox(&mut automatically_install_updates, logic::get_message(locale, "automatically-install-updates", None));
 
     // Add them to the config again
-    logic::set_config_value("check_for_updates", check_for_updates.into()); // TODO: FIX
+    logic::set_config_value("check_for_updates", check_for_updates.into());
     logic::set_config_value("automatically_install_updates", automatically_install_updates.into());
 }
 

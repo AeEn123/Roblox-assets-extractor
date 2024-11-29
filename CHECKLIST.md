@@ -15,14 +15,18 @@
 - [x] - CMD window fixed
 
 ## 0.1.3
-- [ ] - Naming of assets
-- [ ] - Add option to export named assets
-- [ ] - Implement all TODO comments
+- [x] - Naming of assets
+- [x] - Add option to export named assets
+- [x] - Implement all TODO comments
+- [x] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
+- [ ] - Locales need updating
+
+## 0.1.4
 - [ ] - Copy/swap assets around
 - [ ] - Multithreaded file handling
 - [ ] - Finish CLI mode
 
 ## Future releases
-- [ ] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
+
 - [ ] - Fix display of japanese locale #2
 - [ ] - Docs available in different languages
