@@ -23,10 +23,8 @@
 
 ## 0.1.4
 - [ ] - Copy/swap assets around
-- [ ] - Multithreaded file handling
 - [ ] - Finish CLI mode
 
 ## Future releases
-
 - [ ] - Fix display of japanese locale #2
 - [ ] - Docs available in different languages
