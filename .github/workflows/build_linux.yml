@@ -1,6 +1,20 @@
 name: Linux Build
 
 on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "**.rs"
+      - "**.toml"
+      - "**.ftl"
+      - "assets/**"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "**.rs"
+      - "**.toml"
+      - "**.ftl"
+      - "assets/**"
   workflow_dispatch:
 env:
   CARGO_TERM_COLOR: always

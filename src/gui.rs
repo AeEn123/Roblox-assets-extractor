@@ -311,7 +311,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
         } else {
             // This is only shown in the about tab
             ui.heading("Roblox Assets Extractor");
-            ui.label(format!("Version: v{VERSION}"));
+
+            let mut args = fluent_bundle::FluentArgs::new();
+            args.set("version", VERSION);
+
+            ui.label(logic::get_message(self.locale, "version", Some(&args)));
 
             ui.separator();
 
