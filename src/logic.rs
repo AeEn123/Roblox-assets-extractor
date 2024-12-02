@@ -145,11 +145,22 @@ fn clear_file_list() {
 }
 
 fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
-    haystack.windows(needle.len()).position(|window| window == needle)
+    let len = needle.len();
+    if len > 0 {
+        haystack.windows(len).position(|window| window == needle)
+    } else {
+        None
+    }
 }
 
 fn bytes_contains(haystack: &[u8], needle: &[u8]) -> bool {
-    haystack.windows(needle.len()).any(|window| window == needle)
+    let len = needle.len();
+    if len > 0 {
+        haystack.windows(len).any(|window| window == needle)
+    } else {
+        false
+    }
+
 }
 
 fn find_header(mode: String, bytes: Vec<u8>) -> String {
@@ -653,7 +664,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 
                         match fs::write(new_destination.clone(), extracted_bytes) {
                             Ok(_) => (),
-                            Err(e) => eprintln!("{}", e),
+                            Err(e) => eprintln!("Error writing file: {}", e),
                         }
                         return new_destination;
 
@@ -689,6 +700,11 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 }
 
 pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool, use_alias: bool) {
+    // Create directory if it doesn't exist
+    match fs::create_dir(destination.clone()) {
+        Ok(_) => (),
+        Err(e) => eprintln!("Error creating directory: {}", e)
+    };
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {

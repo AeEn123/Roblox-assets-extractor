@@ -31,7 +31,7 @@ struct Cli {
     #[arg(short, long)]
     list: bool,
 
-    /// Set mode
+    /// Set mode, using this is generally recommended, if this is not provided, the program will run the same function across each mode
     #[arg(short, long, value_name = "CATAGORY")]
     mode: Option<Category>,
 
@@ -49,8 +49,15 @@ struct Cli {
 
     /// Return the cache directory
     #[arg(short, long)]
-    cachedir: bool,
+    cache_dir: bool,
 
+    /// Connect to the internet to check for updates
+    #[arg(long)]
+    check_for_updates: bool,
+
+    /// Connect to the internet to download new update binary
+    #[arg(long)]
+    download_new_update: bool,
     
 }
 
@@ -119,8 +126,12 @@ fn main() {
                 extract(category, asset.clone(), args.dest.clone(), args.extention);
             }
         }
-    } else if args.cachedir {
+    } else if args.cache_dir {
         println!("{}", logic::get_cache_directory());
+    } else if args.check_for_updates {
+        updater::check_for_updates(false, false);
+    } else if args.download_new_update {
+        updater::check_for_updates(false, true);
     } else {
         // If nothing passed, run GUI
         gui::run_gui();
