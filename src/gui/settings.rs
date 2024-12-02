@@ -1,6 +1,5 @@
 use crate::logic;
 use std::sync::Arc;
-use serde_json::Value;
 use fluent_bundle::{FluentBundle, FluentResource, FluentArgs};
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 
@@ -77,7 +76,7 @@ pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentR
                 // Validation checks
                 match logic::validate_directory(&path.to_string_lossy().to_string()) {
                     Ok(directory) => {
-                        logic::set_config_string("cache_directory", &directory);
+                        logic::set_config_value("cache_directory", directory.into());
                         logic::set_cache_directory(logic::detect_directory()); // Set directory to new one
                     }
                     Err(_) => {
@@ -92,7 +91,7 @@ pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentR
             }
         }
         if ui.button(logic::get_message(locale, "button-reset-cache-dir", None)).clicked() {
-            logic::set_config_string("cache_directory", "no directory set"); // Clear directory in config
+            logic::set_config_value("cache_directory", "no directory set".into()); // Clear directory in config
             logic::set_cache_directory(logic::detect_directory()); // Set it back to default
         }
     });
@@ -104,20 +103,25 @@ pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
 
     // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
     let mut check_for_updates = logic::get_config_bool("check_for_updates").unwrap_or(true);
-
     let mut automatically_install_updates = logic::get_config_bool("automatically_install_updates").unwrap_or(false);
 
     ui.checkbox(&mut check_for_updates, logic::get_message(locale, "check-for-updates", None));
     ui.checkbox(&mut automatically_install_updates, logic::get_message(locale, "automatically-install-updates", None));
 
     // Add them to the config again
-    logic::set_config_bool("check_for_updates", check_for_updates); // TODO: FIX
-    logic::set_config_bool("automatically_install_updates", automatically_install_updates);
+    logic::set_config_value("check_for_updates", check_for_updates.into());
+    logic::set_config_value("automatically_install_updates", automatically_install_updates.into());
 }
 
 pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.heading(logic::get_message(locale, "behavior", None));
-    // TODO: use alias checkbox
+
+    ui.label(logic::get_message(locale, "use-alias-description", None));
+
+    let mut use_alias = logic::get_config_bool("use_alias").unwrap_or(true);
+    ui.checkbox(&mut use_alias, logic::get_message(locale, "use-alias", None));
+
+    logic::set_config_value("use_alias", use_alias.into());
 }
 
 pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -> bool {
@@ -172,7 +176,7 @@ pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -
 
             // Handle the click/double click
             if response.clicked() {
-                logic::set_config_string("language", lang);
+                logic::set_config_value("language", lang.to_string().into());
                 user_clicked = true; // Refresh locales
             }
         }

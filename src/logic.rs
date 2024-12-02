@@ -145,11 +145,22 @@ fn clear_file_list() {
 }
 
 fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
-    haystack.windows(needle.len()).position(|window| window == needle)
+    let len = needle.len();
+    if len > 0 {
+        haystack.windows(len).position(|window| window == needle)
+    } else {
+        None
+    }
 }
 
 fn bytes_contains(haystack: &[u8], needle: &[u8]) -> bool {
-    haystack.windows(needle.len()).any(|window| window == needle)
+    let len = needle.len();
+    if len > 0 {
+        haystack.windows(len).any(|window| window == needle)
+    } else {
+        false
+    }
+
 }
 
 fn find_header(mode: String, bytes: Vec<u8>) -> String {
@@ -258,7 +269,6 @@ pub fn detect_directory() -> String {
         match validate_directory(&directory.to_string().replace('"',"")) { // It kept returning "value" instead of value
             Ok(resolved_directory) => return resolved_directory,
             Err(e) => {
-                println!("User-defined directory is invalid: {}", e);
                 errors.push_str(&e.to_string());
             },
         }
@@ -272,13 +282,36 @@ pub fn detect_directory() -> String {
 
     }
 
-    // If it was unable to detect any directory, tell the user and panic the program
+    // If it was unable to detect any directory, tell the user
     let _ = native_dialog::MessageDialog::new()
     .set_type(native_dialog::MessageType::Error)
     .set_title(&get_message(&get_locale(None), "error-directory-detection-title", None))
     .set_text(&get_message(&get_locale(None), "error-directory-detection-description", None))
     .show_alert();
-    panic!("Directory detection failed!{}", errors);
+
+    let yes = native_dialog::MessageDialog::new()
+    .set_type(native_dialog::MessageType::Error)
+    .set_title(&get_message(&get_locale(None), "confirmation-custom-directory-title", None))
+    .set_text(&get_message(&get_locale(None), "confirmation-custom-directory-description", None))
+    .show_confirm()
+    .unwrap();
+
+    if yes {
+        let option_path = native_dialog::FileDialog::new()
+        .show_open_single_dir()
+        .unwrap();
+        if let Some(path) = option_path {
+            set_config_value("cache_directory", validate_directory(&path.to_string_lossy().to_string()).unwrap().into());
+            return detect_directory();
+        } else {
+            panic!("Directory detection failed!{}", errors);
+        }
+    } else {
+        panic!("Directory detection failed!{}", errors);
+    }
+
+
+    
 
 }
 
@@ -629,8 +662,10 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                             }
                         }
 
-                        // Ignore result, errors won't cause any further issues
-                        let _ = fs::write(new_destination.clone(), extracted_bytes);
+                        match fs::write(new_destination.clone(), extracted_bytes) {
+                            Ok(_) => (),
+                            Err(e) => eprintln!("Error writing file: {}", e),
+                        }
                         return new_destination;
 
 
@@ -665,6 +700,11 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 }
 
 pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool, use_alias: bool) {
+    // Create directory if it doesn't exist
+    match fs::create_dir(destination.clone()) {
+        Ok(_) => (),
+        Err(e) => eprintln!("Error creating directory: {}", e)
+    };
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
         Ok(metadata) => {
@@ -1010,12 +1050,11 @@ pub fn set_config(value: Value) {
         
         *config = value;
     }
-
 }
 
-pub fn set_config_string(key: &str, value: &str) {
+pub fn set_config_value(key: &str, value: Value) {
     let mut config = get_config();
-    config[key] = value.into();
+    config[key] = value;
     set_config(config);
 }
 
@@ -1029,17 +1068,19 @@ pub fn set_asset_alias(asset: &str, value: &str) {
     set_config(config);
 }
 
-pub fn set_config_bool(key: &str, value: bool) {
-    let mut config = get_config();
-    config[key] = value.into();
-    set_config(config);
-}
-
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
     let old_request_repaint = *request_repaint;
     *request_repaint = false; // Set to false when this function is called to acknoledge
     return old_request_repaint
+}
+
+pub fn get_categories() -> Vec<String> {
+    let mut catagories = Vec::new();
+    for key in HEADERS.lock().unwrap().keys() {
+        catagories.push(key.to_owned());
+    }
+    return catagories;
 }
 
 pub fn set_update_file(file: String) {

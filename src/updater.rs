@@ -98,6 +98,8 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                                 Err(e) => println!("GUI failed: {}",e)
                             }
                         }
+                    } else {
+                        println!("No updates are available.")
                     }
                 }
                 Err(e) => eprintln!("Failed to parse json: {}", e)

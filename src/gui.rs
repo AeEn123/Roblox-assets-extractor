@@ -16,8 +16,9 @@ mod settings;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
-const CONTRIBUTERS: [&str; 3] = [
+const CONTRIBUTERS: [&str; 4] = [
     "AeEn123",
+    "MarcelDev",
     "Vonercent",
     "aaditkumar2009",
 ];
@@ -48,7 +49,8 @@ struct TabViewer<'a> {
 
 fn double_click(dir: String, value: String, mode: String) {
     let temp_dir = logic::get_temp_dir(true);
-    let destination = format!("{}/{}", temp_dir, value); // Join both paths
+    let alias = logic::get_asset_alias(&value);
+    let destination = format!("{}/{}", temp_dir, alias); // Join both paths
     let origin = format!("{}/{}", dir, value);
     let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
     if new_destination != "None" {
@@ -292,15 +294,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             ui.separator();
 
             settings::cache_dir_management(ui, self.locale);
+
             ui.separator();
-            
+            settings::behavior(ui, &self.locale);
 
-            // Config will be mutated as part of checkbox user interaction.
-            let mut config = logic::get_config();
-
+            ui.separator();    
             settings::updates(ui, self.locale);
-
-            logic::set_config(config); // Update config to new one
 
             ui.separator();
 
@@ -312,7 +311,11 @@ impl egui_dock::TabViewer for TabViewer<'_> {
         } else {
             // This is only shown in the about tab
             ui.heading("Roblox Assets Extractor");
-            ui.label(format!("Version: v{VERSION}"));
+
+            let mut args = fluent_bundle::FluentArgs::new();
+            args.set("version", VERSION);
+
+            ui.label(logic::get_message(self.locale, "version", Some(&args)));
 
             ui.separator();
 
