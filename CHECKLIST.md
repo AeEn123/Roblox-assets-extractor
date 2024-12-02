@@ -19,7 +19,7 @@
 - [x] - Add option to export named assets
 - [x] - Implement all TODO comments
 - [x] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
-- [?] - Locales need updating
+- [ ] - Locales need updating (Deadline: 9/12/2024)
 
 ## 0.1.4
 - [ ] - Copy/swap assets around
