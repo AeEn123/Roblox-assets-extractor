@@ -651,8 +651,10 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                             }
                         }
 
-                        // Ignore result, errors won't cause any further issues
-                        let _ = fs::write(new_destination.clone(), extracted_bytes);
+                        match fs::write(new_destination.clone(), extracted_bytes) {
+                            Ok(_) => (),
+                            Err(e) => eprintln!("{}", e),
+                        }
                         return new_destination;
 
 
@@ -1050,13 +1052,19 @@ pub fn set_asset_alias(asset: &str, value: &str) {
     set_config(config);
 }
 
-
-
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
     let old_request_repaint = *request_repaint;
     *request_repaint = false; // Set to false when this function is called to acknoledge
     return old_request_repaint
+}
+
+pub fn get_categories() -> Vec<String> {
+    let mut catagories = Vec::new();
+    for key in HEADERS.lock().unwrap().keys() {
+        catagories.push(key.to_owned());
+    }
+    return catagories;
 }
 
 pub fn set_update_file(file: String) {

@@ -41,7 +41,7 @@ error-directory-detection-description = Wykrycie katalogu nieudane! Czy gra Robl
 error-temporary-directory-title = Nie udało się utworzyć katalogu tymczasowego.
 error-temporary-directory-description = Błąd: Nie udało się stworzyć katalogu tymczasowego! Czy masz pozwolenia do odczytu/zapisu plików? Jeżeli ten błąd pojawia się ponownie sprobój uruchomić program jako administrator.
 error-invalid-directory-title = Nieprawidłowy katalog
-error-invalid-directory-description = Upewnij się, że scieżka którą podaleś(aś) jest katalogiem/
+error-invalid-directory-description = Upewnij się, że scieżka którą podaleś(aś) jest katalogiem
 
 # Headings
 actions = Akcje

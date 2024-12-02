@@ -35,15 +35,65 @@ struct Cli {
     #[arg(short, long, value_name = "CATAGORY")]
     mode: Option<Category>,
 
-    /// Extract asset
+    /// Extract asset, extract directory if no asset provided
     #[arg(short, long)]
-    extract: Option<String>,
+    extract: Option<Option<String>>,
+
+    /// Add a file extention automatically
+    #[arg(long)]
+    extention: bool,
 
     /// Define a destination path
     #[arg(short, long)]
     dest: Option<String>,
 
+    /// Return the cache directory
+    #[arg(short, long)]
+    cachedir: bool,
+
     
+}
+
+fn get_tab(category: Category) -> String {
+    category.to_string().to_lowercase().replace("ktx","ktx-files").replace("rbxm","rbxm-files")
+}
+
+fn list(tab: String) {
+    let cache_directory = {
+        let cache_dir = logic::get_cache_directory();
+        // Music tab just adds .ogg while other tabs scrape the header files from HTTP to allow all media players to play it
+        if tab == "music" {
+            format!("{}/sounds", cache_dir)
+        } else {
+            format!("{}/http", cache_dir)
+        }
+    };
+    logic::refresh(cache_directory, tab, true, true); // cli_list_mode is set to true, this will print assets to console
+}
+
+fn extract(tab: String, asset: Option<String>, destination: Option<String>, add_extention: bool) {
+    let cache_directory = {
+        let cache_dir = logic::get_cache_directory();
+        // Music tab just adds .ogg while other tabs scrape the header files from HTTP to allow all media players to play it
+        if tab == "music" {
+            format!("{}/sounds", cache_dir)
+        } else {
+            format!("{}/http", cache_dir)
+        }
+    };
+    if let Some(asset) = asset {
+        let dest = destination.unwrap_or(asset.clone());
+        logic::extract_file(format!("{}/{}", cache_directory, asset), tab, dest, add_extention);
+    } else {
+        if let Some(dest) = destination {
+            logic::refresh(cache_directory.clone(), tab.clone(), true, true);
+            logic::extract_dir(cache_directory, dest, tab, logic::get_file_list(), true, false);
+        } else {
+            eprintln!("Please provide either a destination path or an asset to extract! --help for more details.")
+        }
+
+    }
+
 }
 
 fn main() {
@@ -51,26 +101,26 @@ fn main() {
 
     if args.list {
         if let Some(category) = args.mode {
-            let tab = category.to_string().to_lowercase();
-
-            let cache_directory = {
-                let cache_dir = logic::get_cache_directory();
-                // Music tab just adds .ogg while other tabs scrape the header files from HTTP to allow all media players to play it
-                if tab == "music" {
-                    format!("{}/sounds", cache_dir)
-                } else {
-                    format!("{}/http", cache_dir)
-                }
-            };
-            logic::refresh(cache_directory, tab, true, true); // cli_list_mode is set to true, this will print assets to console
+            list(get_tab(category));
         } else {
-            // Not enough arguments
-            eprintln!("Category argument required for list mode! --help for details.")
+            // Not enough arguments - go through all
+            for category in logic::get_categories() {
+                list(category);
+            }
         }
 
 
     } else if let Some(asset) = args.extract  {
-        println!("{}", asset)
+        if let Some(category) = args.mode {
+            extract(get_tab(category), asset, args.dest, args.extention);
+        } else {
+            // Not enough arguments - go through all
+            for category in logic::get_categories() {
+                extract(category, asset.clone(), args.dest.clone(), args.extention);
+            }
+        }
+    } else if args.cachedir {
+        println!("{}", logic::get_cache_directory());
     } else {
         // If nothing passed, run GUI
         gui::run_gui();
