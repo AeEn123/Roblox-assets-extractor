@@ -17,6 +17,7 @@ struct Asset {
 
 #[derive(Deserialize)]
 struct Release {
+    name: String,
     tag_name: String,
     body: String,
     assets: Vec<Asset>, // List of assets
@@ -86,6 +87,7 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                     let clean_version = clean_version_number(env!("CARGO_PKG_VERSION"));
                     if clean_tag_name != clean_version {
                         println!("An update is available.");
+                        println!("{}", json.name);
                         println!("{}", json.body);
 
                         let correct_asset = detect_download_binary(&json.assets);
@@ -93,7 +95,7 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                         if auto_download_update {
                             download_update(&correct_asset.browser_download_url);
                         } else if run_gui {
-                            match gui::run_gui(json.body, correct_asset.browser_download_url.clone()) {
+                            match gui::run_gui(json.body, json.name, correct_asset.browser_download_url.clone()) {
                                 Ok(_) => println!("User exited GUI"),
                                 Err(e) => println!("GUI failed: {}",e)
                             }
