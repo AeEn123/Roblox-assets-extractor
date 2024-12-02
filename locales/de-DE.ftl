@@ -89,3 +89,6 @@ button-rename = Umbenennen <F2>
 use-alias-description = Anstatt diese Asset mit den rohen Dateinamen zu exportieren, kannst du dieses Kontrollkästchen ankreuzen und damit wird die Asset mit deinen Dateinamen exportiert. Du kannst dieses indem du die Asset in dieser Anwendung umbenennst.
 behavior = Verhalten
 use-alias = Exportiere deine umbenannten Dateien
+button-search = Search <Ctrl+F> # TODO: Translate
+confirmation-custom-directory-title = Choose a different directory # TODO: Translate
+confirmation-custom-directory-description = Do you want to choose a different cache directory? # TODO: Translate
