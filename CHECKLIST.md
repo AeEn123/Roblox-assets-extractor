@@ -19,11 +19,11 @@
 - [x] - Add option to export named assets
 - [x] - Implement all TODO comments
 - [x] - Builds using GitHub Actions (Run workflow on Windows to target x86_64-pc-windows-msvc)
-- [ ] - Locales need updating
+- [?] - Locales need updating
 
 ## 0.1.4
 - [ ] - Copy/swap assets around
-- [ ] - Finish CLI mode
+- [x] - Finish CLI mode
 
 ## Future releases
 - [ ] - Fix display of japanese locale #2
