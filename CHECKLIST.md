@@ -27,5 +27,4 @@
 - [ ] - Fix display of japanese locale #2
 
 ## Future releases
-
 - [ ] - Docs available in different languages
