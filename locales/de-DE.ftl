@@ -89,3 +89,6 @@ button-rename = Rename <F2> # TODO: Translate
 use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself. # TODO: Translate
 behavior = Behavior # TODO: Translate
 use-alias = Export your renamed filenames # TODO: Translate
+button-search = Search <Ctrl+F> # TODO: Translate
+confirmation-custom-directory-title = Choose a different directory # TODO: Translate
+confirmation-custom-directory-description = Do you want to choose a different cache directory? # TODO: Translate

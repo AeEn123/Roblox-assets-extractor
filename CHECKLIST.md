@@ -24,7 +24,8 @@
 ## 0.1.4
 - [ ] - Copy/swap assets around
 - [x] - Finish CLI mode
+- [ ] - Fix display of japanese locale #2
 
 ## Future releases
-- [ ] - Fix display of japanese locale #2
+
 - [ ] - Docs available in different languages

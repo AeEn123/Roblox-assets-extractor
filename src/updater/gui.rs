@@ -10,6 +10,7 @@ struct App {
     cache: CommonMarkCache,
     changelog: String,
     url: String,
+    name: String,
 }
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -22,6 +23,8 @@ impl eframe::App for App {
             ui.label(logic::get_message(&self.locale, "update-changelog", None));
 
             ui.separator();
+
+            ui.heading(&self.name);
 
             egui::ScrollArea::vertical().show(ui, |ui| {
                 CommonMarkViewer::new()
@@ -47,7 +50,7 @@ impl eframe::App for App {
     }
 }
 
-pub fn run_gui(text: String, url: String) -> eframe::Result {
+pub fn run_gui(text: String, name: String, url: String) -> eframe::Result {
     let mut args = std::env::args();
     args.next();
 
@@ -72,6 +75,7 @@ pub fn run_gui(text: String, url: String) -> eframe::Result {
                 cache: CommonMarkCache::default(),
                 changelog: text,
                 locale: logic::get_locale(None),
+                name: name,
                 url: url
             }))
         }),

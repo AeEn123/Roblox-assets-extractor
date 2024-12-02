@@ -22,6 +22,7 @@ button-finish = Finish
 button-yes = Yes
 button-no = No
 button-rename = Rename <F2>
+button-search = Search <Ctrl+F>
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
