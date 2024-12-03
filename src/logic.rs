@@ -22,9 +22,11 @@ lazy_static! {
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
-    
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
+
+    static ref FILTERED_FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
     static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false); // Delete/extract
 
 
@@ -797,7 +799,6 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
             let locale = get_locale(None);
 
             let headers = {HEADERS.lock().unwrap().clone()};
-
             let mut all_headers: Vec<(String, String)> = Vec::new();
 
             for key in headers.keys() {
@@ -967,9 +968,29 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
         }
     }
 }
+pub fn filter_file_list(query: String) {
+    // Clear file list before
+    {
+        let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
+        *filtered_file_list = Vec::new();
+    }
+    let file_list = get_file_list(); // Clone file list
+    for file in file_list {
+        if file.contains(&query) || get_asset_alias(&file).contains(&query) {
+            {
+                let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
+                filtered_file_list.push(file);
+            }
+        }
+    }
+}
 
 pub fn get_file_list() -> Vec<String> {
     FILE_LIST.lock().unwrap().clone()
+}
+
+pub fn get_filtered_file_list() -> Vec<String> {
+    FILTERED_FILE_LIST.lock().unwrap().clone()
 }
 
 pub fn get_cache_directory() -> String {

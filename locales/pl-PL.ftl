@@ -11,7 +11,7 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
-button-search = Search <Ctrl+F> # TODO: Translate
+button-search = Szukaj <CTRL+F>
 button-delete-this-dir = Usuń ten katalog <Del>
 button-extract-type = Wyodrębnij wszystkie tego typu <F3>
 button-refresh = Odśwież <F5>

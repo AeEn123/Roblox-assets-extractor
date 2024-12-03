@@ -44,6 +44,8 @@ struct TabViewer<'a> {
     selected: &'a mut Option<usize>,
     current_tab: &'a mut Option<String>,
     renaming: &'a mut bool,
+    searching: &'a mut bool,
+    search_query: &'a mut String,
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
 }
 
@@ -98,11 +100,17 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 *self.current_tab = Some(tab.to_owned());
                 logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
             }
-                        
+
+            let mut focus_search_box = false; // Focus the search box toggle for this frame
+
             // GUI logic below here
             
             // Top UI buttons
             ui.horizontal(|ui| {
+                if ui.button(logic::get_message(self.locale, "button-search", None)).clicked() || ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::F)) {
+                    *self.searching = !*self.searching;
+                    focus_search_box = true;          
+                }
                 if ui.button(logic::get_message(self.locale, "button-rename", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
                     *self.renaming = !*self.renaming;               
                 }
@@ -194,6 +202,27 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
             let mut first_iterated: bool = false; // Used to track if the first entry iterated.
+
+            let file_list = if *self.searching {
+                let old_search_query = self.search_query.clone();
+
+                let response = ui.text_edit_singleline(self.search_query);
+
+                if focus_search_box {
+                    response.request_focus();
+                }
+
+                if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                    *self.searching = false; // Remove the search bar when the use presses escape
+                }
+
+                if *self.search_query != old_search_query {
+                    logic::filter_file_list(self.search_query.clone());
+                }
+                logic::get_filtered_file_list()
+            } else {
+                file_list
+            };
 
             // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
@@ -341,6 +370,8 @@ struct MyApp {
     selected: Option<usize>, // Used for storing selected state to retain keyboard navigation as seen in the tkinter version
     current_tab: Option<String>, // Allows for detecting when the user changes tabs to refresh automatically
     renaming: bool,
+    searching: bool,
+    search_query: String,
     locale: FluentBundle<Arc<FluentResource>>
 }
 
@@ -363,6 +394,8 @@ impl Default for MyApp {
             selected: None,
             current_tab: None,
             renaming: false,
+            searching: false,
+            search_query: "".to_owned(),
             locale: logic::get_locale(None),
         }
     }
@@ -397,6 +430,8 @@ impl eframe::App for MyApp {
                 // Pass selected as a mutable referance
                 selected: &mut self.selected,
                 renaming: &mut self.renaming,
+                searching: &mut self.searching,
+                search_query: &mut self.search_query,
                 current_tab: &mut self.current_tab,
                 locale: &mut self.locale,
             });
