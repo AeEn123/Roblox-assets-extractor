@@ -22,10 +22,14 @@ lazy_static! {
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
-    
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
+
+    static ref FILTERED_FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
     static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false); // Delete/extract
+
+    static ref CONFIG_FILE: Mutex<String> = Mutex::new(detect_config_file());
 
 
     // File headers for each catagory
@@ -75,11 +79,21 @@ lazy_static! {
 
 
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
-const CONFIG_FILE: &str = "Roblox-assets-extractor-config.json";
+const CONFIG_FILES: [&str;2] = ["~/.config/Roblox-assets-extractor-config.json", "Roblox-assets-extractor-config.json"];
 
 // Define local functions
+fn detect_config_file() -> String {
+    for config_file in CONFIG_FILES {
+        match validate_file(config_file) {
+            Ok(path) => return path,
+            Err(_) => ()
+        }
+    }
+
+    return "Roblox-assets-extractor-config.json".to_owned();
+}
 fn read_config_file() -> Value {
-    match fs::read(CONFIG_FILE) {
+    match fs::read(CONFIG_FILE.lock().unwrap().clone()) {
         Ok(bytes) => {
             match serde_json::from_slice(&bytes) {
                 Ok(v) => return v,
@@ -254,6 +268,27 @@ pub fn validate_directory(directory: &str) -> Result<String, String> {
                 return Ok(resolved_directory);
             } else {
                 return Err(format!("{}: Not a directory", resolved_directory));
+            }
+        }
+        Err(e) => {
+            return Err(e.to_string()); // Convert to correct data type
+        }
+    }
+}
+
+pub fn validate_file(directory: &str) -> Result<String, String> {
+    let resolved_file = directory
+    .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
+    .replace("~", &format!("/home/{}", whoami::username()));
+    // There's probably a better way of doing this... It works though :D
+
+    match fs::metadata(&resolved_file) { // Directory detection
+        Ok(metadata) => {
+            if metadata.is_file() {
+                // Successfully detected a file, we can return it
+                return Ok(resolved_file);
+            } else {
+                return Err(format!("{}: Not a directory", resolved_file));
             }
         }
         Err(e) => {
@@ -797,7 +832,6 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
             let locale = get_locale(None);
 
             let headers = {HEADERS.lock().unwrap().clone()};
-
             let mut all_headers: Vec<(String, String)> = Vec::new();
 
             for key in headers.keys() {
@@ -967,9 +1001,29 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
         }
     }
 }
+pub fn filter_file_list(query: String) {
+    // Clear file list before
+    {
+        let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
+        *filtered_file_list = Vec::new();
+    }
+    let file_list = get_file_list(); // Clone file list
+    for file in file_list {
+        if file.contains(&query) || get_asset_alias(&file).contains(&query) {
+            {
+                let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
+                filtered_file_list.push(file);
+            }
+        }
+    }
+}
 
 pub fn get_file_list() -> Vec<String> {
     FILE_LIST.lock().unwrap().clone()
+}
+
+pub fn get_filtered_file_list() -> Vec<String> {
+    FILTERED_FILE_LIST.lock().unwrap().clone()
 }
 
 pub fn get_cache_directory() -> String {
@@ -1038,7 +1092,7 @@ pub fn set_config(value: Value) {
     if *config != value {
         match serde_json::to_vec_pretty(&value) {
             Ok(data) => {
-                let result = fs::write(CONFIG_FILE, data);
+                let result = fs::write(CONFIG_FILE.lock().unwrap().clone(), data);
                 if result.is_err() {
                     println!("Failed to write config file: {:?}", result)
                 }

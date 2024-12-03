@@ -99,7 +99,6 @@ pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentR
 
 pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.heading(logic::get_message(locale, "updates", None));
-    ui.label(logic::get_message(locale, "no-function", None));
 
     // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
     let mut check_for_updates = logic::get_config_bool("check_for_updates").unwrap_or(true);
