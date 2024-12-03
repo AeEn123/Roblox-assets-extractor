@@ -6,10 +6,6 @@
 > [!NOTE]
 > Running on Windows requires Microsoft Visual C++ Redistributable. You can download that from [here](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
 
-> There is a PKGBUILD for Arch Linux available. You can download it from the root of the repository.
-
-
-
 # Roblox Assets Extractor
 This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
 
@@ -48,6 +44,23 @@ There are similar buttons in the settings menu, where you can delete your cache 
 # CLI mode
 CLI is work-in-progress.
 See [CLI.md](/docs/en-GB/CLI.md)
+
+# Installing for Windows
+The program only comes portable on Windows for now, this may change in the future
+
+# Installing for Linux
+Installing for Linux varies for each distro. We hope we can eventually create a flatpak for universal installation.
+## Arch Linux
+You can install on Arch Linux by using the PKGBUILD located in `packages/arch`
+An example installation script:
+```bash
+mkdir /tmp/Roblox-assets-extractor
+cd /tmp/Roblox-assets-extractor
+wget raw.githubusercontent.com/AeEn123/Roblox-assets-extractor/refs/heads/main/packages/arch/PKGBUILD
+makepkg -si
+```
+## Other distros
+Other distros will hopefully be supported soon. If you know how to make one and want it merged in this project, create a pull request!
 
 # Testing development builds
 The development builds can be downloaded below
