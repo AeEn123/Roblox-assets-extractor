@@ -21,16 +21,8 @@ impl eframe::App for MyApp {
                 // This returns true if the locales need to be refreshed
                 self.locale = logic::get_locale(None);
             }
-
-            ui.separator();
             settings::behavior(ui, &self.locale);
-            
-            ui.separator();
-
-            // Config will be mutated as part of checkbox user interaction.
             settings::updates(ui, &self.locale);
-
-
             if self.first_frame {
                 logic::set_config_value("welcomed", false.into());
                 self.first_frame = false

@@ -5,6 +5,7 @@ use native_dialog::{MessageDialog, FileDialog, MessageType};
 
 
 pub fn actions(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+    ui.separator();
     ui.heading(logic::get_message(locale, "actions", None));
 
     // Clear cache description
@@ -58,6 +59,7 @@ pub fn actions(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
 }
 
 pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+    ui.separator();
     ui.label(logic::get_message(locale, "custom-cache-dir-description", None));
 
     let mut args = FluentArgs::new();
@@ -98,6 +100,10 @@ pub fn cache_dir_management(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentR
 }
 
 pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+    if !logic::get_system_config_bool("allow-updates").unwrap_or(true) {
+        return
+    }
+    ui.separator();
     ui.heading(logic::get_message(locale, "updates", None));
 
     // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
@@ -113,6 +119,7 @@ pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
 }
 
 pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
+    ui.separator();
     ui.heading(logic::get_message(locale, "behavior", None));
 
     ui.label(logic::get_message(locale, "use-alias-description", None));

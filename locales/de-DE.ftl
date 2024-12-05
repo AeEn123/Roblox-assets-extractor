@@ -92,3 +92,6 @@ use-alias = Exportiere deine umbenannten Dateien
 button-search = Suche <Strg+F>
 confirmation-custom-directory-title = Wähle ein anderen Ordner aus
 confirmation-custom-directory-description = Willst du ein anderen Cacheordner auswählen?
+
+confirmation-ban-warning-title = Potential ban alert # TODO: Translate
+confirmation-ban-warning-description = Editing assets in games can cause your client to behave differently leading to potential game bans! Use at your own risk. Do you understand? # TODO: Translate

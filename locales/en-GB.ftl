@@ -34,6 +34,8 @@ confirmation-clear-cache-title = Clearing roblox cache
 confirmation-clear-cache-description = Are you sure you want to clear your roblox cache? The files will be regenerated when the roblox client is loaded.
 confirmation-custom-directory-title = Choose a different directory
 confirmation-custom-directory-description = Do you want to choose a different cache directory?
+confirmation-ban-warning-title = Potential ban alert
+confirmation-ban-warning-description = Editing assets in games can cause your client to behave differently leading to potential game bans! Use at your own risk. Do you understand?
 
 # Errors
 no-files = No files to list.
