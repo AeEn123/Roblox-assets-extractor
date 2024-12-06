@@ -1181,12 +1181,11 @@ pub fn run_install_script(run_afterwards: bool) -> bool {
         println!("Installing from {}", update_file);
         if get_system_config_bool("prefer-installers").unwrap_or(false) {
             // Just run the installer
-            match open::that_detached(update_file) {
+            match open::that(update_file) {
                 Ok(_) => (),
                 Err(e) => eprintln!("Installer failed to launch {} ", e)
             }
             std::process::exit(0);
-            return true;
 
         } else {
             // Run install script
