@@ -32,7 +32,15 @@ fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
 
     for asset in assets {
         let name = asset.name.to_lowercase();
-        if name.contains(os) && !name.contains("install") { // Don't download installers
+
+        // Download installer based on system config
+        let installer = if logic::get_system_config_bool("prefer-installers").unwrap_or(false) {
+            name.contains("install")
+        } else {
+            !name.contains("install")
+        };
+
+        if name.contains(os) && installer {
             return asset // Return the correct binary based on OS
         }
     }

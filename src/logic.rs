@@ -1179,34 +1179,47 @@ pub fn set_update_file(file: String) {
 pub fn run_install_script(run_afterwards: bool) -> bool {
     if let Some(update_file) = {UPDATE_FILE.lock().unwrap().clone()} {
         println!("Installing from {}", update_file);
-        let install_script = save_install_script();
-        if install_script != "" {
-            #[cfg(target_os = "windows")]
-            let mut command = std::process::Command::new("cmd");
-            #[cfg(target_family = "unix")]
-            let mut command = std::process::Command::new("sh");
-
-            let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
-            
-            #[cfg(target_family = "unix")]
-            if run_afterwards {
-                command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
-            } else {
-                command.args([install_script, update_file, program_path]).spawn().expect("failed to start update script");
+        if get_system_config_bool("prefer-installers").unwrap_or(false) {
+            // Just run the installer
+            match open::that_detached(update_file) {
+                Ok(_) => (),
+                Err(e) => eprintln!("Installer failed to launch {} ", e)
             }
-
-            #[cfg(target_os = "windows")] // cmd /c
-            if run_afterwards {
-                command.args(["/c".to_owned(), install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
-            } else {
-                // Run exit afterwards, otherwise it'll open a blank cmd window
-                command.args(["/c".to_owned(), install_script, update_file, program_path, "exit".to_owned()]).spawn().expect("failed to start update script");
-            }
-
             std::process::exit(0);
+            return true;
+
+        } else {
+            // Run install script
+            let install_script = save_install_script();
+            if install_script != "" {
+                #[cfg(target_os = "windows")]
+                let mut command = std::process::Command::new("cmd");
+                #[cfg(target_family = "unix")]
+                let mut command = std::process::Command::new("sh");
+    
+                let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
+                
+                #[cfg(target_family = "unix")]
+                if run_afterwards {
+                    command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
+                } else {
+                    command.args([install_script, update_file, program_path]).spawn().expect("failed to start update script");
+                }
+    
+                #[cfg(target_os = "windows")] // cmd /c
+                if run_afterwards {
+                    command.args(["/c".to_owned(), install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
+                } else {
+                    // Run exit afterwards, otherwise it'll open a blank cmd window
+                    command.args(["/c".to_owned(), install_script, update_file, program_path, "exit".to_owned()]).spawn().expect("failed to start update script");
+                }
+    
+                std::process::exit(0);
+            }
+    
+            return true;
         }
 
-        return true;
     } else {
         return false;
     }
