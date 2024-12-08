@@ -19,6 +19,7 @@ lazy_static! {
     static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref UPDATE_FILE: Mutex<Option<String>> = Mutex::new(None);
     static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
+    static ref SYSTEM_CONFIG: Mutex<Value> = Mutex::new(read_system_config());
     static ref REQUEST_REPAINT: Mutex<bool> = Mutex::new(false);
     static ref PROGRESS: Mutex<f32> = Mutex::new(1.0);
 
@@ -79,21 +80,46 @@ lazy_static! {
 
 
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
-const CONFIG_FILES: [&str;2] = ["~/.config/Roblox-assets-extractor-config.json", "Roblox-assets-extractor-config.json"];
+const SYSTEM_CONFIG_FILE: &str = "Roblox-assets-extractor-system.json";
+const DEFAULT_CONFIG_FILE: &str = "Roblox-assets-extractor-config.json";
 
 // Define local functions
 fn detect_config_file() -> String {
-    for config_file in CONFIG_FILES {
-        match validate_file(config_file) {
-            Ok(path) => return path,
-            Err(_) => ()
-        }
+    if let Some(config_path) = get_system_config_string("config-path") {
+        return resolve_path(&config_path);
+        
+    } else {
+        return DEFAULT_CONFIG_FILE.to_string()
     }
-
-    return "Roblox-assets-extractor-config.json".to_owned();
 }
 fn read_config_file() -> Value {
     match fs::read(CONFIG_FILE.lock().unwrap().clone()) {
+        Ok(bytes) => {
+            match serde_json::from_slice(&bytes) {
+                Ok(v) => return v,
+                Err(e) => {
+                    eprintln!("Failed to parse config file! {}", e);
+                    return json!({}); // Blank config by default
+                }
+            }
+        }
+
+        Err(_e) => {
+            // Most likely no such file or directory
+            return json!({});
+        }
+    }
+}
+
+fn read_system_config() -> Value {
+    let path = match std::env::current_exe() {
+        Ok(path) => {
+            path.parent().unwrap_or(&path).join(SYSTEM_CONFIG_FILE)
+        }
+        Err(_) => std::path::PathBuf::new().join(SYSTEM_CONFIG_FILE)
+    };
+
+    match fs::read(path) {
         Ok(bytes) => {
             match serde_json::from_slice(&bytes) {
                 Ok(v) => return v,
@@ -256,9 +282,7 @@ fn save_install_script() -> String {
 
 // Define public functions
 pub fn validate_directory(directory: &str) -> Result<String, String> {
-    let resolved_directory = directory
-    .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
-    .replace("~", &format!("/home/{}", whoami::username()));
+    let resolved_directory = resolve_path(directory);
     // There's probably a better way of doing this... It works though :D
 
     match fs::metadata(&resolved_directory) { // Directory detection
@@ -276,25 +300,13 @@ pub fn validate_directory(directory: &str) -> Result<String, String> {
     }
 }
 
-pub fn validate_file(directory: &str) -> Result<String, String> {
-    let resolved_file = directory
+pub fn resolve_path(directory: &str) -> String {
+    let resolved_path = directory
     .replace("%Temp%", &format!("C:\\Users\\{}\\AppData\\Local\\Temp", whoami::username()))
+    .replace("%localappdata%", &format!("C:\\Users\\{}\\AppData\\Local", whoami::username()))
     .replace("~", &format!("/home/{}", whoami::username()));
     // There's probably a better way of doing this... It works though :D
-
-    match fs::metadata(&resolved_file) { // Directory detection
-        Ok(metadata) => {
-            if metadata.is_file() {
-                // Successfully detected a file, we can return it
-                return Ok(resolved_file);
-            } else {
-                return Err(format!("{}: Not a directory", resolved_file));
-            }
-        }
-        Err(e) => {
-            return Err(e.to_string()); // Convert to correct data type
-        }
-    }
+    return resolved_path
 }
 
 pub fn detect_directory() -> String {
@@ -1047,17 +1059,26 @@ pub fn get_list_task_running() -> bool {
     LIST_TASK_RUNNING.lock().unwrap().clone()
 }
 
-pub fn get_config() -> Value {
-    CONFIG.lock().unwrap().clone()
-}
-
 pub fn get_language_list() -> HashMap<String,String> {
     LANGUAGE_LIST.lock().unwrap().clone()
+}
+
+pub fn get_config() -> Value {
+    CONFIG.lock().unwrap().clone()
 }
 
 pub fn get_config_string(key: &str) -> Option<String> {
     if let Some(value) = get_config().get(key) {
         return Some(value.as_str()?.to_owned().replace('"',"")); // For some reason returns in quotes, remove the quotes
+    } else {
+        return None;
+    }
+   
+}
+
+pub fn get_config_bool(key: &str) -> Option<bool> {
+    if let Some(value) = get_config().get(key) {
+        return Some(value.as_bool()?);
     } else {
         return None;
     }
@@ -1077,15 +1098,6 @@ pub fn get_asset_alias(asset: &str) -> String {
 
 }
 
-pub fn get_config_bool(key: &str) -> Option<bool> {
-    if let Some(value) = get_config().get(key) {
-        return Some(value.as_bool()?);
-    } else {
-        return None;
-    }
-   
-}
-
 pub fn set_config(value: Value) {
     let mut config = CONFIG.lock().unwrap();
     // Write config file only if config changes
@@ -1094,7 +1106,7 @@ pub fn set_config(value: Value) {
             Ok(data) => {
                 let result = fs::write(CONFIG_FILE.lock().unwrap().clone(), data);
                 if result.is_err() {
-                    println!("Failed to write config file: {:?}", result)
+                    println!("Failed to write config file: {}", result.unwrap_err())
                 }
             },
             Err(e) => {
@@ -1122,6 +1134,28 @@ pub fn set_asset_alias(asset: &str, value: &str) {
     set_config(config);
 }
 
+pub fn get_system_config() -> Value {
+    SYSTEM_CONFIG.lock().unwrap().clone()
+}
+
+pub fn get_system_config_string(key: &str) -> Option<String> {
+    if let Some(value) = get_system_config().get(key) {
+        return Some(value.as_str()?.to_owned().replace('"',"")); // For some reason returns in quotes, remove the quotes
+    } else {
+        return None;
+    }
+   
+}
+
+pub fn get_system_config_bool(key: &str) -> Option<bool> {
+    if let Some(value) = get_system_config().get(key) {
+        return Some(value.as_bool()?);
+    } else {
+        return None;
+    }
+   
+}
+
 pub fn get_request_repaint() -> bool {
     let mut request_repaint = REQUEST_REPAINT.lock().unwrap();
     let old_request_repaint = *request_repaint;
@@ -1145,34 +1179,46 @@ pub fn set_update_file(file: String) {
 pub fn run_install_script(run_afterwards: bool) -> bool {
     if let Some(update_file) = {UPDATE_FILE.lock().unwrap().clone()} {
         println!("Installing from {}", update_file);
-        let install_script = save_install_script();
-        if install_script != "" {
-            #[cfg(target_os = "windows")]
-            let mut command = std::process::Command::new("cmd");
-            #[cfg(target_family = "unix")]
-            let mut command = std::process::Command::new("sh");
-
-            let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
-            
-            #[cfg(target_family = "unix")]
-            if run_afterwards {
-                command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
-            } else {
-                command.args([install_script, update_file, program_path]).spawn().expect("failed to start update script");
+        if get_system_config_bool("prefer-installers").unwrap_or(false) {
+            // Just run the installer
+            match open::that(update_file) {
+                Ok(_) => (),
+                Err(e) => eprintln!("Installer failed to launch {} ", e)
             }
-
-            #[cfg(target_os = "windows")] // cmd /c
-            if run_afterwards {
-                command.args(["/c".to_owned(), install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
-            } else {
-                // Run exit afterwards, otherwise it'll open a blank cmd window
-                command.args(["/c".to_owned(), install_script, update_file, program_path, "exit".to_owned()]).spawn().expect("failed to start update script");
-            }
-
             std::process::exit(0);
+
+        } else {
+            // Run install script
+            let install_script = save_install_script();
+            if install_script != "" {
+                #[cfg(target_os = "windows")]
+                let mut command = std::process::Command::new("cmd");
+                #[cfg(target_family = "unix")]
+                let mut command = std::process::Command::new("sh");
+    
+                let program_path = std::env::current_exe().unwrap().to_string_lossy().to_string();
+                
+                #[cfg(target_family = "unix")]
+                if run_afterwards {
+                    command.args([install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
+                } else {
+                    command.args([install_script, update_file, program_path]).spawn().expect("failed to start update script");
+                }
+    
+                #[cfg(target_os = "windows")] // cmd /c
+                if run_afterwards {
+                    command.args(["/c".to_owned(), install_script, update_file, program_path.clone(), program_path]).spawn().expect("failed to start update script");
+                } else {
+                    // Run exit afterwards, otherwise it'll open a blank cmd window
+                    command.args(["/c".to_owned(), install_script, update_file, program_path, "exit".to_owned()]).spawn().expect("failed to start update script");
+                }
+    
+                std::process::exit(0);
+            }
+    
+            return true;
         }
 
-        return true;
     } else {
         return false;
     }

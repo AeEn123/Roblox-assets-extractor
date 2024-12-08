@@ -320,17 +320,9 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // This is only shown in the settings tab
 
             settings::actions(ui, self.locale);
-            ui.separator();
-
             settings::cache_dir_management(ui, self.locale);
-
-            ui.separator();
-            settings::behavior(ui, &self.locale);
-
-            ui.separator();    
+            settings::behavior(ui, &self.locale);  
             settings::updates(ui, self.locale);
-
-            ui.separator();
 
             if settings::language(ui, self.locale) {
                 // This returns true if the locales need to be refreshed

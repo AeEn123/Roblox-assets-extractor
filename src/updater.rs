@@ -31,7 +31,16 @@ fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
     let os = std::env::consts::OS; // Get the user's operating system to download the correct binary    
 
     for asset in assets {
-        if asset.name.to_lowercase().contains(os) {
+        let name = asset.name.to_lowercase();
+
+        // Download installer based on system config
+        let installer = if logic::get_system_config_bool("prefer-installers").unwrap_or(false) {
+            name.contains("install")
+        } else {
+            !name.contains("install")
+        };
+
+        if name.contains(os) && installer {
             return asset // Return the correct binary based on OS
         }
     }
@@ -41,6 +50,10 @@ fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
 }
 
 pub fn download_update(url: &str) {
+    if !logic::get_system_config_bool("allow-updates").unwrap_or(true) {
+        println!("Updating has been disabled by the system.");
+        return
+    }
     let client = Client::new();
     let filename = std::env::current_exe().unwrap().file_name().unwrap().to_string_lossy().to_string();
     let temp_dir = logic::get_temp_dir(true);

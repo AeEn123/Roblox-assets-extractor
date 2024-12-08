@@ -122,9 +122,12 @@ fn main() {
             extract(get_tab(category), asset, args.dest, args.extention);
         } else {
             // Not enough arguments - go through all
-            for category in logic::get_categories() {
-                extract(category, asset.clone(), args.dest.clone(), args.extention);
+            if let Some(destination) = args.dest {
+                logic::extract_all(destination, true, false);
+            } else {
+                eprintln!("--dest is required to extract all assets. --help for more details")
             }
+
         }
     } else if args.cache_dir {
         println!("{}", logic::get_cache_directory());
