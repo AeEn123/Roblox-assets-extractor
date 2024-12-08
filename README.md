@@ -13,6 +13,8 @@
 # Roblox Assets Extractor
 This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
 
+![Screenshot](/assets/screenshot.png)
+
 # FAQ
 ### Does this interfere with the roblox client?
 No, it is opening files that your client has already created. You can see them yourself in %Temp%\Roblox
