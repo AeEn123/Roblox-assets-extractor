@@ -392,7 +392,7 @@ impl Default for MyApp {
 }
 
 fn detect_japanese_font() -> Option<String> {
-    let font_dirs = ["/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.local/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "C:\\Windows\\Fonts\\GOTHIC.ttf"];
+    let font_dirs = ["C:\\Windows\\Fonts\\msgothic.ttc", "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.local/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.fonts/noto-cjk/NotoSerifCJK-Regular.ttc"];
     
     for font in font_dirs {
         let resolved_font = logic::resolve_path(&font);
