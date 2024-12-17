@@ -42,25 +42,36 @@ struct TabViewer<'a> {
     renaming: &'a mut bool,
     searching: &'a mut bool,
     search_query: &'a mut String,
+    swapping: &'a mut bool,
+    swapping_asset_a: &'a mut Option<String>,
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
 }
 
-fn double_click(dir: String, value: String, mode: String) {
-    let temp_dir = logic::get_temp_dir(true);
-    let alias = logic::get_asset_alias(&value);
-    let destination = format!("{}/{}", temp_dir, alias); // Join both paths
-    let origin = format!("{}/{}", dir, value);
-    let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
-    if new_destination != "None" {
-        let _ = open::that(new_destination); // Open when finished
+fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, swapping_asset_a: &mut Option<String>) {
+    if !*swapping {
+        let temp_dir = logic::get_temp_dir(true);
+        let alias = logic::get_asset_alias(&value);
+        let destination = format!("{}/{}", temp_dir, alias); // Join both paths
+        let origin = format!("{}/{}", dir, value);
+        let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
+        if new_destination != "None" {
+            let _ = open::that(new_destination); // Open when finished
+        }
+    } else {
+        if swapping_asset_a.is_none() {
+            *swapping_asset_a = Some(value);
+        } else {
+            logic::swap_assets(&dir, &swapping_asset_a.as_ref().unwrap(), &value);
+            *swapping_asset_a = None;
+            *swapping = false
+        }
     }
+
 }
 
 fn add_dependency_credit(dependency: &str, ui: &mut egui::Ui) {
     ui.hyperlink_to(dependency.replace("https://github.com/", ""), dependency);
 }
-
-
 
 impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = String;
@@ -79,9 +90,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             } else {
                 format!("{}/http", cache_dir)
             }
-        };
-
-        
+        };        
 
         let file_list = logic::get_file_list(); // Get the file list as it is used throughout the GUI
 
@@ -154,6 +163,25 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 if ui.button(logic::get_message(self.locale, "button-refresh", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
                     logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
                 }
+
+                if ui.button(logic::get_message(self.locale, "button-swap", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F4)) {
+                    let mut warning_acknoledged = logic::get_config_bool("ban-warning-ack").unwrap_or(false);
+
+                    if !warning_acknoledged {
+                        warning_acknoledged = MessageDialog::new()
+                        .set_type(MessageType::Info)
+                        .set_title(&logic::get_message(self.locale, "confirmation-ban-warning-title", None))
+                        .set_text(&logic::get_message(self.locale, "confirmation-ban-warning-description", None))
+                        .show_confirm()
+                        .unwrap();
+                    }
+
+                    if warning_acknoledged {
+                        logic::set_config_value("ban-warning-ack", warning_acknoledged.into());
+                        *self.swapping = !*self.swapping;
+                    }
+
+                }
             });
 
             
@@ -191,7 +219,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     if let Some(selected) = *self.selected {
                         // Get file name after getting the selected value
                         if let Some(file_name) = file_list.get(selected) {
-                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
+                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
                         }                   
                     }
                 }
@@ -200,6 +228,17 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
             let mut first_iterated: bool = false; // Used to track if the first entry iterated.
+
+
+            if *self.swapping {
+                if self.swapping_asset_a.as_ref().is_none() {
+                    ui.heading(logic::get_message(self.locale, "swap-choose-file", None));
+                } else {
+                    let mut args = fluent_bundle::FluentArgs::new();
+                    args.set("asset", logic::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
+                    ui.heading(logic::get_message(self.locale, "swap-with", Some(&args)));
+                }
+            }
 
             let file_list = if *self.searching {
                 let old_search_query = self.search_query.clone();
@@ -285,7 +324,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                             // Handle the click/double click
                             if response.clicked() && is_selected {
-                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string());
+                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
                             } else if response.clicked() && !*self.renaming {
                                 *self.selected = Some(i);
                             }
@@ -362,6 +401,8 @@ struct MyApp {
     renaming: bool,
     searching: bool,
     search_query: String,
+    swapping: bool,
+    swapping_asset_a: Option<String>,
     locale: FluentBundle<Arc<FluentResource>>
 }
 
@@ -386,6 +427,8 @@ impl Default for MyApp {
             renaming: false,
             searching: false,
             search_query: "".to_owned(),
+            swapping: false,
+            swapping_asset_a: None,
             locale: logic::get_locale(None),
         }
     }
@@ -404,7 +447,7 @@ fn detect_japanese_font() -> Option<String> {
                 }
             }
             Err(e) => {
-                println!("{}", e)
+                println!("{}: invalid - {}", resolved_font, e)
             }
         }
         
@@ -472,6 +515,8 @@ impl eframe::App for MyApp {
                 renaming: &mut self.renaming,
                 searching: &mut self.searching,
                 search_query: &mut self.search_query,
+                swapping: &mut self.swapping,
+                swapping_asset_a: &mut self.swapping_asset_a,
                 current_tab: &mut self.current_tab,
                 locale: &mut self.locale,
             });

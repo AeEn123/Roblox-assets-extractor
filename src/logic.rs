@@ -1013,6 +1013,64 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
         }
     }
 }
+
+pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
+    let asset_a_path = format!("{}/{}", dir, asset_a);
+    let asset_b_path = format!("{}/{}", dir, asset_b);
+    let locale = get_locale(None);
+
+    let asset_a_bytes = match fs::read(&asset_a_path) {
+        Ok(bytes) => {
+            bytes
+        },
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            println!("Error opening file: {}", e);
+            return
+        }
+    };
+
+    let asset_b_bytes = match fs::read(&asset_b_path) {
+        Ok(bytes) => {
+            bytes
+        },
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            println!("Error opening file: {}", e);
+            return
+        }
+    };
+
+    match fs::write(&asset_a_path, asset_b_bytes) {
+        Ok(_) => (),
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            println!("Error opening file: {}", e);
+        }
+    };
+
+    match fs::write(&asset_b_path, asset_a_bytes) {
+        Ok(_) => (),
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            println!("Error opening file: {}", e);
+        }
+    };
+
+}
+
 pub fn filter_file_list(query: String) {
     // Clear file list before
     {

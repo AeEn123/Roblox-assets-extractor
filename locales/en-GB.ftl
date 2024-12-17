@@ -23,6 +23,7 @@ button-yes = Yes
 button-no = No
 button-rename = Rename <F2>
 button-search = Search <Ctrl+F>
+button-swap = Swap assets <F4>
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -66,6 +67,9 @@ clear-cache-description = If it is taking too long to list files and extracting 
 extract-all-description = The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.
 custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button.
 use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself.
+swap-choose-file = Choose a file to swap
+swap-with = Choose a file to swap with "{ $asset }"
+
 
 # Statuses
 idling = Idling

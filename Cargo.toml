@@ -4,7 +4,7 @@ version = "0.1.3"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.21", features = ["derive"] }
+clap = { version = "4.5.23", features = ["derive"] }
 eframe = { features = ["glow"], default-features = false, version = "0.29" }
 egui = "0.29"
 egui_commonmark = "0.18.0"
@@ -14,7 +14,7 @@ lazy_static = "1.5.0"
 native-dialog = "0.7.0"
 open = "5.3.1"
 reqwest = { version = "0.12.9", features = ["blocking"] }
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { version = "1.0.216", features = ["derive"] }
 serde_json = { version = "1.0.133", features=["std"], default-features = false }
 sys-locale = "0.3.2"
 tempfile = "3"
@@ -22,7 +22,7 @@ unic-langid = "0.9.5"
 whoami = { version = "1.5.2", default-features = false }
 
 [build-dependencies]
-winresource = "0.1.17"
+winresource = "0.1.19"
 
 # Minimize executable size (Target size < 10MB)
 [profile.release.package."*"]

@@ -11,6 +11,7 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
+button-swap = Swap assets <F4> # TODO: Translate
 button-search = Szukaj <CTRL+F>
 button-delete-this-dir = Usuń ten katalog <Del>
 button-extract-type = Wyodrębnij wszystkie tego typu <F3>
@@ -62,6 +63,8 @@ use-alias = Eksportuj nazwy alternatywne dla plików
 
 
 # Descriptions
+swap-choose-file = Choose a file to swap # TODO: Translate
+swap-with = Choose a file to swap with "{ $asset }" # TODO: Translate
 clear-cache-description = Jeżeli wyświetlanie lub wyodrębnianie plików zajmuje za długo, możesz wyczyścić pamieć podręczną gry Roblox. Usunie to wszystkie pliki z pamięci podręcznej i gra Roblox wygeneruje pliki, kiedy są wymagane.
 extract-all-description = Ten przycisk skopiuje wszystkie zasoby i stworzy katalogi np. /sounds, /images aby je kategoryzować. Możesz zmienić folder do wypakowania przed startem.
 custom-cache-dir-description = Jeżeli potrzebujesz dostęp do pamięci potrzebnej innej instalacji gry Roblox, możesz zmienić katalog pamięci podręcznej poniżej, a możesz ustawić go spowrotem do domyślnego ustawienia klikając inny przycisk.

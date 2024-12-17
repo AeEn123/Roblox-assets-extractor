@@ -23,8 +23,11 @@
 
 ## 0.1.4
 - [ ] - Copy/swap assets around
-- [ ] - Fix display of japanese locale #2
+- [ ] - Update locales
 
 ## Future releases
 - [ ] - Docs available in different languages
 - [ ] - Finish CLI mode documentation
+- [ ] - Built-in media player/image decoder to quickly preview assets
+- [ ] - Community-made resource packs
+- [ ] - Automatic command line generation for [Bloxstrap](https://github.com/pizzaboxer/bloxstrap)
