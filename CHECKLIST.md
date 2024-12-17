@@ -22,8 +22,8 @@
 - [x] - Locales need updating (Deadline: 9/12/2024)
 
 ## 0.1.4
-- [ ] - Copy/swap assets around
-- [ ] - Update locales
+- [x] - Copy/swap assets around
+- [ ] - Update locales (Deadline: 25/12/2024 (Christmas :D))
 
 ## Future releases
 - [ ] - Docs available in different languages
