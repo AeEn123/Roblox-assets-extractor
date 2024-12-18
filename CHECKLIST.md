@@ -23,9 +23,12 @@
 
 ## 0.1.4
 - [x] - Copy/swap assets around
+- [x] - Light/dark theme button (can just copy some code seen in [eframe template](https://github.com/emilk/eframe_template))
 - [ ] - Update locales (Deadline: 25/12/2024 (Christmas :D))
 
 ## Future releases
+
+- [ ] - Jump to asset on keyboard press
 - [ ] - Docs available in different languages
 - [ ] - Finish CLI mode documentation
 - [ ] - Built-in media player/image decoder to quickly preview assets

@@ -97,5 +97,5 @@ confirmation-ban-warning-title = Potenzielle Bannwarnung
 confirmation-ban-warning-description = Assets in Spielen zu bearbeiten kann dazuführen ,dass sich dein Spiel anders verhält was zu potenziellen Bännen in Spielen führen kann! Benutze es mit dein eigenen Risiko. Verstehst du es?
 
 button-swap = Swap assets <F4> # TODO: Translate
-swap-with = Choose a file to swap with "{ $asset }" # TODO: Translate
-swap-choose-file = Choose a file to swap # TODO: Translate
+swap-choose-file = Double click a file to swap # TODO: Translate
+swap-with = Double click a file to swap with "{ $asset }" # TODO: Translate
