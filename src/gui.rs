@@ -323,10 +323,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             ui.painter().rect_filled(rect, 0.0, background_colour);
 
                             // Handle the click/double click
-                            if response.clicked() && is_selected {
-                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
-                            } else if response.clicked() && !*self.renaming {
+                            if response.clicked() || response.secondary_clicked() && !*self.renaming {
                                 *self.selected = Some(i);
+                            }
+
+                            if response.double_clicked() {
+                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
                             }
 
                             // Handle keyboard scrolling
