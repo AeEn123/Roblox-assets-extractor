@@ -122,6 +122,14 @@ pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.separator();
     ui.heading(logic::get_message(locale, "behavior", None));
 
+    egui::widgets::global_theme_preference_buttons(ui);
+    match ui.ctx().options(|opt| opt.theme_preference) {
+        egui::ThemePreference::Dark => logic::set_config_value("theme", "dark".into()),
+        egui::ThemePreference::Light => logic::set_config_value("theme", "light".into()),
+        egui::ThemePreference::System => logic::set_config_value("theme", "system".into())
+    }
+    
+    
     ui.label(logic::get_message(locale, "use-alias-description", None));
 
     let mut use_alias = logic::get_config_bool("use_alias").unwrap_or(true);

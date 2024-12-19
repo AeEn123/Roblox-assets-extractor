@@ -94,5 +94,5 @@ confirmation-custom-directory-title = Choose a different directory # TODO: Trans
 confirmation-ban-warning-description = Editing assets in games can cause your client to behave differently leading to potential game bans! Use at your own risk. Do you understand? # TODO: Translate
 confirmation-ban-warning-title = Potential ban alert # TODO: Translate
 button-swap = Swap assets <F4> # TODO: Translate
-swap-with = Choose a file to swap with "{ $asset }" # TODO: Translate
-swap-choose-file = Choose a file to swap # TODO: Translate
+swap-choose-file = Double click a file to swap # TODO: Translate
+swap-with = Double click a file to swap with "{ $asset }" # TODO: Translate

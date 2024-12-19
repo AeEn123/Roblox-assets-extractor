@@ -12,6 +12,58 @@ pub struct MyApp {
     locale: FluentBundle<Arc<FluentResource>>,
 }
 
+fn detect_japanese_font() -> Option<String> {
+    let font_dirs = ["C:\\Windows\\Fonts\\msgothic.ttc", "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.local/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.fonts/noto-cjk/NotoSerifCJK-Regular.ttc"];
+    
+    for font in font_dirs {
+        let resolved_font = logic::resolve_path(&font);
+        match std::fs::metadata(&resolved_font) {
+            Ok(metadata) => {
+                if metadata.is_file() {
+                    println!("{}: valid", resolved_font);
+                    return Some(resolved_font);
+                }
+            }
+            Err(e) => {
+                println!("{}: invalid - {}", resolved_font, e)
+            }
+        }
+        
+    };
+    return None;
+}
+
+// https://users.rust-lang.org/t/is-posible-egui-change-fonts-to-japanese-how/59662/5
+impl MyApp {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        //Custom font install
+        // 1. Create a `FontDefinitions` object.
+        let mut font = egui::FontDefinitions::default();
+        // Install my own font (maybe supporting non-latin characters):
+        // 2. register the font content with a name.
+        match detect_japanese_font() {
+            Some(font_path) => {
+                match std::fs::read(font_path) {
+                    Ok(bytes) => {
+                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes));
+                        font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
+                        font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
+                        // 3. Configure context with modified `FontDefinitions`.
+                        cc.egui_ctx.set_fonts(font);
+                    }
+                    Err(e) => {
+                        println!("Error loading Japanese fonts: {e}")
+                    }
+                }
+            }
+            None => {
+                println!("No Japanese fonts detected, Japanese characters will not render.")
+            }
+        }    
+        Default::default()
+    }
+}
+
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -60,7 +112,7 @@ pub fn run_gui() -> eframe::Result {
     eframe::run_native(
         &format!("Roblox Assets Extractor v{VERSION}").to_owned(),
         options,
-        Box::new(|_cc| Ok(Box::<MyApp>::default())),
+        Box::new(|cc| Ok(Box::new(MyApp::new(cc)))),
     )
     
 }

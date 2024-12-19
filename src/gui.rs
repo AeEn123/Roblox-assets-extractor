@@ -481,7 +481,15 @@ impl MyApp {
             None => {
                 println!("No Japanese fonts detected, Japanese characters will not render.")
             }
-        }    
+        }
+        
+        // Get theme from config
+        match logic::get_config_string("theme").unwrap_or("system".to_owned()).as_str() {
+            "dark" => cc.egui_ctx.set_theme(egui::Theme::Dark),
+            "light" => cc.egui_ctx.set_theme(egui::Theme::Light),
+            _ => ()
+        }
+
         Default::default()
     }
 }
