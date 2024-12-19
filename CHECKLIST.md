@@ -23,6 +23,8 @@
 
 ## 0.1.4
 - [x] - Copy/swap assets around
+- [ ] - Make search case insensitive
+- [ ] - Clear filtered list when deleting files
 - [ ] - Update locales (Deadline: 25/12/2024 (Christmas :D))
 
 ## Future releases

@@ -1028,7 +1028,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file: {}", e);
+            println!("Error opening file '{}': {}", asset_a_path, e);
             return
         }
     };
@@ -1042,7 +1042,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file: {}", e);
+            println!("Error opening file '{}': {}", asset_b_path, e);
             return
         }
     };
@@ -1054,7 +1054,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file: {}", e);
+            println!("Error opening file '{}': {}", asset_a_path, e);
         }
     };
 
@@ -1065,7 +1065,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file: {}", e);
+            println!("Error opening file '{}': {}", asset_b_path, e);
         }
     };
 

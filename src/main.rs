@@ -47,6 +47,10 @@ struct Cli {
     #[arg(short, long)]
     dest: Option<String>,
 
+    /// Swap two assets
+    #[arg(short, long)]
+    swap: Option<String>,
+
     /// Return the cache directory
     #[arg(short, long)]
     cache_dir: bool,
@@ -128,6 +132,17 @@ fn main() {
                 eprintln!("--dest is required to extract all assets. --help for more details")
             }
 
+        }
+    } else if let Some(asset) = args.swap {
+        if let Some(dest) = args.dest {
+            let dir = match args.mode {
+                Some(Category::Music) => &format!("{}/sounds", &logic::get_cache_directory()), //sounds if music
+                _ => &format!("{}/http", &logic::get_cache_directory())
+            };
+
+            logic::swap_assets(dir, &asset, &dest);
+        } else {
+            eprintln!("--dest is required for swapping assets, --help for more details")
         }
     } else if args.cache_dir {
         println!("{}", logic::get_cache_directory());
