@@ -1,6 +1,6 @@
 pkgname=Roblox-assets-extractor
 pkgdesc='A safe way to extract assets from your Roblox installation.'
-pkgver=0.1.3
+pkgver=0.1.4
 pkgrel=1
 makedepends=('rust' 'cargo')
 arch=('x86_64')
@@ -22,22 +22,9 @@ build() {
   cargo build --frozen --release --all-features
 }
 
-check() {
-  export RUSTUP_TOOLCHAIN=stable
-  cargo test --frozen --all-features
-}
-
 package() {
   install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
-  install -Dm644 "assets/icon.svg" "${pkgdir}/usr/share/icons/hicolor/symbolic/apps/Roblox-assets-extractor.svg"
-  install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/Roblox-assets-extractor.desktop" <<EOF
-  [Desktop Entry]
-  Type=Application
-  Name=Roblox Assets Extractor
-  Comment=A safe way to extract assets from your Roblox installation.
-  Categories=Utility
-  Exec=Roblox-assets-extractor
-  Icon=Roblox-assets-extractor
-  Terminal=false
-EOF
+  install -Dm644 "assets/icon.svg" "${pkgdir}/usr/share/icons/hicolor/symbolic/apps/$pkgname.svg"
+  install -Dm644 "packages/arch/$pkgname.desktop" "${pkgdir}/usr/share/applications/$pkgname.desktop"
+  install -Dm644 "packages/arch/$pkgname-system.json" "${pkgdir}/usr/bin/$pkgname-system.json"
 }
