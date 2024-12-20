@@ -23,11 +23,13 @@
 
 ## 0.1.4
 - [x] - Copy/swap assets around
-- [ ] - Make search case insensitive
-- [ ] - Clear filtered list when deleting files
-- [ ] - Update locales (Deadline: 25/12/2024 (Christmas :D))
+
+## 0.1.5
+- [x] - Make search case insensitive
+- [ ] - Move asset-specific operations into right click menu
 
 ## Future releases
+- [ ] - Implement asset copying
 - [ ] - Finish CLI mode documentation
 - [ ] - Built-in media player/image decoder to quickly preview assets
 - [ ] - Community-made resource packs

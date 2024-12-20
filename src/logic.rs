@@ -1072,6 +1072,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
 }
 
 pub fn filter_file_list(query: String) {
+    let query_lower = query.to_lowercase();
     // Clear file list before
     {
         let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
@@ -1079,7 +1080,7 @@ pub fn filter_file_list(query: String) {
     }
     let file_list = get_file_list(); // Clone file list
     for file in file_list {
-        if file.contains(&query) || get_asset_alias(&file).contains(&query) {
+        if file.contains(&query_lower) || get_asset_alias(&file).to_lowercase().contains(&query_lower) {
             {
                 let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
                 filtered_file_list.push(file);
