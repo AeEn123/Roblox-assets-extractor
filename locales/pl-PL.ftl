@@ -11,7 +11,7 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
-button-swap = Swap assets <F4> # TODO: Translate
+button-swap = Zamień zasoby <F4>
 button-search = Szukaj <CTRL+F>
 button-delete-this-dir = Usuń ten katalog <Del>
 button-extract-type = Wyodrębnij wszystkie tego typu <F3>
@@ -26,8 +26,8 @@ button-no = Nie
 button-rename = Zmień nazwe <F2>
 
 # Confirmations
-confirmation-ban-warning-description = Editing assets in games can cause your client to behave differently leading to potential game bans! Use at your own risk. Do you understand? # TODO: Translate
-confirmation-ban-warning-title = Potential ban alert # TODO: Translate
+confirmation-ban-warning-description = Edytowanie zasobów w grach może spowodować inne zachowanie gry Roblox i możliwy jest ban twojego konta! Używaj pod własnym ryzykiem
+confirmation-ban-warning-title = Możliwość bana
 confirmation-generic-confirmation-title = Potwierdzenie
 confirmation-delete-confirmation-title = Usuwanie plikow
 confirmation-delete-confirmation-description = Czy jesteś pewny(a) czy chcesz usunąc wszystkie pliki w tym katalogu?
@@ -63,8 +63,8 @@ use-alias = Eksportuj nazwy alternatywne dla plików
 
 
 # Descriptions
-swap-with = Double click a file to swap with "{ $asset }" # TODO: Translate
-swap-choose-file = Double click a file to swap # TODO: Translate
+swap-with = Podwójnie nacisnij plik aby zamienić zasoby z "{ $asset }"
+swap-choose-file = Podwójnie naciśnij plik do zamienienia
 clear-cache-description = Jeżeli wyświetlanie lub wyodrębnianie plików zajmuje za długo, możesz wyczyścić pamieć podręczną gry Roblox. Usunie to wszystkie pliki z pamięci podręcznej i gra Roblox wygeneruje pliki, kiedy są wymagane.
 extract-all-description = Ten przycisk skopiuje wszystkie zasoby i stworzy katalogi np. /sounds, /images aby je kategoryzować. Możesz zmienić folder do wypakowania przed startem.
 custom-cache-dir-description = Jeżeli potrzebujesz dostęp do pamięci potrzebnej innej instalacji gry Roblox, możesz zmienić katalog pamięci podręcznej poniżej, a możesz ustawić go spowrotem do domyślnego ustawienia klikając inny przycisk.

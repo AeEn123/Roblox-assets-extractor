@@ -1,4 +1,4 @@
-#Translated by @cbaadit
+# Translated by @cbaadit
 # 言語情報
 language-name = 日本語
 
