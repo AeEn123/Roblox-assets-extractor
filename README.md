@@ -9,8 +9,6 @@
 [![Windows Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml)
 [![Linux Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml)
 [![Discord invite](https://img.shields.io/discord/470242481582243860?label=Discord)](https://discord.gg/xqNA5jt6DN)
-> [!NOTE]
-> Running on Windows requires Microsoft Visual C++ Redistributable. You can download that from [here](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
 
 # Roblox Assets Extractor
 This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
@@ -18,26 +16,7 @@ This tool extracts cached data from your Roblox installation by looking at the h
 ![Screenshot](/assets/screenshot.png)
 
 # FAQ
-### Does this interfere with the roblox client?
-No, it is opening files that your client has already created. You can see them yourself in %Temp%\Roblox
-
-### Is this malware?
-No, this is not malware, similar to other Free and Open Source Software, the code is available for everyone to see. It would be impossible for us to hide malware in here. The builds are also safe as the builds are now created by GitHub actions meaning everything is fully transparent. If you still don't trust this software, you can use the web demo at https://aeen123.github.io/Roblox-assets-extractor/ (you don't need to download anything for that)
-
-### Windows says "Windows protected your PC" What do I do?
-If Windows detects a program from an unverified publisher, this popup will appear. If this popup does appear, click "More info" and click "Run anyway".
-
-### Can this get me banned?
-No, unlike cheats, this **does not** inject into roblox. Making this an anti-cheat friendly way of extracting assets.
-
-### My extracted assets don’t play in my media player, what can I do?
-Some media players may not support the format that the file is in. If that is the case, please try another media player that supports all of the formats this supports, e.g VLC. **If the file is really broken, please [create an issue.](https://github.com/AeEn123/Roblox-assets-extractor/issues)**
-
-### Can I switch to the light/dark theme?
-Yes, the theme of the program automatically syncs to your system theme.
-
-### Why is KTX files in a different tab? Shouldn't it be in the Textures tab?
-Technically it should, but most image viewers don't support KTX files, so it is best to move this aside to a different tab to avoid compatability issues, this tab should be used for more advanced users.
+See [FAQ.md](/docs/en-GB/FAQ.MD)
 
 # Usage
 ## Tabs

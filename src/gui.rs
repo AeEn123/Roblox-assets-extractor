@@ -19,20 +19,20 @@ const CONTRIBUTERS: [&str; 4] = [
     "Vonercent",
     "aaditkumar2009",
 ];
-const DEPENDENCIES: [&str; 13] = [
-    "https://github.com/emilk/egui",
-    "https://github.com/Adanos020/egui_dock",
-    "https://github.com/lampsitter/egui_commonmark",
-    "https://github.com/native-dialog-rs/native-dialog-rs",
-    "https://github.com/rust-lang-nursery/lazy-static.rs",
-    "https://github.com/projectfluent/fluent-rs",
-    "https://github.com/1Password/sys-locale",
-    "https://github.com/zbraniecki/unic-locale",
-    "https://github.com/Stebalien/tempfile",
-    "https://github.com/clap-rs/clap",
-    "https://github.com/ardaku/whoami",
-    "https://github.com/seanmonstar/reqwest",
-    "https://github.com/serde-rs/json",
+const DEPENDENCIES: [[&str; 2]; 13] = [
+    ["https://github.com/emilk/egui", ""],
+    ["https://github.com/Adanos020/egui_dock", ""],
+    ["https://github.com/lampsitter/egui_commonmark", ""],
+    ["https://github.com/native-dialog-rs/native-dialog-rs", ""],
+    ["https://github.com/rust-lang-nursery/lazy-static.rs", ""],
+    ["https://github.com/projectfluent/fluent-rs", ""],
+    ["https://github.com/1Password/sys-locale", ""],
+    ["https://github.com/zbraniecki/unic-locale", ""],
+    ["https://github.com/Stebalien/tempfile", ""],
+    ["https://github.com/clap-rs/clap", ""],
+    ["https://github.com/ardaku/whoami", ""],
+    ["https://github.com/seanmonstar/reqwest", ""],
+    ["https://github.com/serde-rs/json", ""],
 ];
 
 struct TabViewer<'a> {
@@ -69,8 +69,16 @@ fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, s
 
 }
 
-fn add_dependency_credit(dependency: &str, ui: &mut egui::Ui) {
-    ui.hyperlink_to(dependency.replace("https://github.com/", ""), dependency);
+fn add_dependency_credit(dependency: [&str;2], ui: &mut egui::Ui, sponsor_message: &str) {
+    if dependency[1] != "" {
+        ui.horizontal(|ui| {
+            ui.hyperlink_to(dependency[0].replace("https://github.com/", ""), dependency[0]);
+            ui.label("|");
+            ui.hyperlink_to(sponsor_message, dependency[1]);
+        });
+    } else {
+        ui.hyperlink_to(dependency[0].replace("https://github.com/", ""), dependency[0]);
+    }
 }
 
 impl egui_dock::TabViewer for TabViewer<'_> {
@@ -376,6 +384,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             args.set("version", VERSION);
 
             ui.label(logic::get_message(self.locale, "version", Some(&args)));
+            
+            ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
+
+            ui.separator();
+
+            ui.heading(logic::get_message(self.locale, "support-project-donate", None));
+
+            ui.horizontal(|ui| {
+                ui.hyperlink_to(logic::get_message(self.locale, "support-sponsor", None), "https://github.com/sponsors/AeEn123");
+                ui.label("|");
+                ui.hyperlink_to("Roblox", "https://www.roblox.com/communities/10808976/Alfie-Likes-Computers#!/store")
+
+            });
 
             ui.separator();
 
@@ -387,8 +408,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             ui.separator();
 
             ui.heading(logic::get_message(self.locale, "dependencies", None));
+
+            let sponsor_message = logic::get_message(self.locale, "support-sponsor", None);
             for dependency in DEPENDENCIES {
-                add_dependency_credit(dependency, ui);
+                add_dependency_credit(dependency, ui, &sponsor_message);
             } 
 
         }

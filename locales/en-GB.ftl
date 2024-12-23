@@ -94,3 +94,5 @@ cache-directory = Cache directory: { $directory }
 welcome = Welcome
 download-update-question = Would you like to download the update?
 update-changelog = Update changelog below
+support-sponsor = ♥ Sponsor
+support-project-donate = ♥ Donate
