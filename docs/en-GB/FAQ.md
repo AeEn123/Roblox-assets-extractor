@@ -5,7 +5,7 @@ Install [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us
 No, it is opening files that your client has already created. You can see them yourself in %Temp%\Roblox
 
 ### Is this malware?
-No, this is not malware, similar to other Free and Open Source Software, the code is available for everyone to see. It would be impossible for us to hide malware in here. The builds are also safe as the builds are now created by GitHub actions meaning everything is fully transparent. If you still don't trust this software, you can use the web demo at https://aeen123.github.io/Roblox-assets-extractor/ (you don't need to download anything for that)
+No, this is not malware, similar to other Free and Open Source Software, the code is available for everyone to see. It would be impossible for us to hide malware in here. The builds are also safe as the builds are now created by GitHub actions meaning everything is fully transparent. If you still don't trust this software, you can use the web demo at https://aeen123.github.io/Roblox-assets-extractor/demo (you don't need to download anything for that)
 
 ### Windows says "Windows protected your PC" What do I do?
 If Windows detects a program from an unverified publisher, this popup will appear. If this popup does appear, click "More info" and click "Run anyway".

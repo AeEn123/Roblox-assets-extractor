@@ -1,6 +1,6 @@
 [![Download for Windows](https://img.shields.io/github/downloads/AeEn123/Roblox-assets-extractor/latest/Roblox-assets-extractor-windows.exe?label=Download&color=blue&style=for-the-badge)](https://github.com/AeEn123/Roblox-assets-extractor/releases/latest/download/Roblox-assets-extractor-windows.exe)
 [![Download for Linux](https://img.shields.io/github/downloads/AeEn123/Roblox-assets-extractor/latest/Roblox-assets-extractor-linux?label=Download&style=for-the-badge)](https://github.com/AeEn123/Roblox-assets-extractor/releases/latest/download/Roblox-assets-extractor-linux)
-[![Web demo](https://img.shields.io/badge/Web_demo-red?logo=googlechrome&style=for-the-badge)](https://aeen123.github.io/Roblox-assets-extractor/)
+[![Website](https://img.shields.io/badge/Website-red?logo=googlechrome&style=for-the-badge)](https://aeen123.github.io/Roblox-assets-extractor/)
 
 [![Windows Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml)
 [![Linux Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml)
