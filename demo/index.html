@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--<meta http-equiv="Content-Security-Policy" content="script-src 'self'" /> -->
+    <link rel="stylesheet" href="styles.css">
+    <title>Roblox Assets Extractor</title>
+</head>
+<body>
+    <div class="navbar">
+        <a id="soundstab" href="#" onclick="sounds()">Sounds</a>
+        <a id="imagestab" href="#" onclick="image()">Images</a>
+        <a class="link" href="https://github.com/AeEn123/Roblox-assets-extractor/releases/latest">Roblox Assets Extractor</a>
+    </div>
+    <div class="bar">
+        The web demo is a proof of concept designed to give you a feel of the program. The standalone version is faster, more responsive and more useful. Consider downloading the standalone version <a href="/">here</a>
+    </div>
+
+    <div id="main">
+
+
+    </div>
+
+    <div id="dirchoose">
+        <h1>Provide Directory</h1>
+        <p>Please provide your Roblox cache directory, this is usually stored in %temp%\Roblox on Windows or ~/var/app/org.vinegarhq.Sober/cache/sober on Linux.</p>
+        <p>If you provide an incorrect directory, you can refresh the webpage.</p>
+        <p>Consider downloading the <a href="/">standalone version</a> of this tool for automatic directory detection!</p>
+        <input type="file" id="cacheDirectoryChooser" webkitdirectory directory multiple>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>

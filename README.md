@@ -1,2 +1,2 @@
 # Web version
-Here is the source code of the web demo, used to demo software to potential users
+Here is the source code for the official website of this project, making it easier for users to download the software
