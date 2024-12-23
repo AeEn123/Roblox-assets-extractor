@@ -4,7 +4,7 @@ pkgver=0.1.4
 pkgrel=1
 makedepends=('rust' 'cargo')
 arch=('x86_64')
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/AeEn123/Roblox-assets-extractor/archive/refs/tags/v0.1.3.tar.gz")
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/AeEn123/Roblox-assets-extractor/archive/refs/tags/v0.1.4.tar.gz")
 sha256sums=('1f8fbbf06c71266b81beb863e85de9feff2bdda0f3067397932f3c2c6f4d738f')
 license=('MIT')
 
