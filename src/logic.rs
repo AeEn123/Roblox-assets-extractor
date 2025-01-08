@@ -196,7 +196,13 @@ fn bytes_search(haystack: Vec<u8>, needle: &[u8]) -> Option<usize> {
 fn bytes_contains(haystack: &[u8], needle: &[u8]) -> bool {
     let len = needle.len();
     if len > 0 {
-        haystack.windows(len).any(|window| window == needle)
+        if needle == b"ID3" {
+            let bin_type = haystack.windows(7).any(|window| window == b"binary/");
+            let mp3_header = haystack.windows(len).any(|window| window == needle);
+            mp3_header && bin_type // Only allow mp3 if type is binary as that is what roblox uses
+        } else {
+            haystack.windows(len).any(|window| window == needle)
+        }
     } else {
         false
     }
