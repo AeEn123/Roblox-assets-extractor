@@ -719,6 +719,15 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                             Ok(_) => (),
                             Err(e) => eprintln!("Error writing file: {}", e),
                         }
+
+                        if let Ok(sys_modified_time) = metadata.modified() {
+                            let modified_time = filetime::FileTime::from_system_time(sys_modified_time);
+                            match filetime::set_file_times(&new_destination, modified_time, modified_time) {
+                                Ok(_) => (),
+                                Err(e) => eprintln!("Failed to write file modification time {}", e)
+                            }
+                        }                        
+
                         return new_destination;
 
 
