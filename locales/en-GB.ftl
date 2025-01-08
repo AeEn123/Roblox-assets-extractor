@@ -89,7 +89,7 @@ error-check-logs = ERROR: Check logs for more details.
 
 # Misc
 no-function = (Not functional yet)
-version = Version: v{ $version }
+version = Version: v{ $version } (compiled at { $date })
 cache-directory = Cache directory: { $directory }
 welcome = Welcome
 download-update-question = Would you like to download the update?

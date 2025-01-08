@@ -93,3 +93,5 @@ cache-directory = キャッシュディレクトリ: { $directory }
 welcome = ようこそ
 download-update-question = アップデートをダウンロードしますか？
 update-changelog = 以下に更新内容を表示
+support-sponsor = ♥ Sponsor # TODO: Translate
+support-project-donate = ♥ Donate # TODO: Translate

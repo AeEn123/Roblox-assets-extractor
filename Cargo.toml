@@ -23,6 +23,7 @@ unic-langid = "0.9.5"
 whoami = { version = "1.5.2", default-features = false }
 
 [build-dependencies]
+chrono = "0.4.39"
 winresource = "0.1.19"
 
 # Minimize executable size (Target size < 10MB)

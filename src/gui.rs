@@ -12,6 +12,7 @@ mod welcome;
 mod settings;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
+const COMPILE_DATE: &str = env!("COMPILE_DATE");
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
 const CONTRIBUTERS: [&str; 4] = [
     "AeEn123",
@@ -382,10 +383,14 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let mut args = fluent_bundle::FluentArgs::new();
             args.set("version", VERSION);
+            args.set("date", COMPILE_DATE);
 
-            ui.label(logic::get_message(self.locale, "version", Some(&args)));
-            
-            ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
+            ui.horizontal(|ui| {
+                ui.label(logic::get_message(self.locale, "version", Some(&args)));
+                                        
+                ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
+            });
+
 
             ui.separator();
 

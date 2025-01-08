@@ -87,6 +87,8 @@ error-extracting-file = BŁĄD: Nie udało się wyodrębnić plików: { $error }
 error-check-logs = BŁĄD: Sprawdż dziennik po więcej informacji.
 
 # Misc
+support-project-donate = ♥ Donate # TODO: Translate
+support-sponsor = ♥ Sponsor # TODO: Translate
 no-function = (Nie działa)
 version = Wersja: { $version }
 cache-directory = Katalog pamięci podręcznej: { $directory }

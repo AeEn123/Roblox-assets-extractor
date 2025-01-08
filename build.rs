@@ -16,6 +16,9 @@ fn main() -> io::Result<()> {
             .set_icon("assets/icon.ico")
             .compile()?;
     }
+    
+    // Add compile date to the program's environment variables
+    println!("cargo:rustc-env=COMPILE_DATE={}", chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string());
 
     // Embed path to locale files
     let locale_dir = Path::new("locales");
