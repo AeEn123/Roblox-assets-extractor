@@ -387,7 +387,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.horizontal(|ui| {
                 ui.label(logic::get_message(self.locale, "version", Some(&args)));
-                                        
+                ui.label("|");         
                 ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
             });
 
