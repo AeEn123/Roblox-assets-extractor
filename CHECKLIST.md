@@ -26,6 +26,7 @@
 
 ## 0.1.5
 - [x] - Make search case insensitive
+- [ ] - Allow user to toggle refresh before extract
 - [ ] - Move asset-specific operations into right click menu
 
 ## Future releases
