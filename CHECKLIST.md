@@ -30,6 +30,7 @@
 
 ## Future releases
 - [ ] - Implement asset copying
+- [ ] - Make it into a table with specific details e.g size, type, time created
 - [ ] - Finish CLI mode documentation
 - [ ] - Built-in media player/image decoder to quickly preview assets
 - [ ] - Community-made resource packs
