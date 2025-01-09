@@ -100,5 +100,5 @@ button-swap = Assets austauschen <F4>
 swap-choose-file = Doppelklicke eine Datei um sie auszutauschen
 swap-with = Doppelklicke eine Datei um sie mit "{ $asset }" auszutauschen
 
-support-sponsor = ♥ Sponsor # TODO: Translate
-support-project-donate = ♥ Donate # TODO: Translate
+support-sponsor = ♥ Sponsor
+support-project-donate = ♥ Spenden
