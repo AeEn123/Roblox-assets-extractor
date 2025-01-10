@@ -13,7 +13,7 @@ fn log(log_type: &str, message: &str) {
 
     let mut log = LOG.lock().unwrap();
 
-    log.push_str(&log_message);
+    log.push_str(&format!("{}\n", log_message));
 }
 
 pub fn info(message: &str) {
@@ -26,4 +26,8 @@ pub fn warn(message: &str) {
 
 pub fn error(message: &str) {
     log("ERROR: ", message)
+}
+
+pub fn get_logs() -> String {
+    return LOG.lock().unwrap().clone();
 }

@@ -9,6 +9,7 @@ rbxm-files = RBXM Files
 ktx-files = KTX Files
 settings = Settings
 about = About
+logs = Logs
 
 # Buttons
 button-delete-this-dir = Delete this directory <Del>
@@ -24,6 +25,8 @@ button-no = No
 button-rename = Rename <F2>
 button-search = Search <Ctrl+F>
 button-swap = Swap assets <F4>
+button-copy-logs = Copy log to clipboard
+button-export-logs = Export log to file
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -69,6 +72,7 @@ custom-cache-dir-description = If you want to access the cache in a different Ro
 use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself.
 swap-choose-file = Double click a file to swap
 swap-with = Double click a file to swap with "{ $asset }"
+logs-description = The logs show how the program is performing, if any errors happen, they will show up here
 
 
 # Statuses

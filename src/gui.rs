@@ -103,7 +103,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         let file_list = logic::get_file_list(); // Get the file list as it is used throughout the GUI
 
-        if tab != "settings" && tab != "about" {
+        if tab != "settings" && tab != "about" && tab != "logs" {
             // This is only shown on tabs other than settings (Extracting assets)
 
             // Detect if tab changed and do a refresh if so
@@ -376,7 +376,46 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 // This returns true if the locales need to be refreshed
                 *self.locale = logic::get_locale(None);
             }
-            
+
+        } else if tab == "logs" {
+            ui.heading(logic::get_message(self.locale, "logs", None));
+            ui.label(logic::get_message(self.locale, "logs-description", None));
+
+            let logs = log::get_logs();
+            let lines = logs.lines();
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for line in lines {
+                    let colour = if line.contains("WARN") {
+                        egui::Color32::from_rgb(150,150,0)
+                    } else if line.contains("ERROR") {
+                        egui::Color32::RED
+                    } else {
+                        ui.visuals().text_color()
+                    };
+                    ui.colored_label(colour, line);
+                }
+            });
+
+            egui::TopBottomPanel::bottom("log-actions").show_inside(ui, |ui| {
+                ui.horizontal(|ui| {
+                    if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
+                        ui.output_mut(|o| o.copied_text = logs.clone());
+                    }
+                    if ui.button(logic::get_message(&self.locale, "button-export-logs", None)).clicked() {
+                        if let Some(path) = FileDialog::new()
+                            .show_save_single_file()
+                            .unwrap()
+                        {
+                            if let Err(e) = std::fs::write(path, logs.clone()) {
+                                log::error(&format!("Failed to save logs: {}", e));
+                            }
+                        }
+                    }
+                });
+
+
+            });
+
         } else {
             // This is only shown in the about tab
             ui.heading("Roblox Assets Extractor");
@@ -438,7 +477,7 @@ struct MyApp {
 
 impl Default for MyApp {
     fn default() -> Self {
-        let tree = DockState::new(vec!["music".to_owned(), "sounds".to_owned(), "images".to_owned(), "rbxm-files".to_owned(), "ktx-files".to_owned(), "settings".to_owned(), "about".to_owned()]);
+        let tree = DockState::new(vec!["music".to_owned(), "sounds".to_owned(), "images".to_owned(), "rbxm-files".to_owned(), "ktx-files".to_owned(), "settings".to_owned(), "logs".to_owned(), "about".to_owned()]);
 
         // Tab map for keyboard navigation
         let mut tab_map = HashMap::new();
