@@ -6,7 +6,7 @@ use fluent_bundle::{FluentBundle, FluentResource};
 use std::sync::Arc;
 
 use std::collections::HashMap; // Used for input
-use crate::{logic, updater}; // Used for functionality
+use crate::{log, logic, updater}; // Used for functionality
 
 mod welcome;
 mod settings;
@@ -472,12 +472,12 @@ fn detect_japanese_font() -> Option<String> {
         match std::fs::metadata(&resolved_font) {
             Ok(metadata) => {
                 if metadata.is_file() {
-                    println!("{}: valid", resolved_font);
+                    log::info(&format!("{}: valid", resolved_font));
                     return Some(resolved_font);
                 }
             }
             Err(e) => {
-                println!("{}: invalid - {}", resolved_font, e)
+                log::warn(&format!("{}: invalid - {}", resolved_font, e))
             }
         }
         
@@ -504,12 +504,12 @@ impl MyApp {
                         cc.egui_ctx.set_fonts(font);
                     }
                     Err(e) => {
-                        println!("Error loading Japanese fonts: {e}")
+                        log::warn(&format!("Error loading Japanese fonts: {e}"))
                     }
                 }
             }
             None => {
-                println!("No Japanese fonts detected, Japanese characters will not render.")
+                log::warn("No Japanese fonts detected, Japanese characters will not render.")
             }
         }
         
@@ -597,7 +597,7 @@ pub fn run_gui() {
         );
 
         if result.is_err() {
-            eprintln!("GUI failed: {}", result.unwrap_err())
+            log::error(&format!("GUI failed: {}", result.unwrap_err()))
         }
     }
 

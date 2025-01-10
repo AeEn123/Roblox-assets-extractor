@@ -3,7 +3,7 @@ use std::fs;
 use reqwest::blocking::Client;
 use serde::Deserialize;
 
-use crate::logic;
+use crate::{log, logic};
 
 mod gui;
 
@@ -45,13 +45,13 @@ fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
         }
     }
 
-    eprintln!("Failed to find asset, going for first asset listed.");
+    log::warn("Failed to find asset, going for first asset listed.");
     return &assets[0];
 }
 
 pub fn download_update(url: &str) {
     if !logic::get_system_config_bool("allow-updates").unwrap_or(true) {
-        println!("Updating has been disabled by the system.");
+        log::warn("Updating has been disabled by the system.");
         return
     }
     let client = Client::new();
@@ -73,13 +73,13 @@ pub fn download_update(url: &str) {
                     let path = format!("{}/{}", temp_dir, filename);
                     match fs::write(path.clone(), bytes) {
                         Ok(_) => logic::set_update_file(path),
-                        Err(e) => eprintln!("Failed to write file: {}", e)
+                        Err(e) => log::error(&format!("Failed to write file: {}", e))
                     }
                 }
-                Err(e) => eprintln!("Failed to parse: {}", e)
+                Err(e) => log::error(&format!("Failed to parse: {}", e))
             }
         }
-        Err(e) => eprintln!("Failed to download: {}", e),
+        Err(e) => log::error(&format!("Failed to download: {}", e)),
     }
 }
 
@@ -99,9 +99,9 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                     let clean_tag_name = clean_version_number(&json.tag_name);
                     let clean_version = clean_version_number(env!("CARGO_PKG_VERSION"));
                     if clean_tag_name != clean_version {
-                        println!("An update is available.");
-                        println!("{}", json.name);
-                        println!("{}", json.body);
+                        log::info("An update is available.");
+                        log::info(&json.name);
+                        log::info(&json.body);
 
                         let correct_asset = detect_download_binary(&json.assets);
 
@@ -109,17 +109,17 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                             download_update(&correct_asset.browser_download_url);
                         } else if run_gui {
                             match gui::run_gui(json.body, json.name, correct_asset.browser_download_url.clone()) {
-                                Ok(_) => println!("User exited GUI"),
-                                Err(e) => println!("GUI failed: {}",e)
+                                Ok(_) => log::info("User exited GUI"),
+                                Err(e) => log::error(&format!("GUI failed: {}",e))
                             }
                         }
                     } else {
-                        println!("No updates are available.")
+                        log::info("No updates are available.")
                     }
                 }
-                Err(e) => eprintln!("Failed to parse json: {}", e)
+                Err(e) => log::error(&format!("Failed to parse json: {}", e))
             }
         }
-        Err(e) => eprintln!("Failed to check for update: {}", e),
+        Err(e) => log::error(&format!("Failed to check for update: {}", e)),
     }
 }

@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod log;
 mod gui;
 mod logic;
 mod updater;

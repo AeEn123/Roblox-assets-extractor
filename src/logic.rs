@@ -8,6 +8,8 @@ use unic_langid::LanguageIdentifier;
 use lazy_static::lazy_static;
 use serde_json::{json, Value};
 
+use crate::log;
+
 include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_resources and LANGUAGE_LIST
 
 // Define mutable static values
@@ -98,7 +100,7 @@ fn read_config_file() -> Value {
             match serde_json::from_slice(&bytes) {
                 Ok(v) => return v,
                 Err(e) => {
-                    eprintln!("Failed to parse config file! {}", e);
+                    log::warn(&format!("Failed to parse config file! {}", e));
                     return json!({}); // Blank config by default
                 }
             }
@@ -124,7 +126,7 @@ fn read_system_config() -> Value {
             match serde_json::from_slice(&bytes) {
                 Ok(v) => return v,
                 Err(e) => {
-                    eprintln!("Failed to parse config file! {}", e);
+                    log::warn(&format!("Failed to parse config file! {}", e));
                     return json!({}); // Blank config by default
                 }
             }
@@ -245,7 +247,7 @@ fn extract_bytes(header: String, bytes: Vec<u8>) -> Vec<u8> {
         // Return all the bytes after the found header index
         return bytes[index..].to_vec()
     }
-    println!("WARN: Failed to extract a file!");
+    log::warn("Failed to extract a file!");
     // Return bytes instead if this fails
     return bytes
 }
@@ -257,8 +259,8 @@ fn save_install_script() -> String {
 
     if temp_dir != "" {
         match fs::write(&path, include_str!("installer/installer.sh")) {
-            Ok(_) => println!("File written to {}", path),
-            Err(e) => println!("Failed to write to {}: {}", path, e)
+            Ok(_) => log::info(&format!("File written to {}", path)),
+            Err(e) => log::error(&format!("Failed to write to {}: {}", path, e))
         }
         
         return path;
@@ -274,8 +276,8 @@ fn save_install_script() -> String {
 
     if temp_dir != "" {
         match fs::write(&path, include_str!("installer/installer.bat")) {
-            Ok(_) => println!("File written to {}", path),
-            Err(e) => println!("Failed to write to {}: {}", path, e)
+            Ok(_) => log::info(&format!("File written to {}", path)),
+            Err(e) => log::error(&format!("Failed to write to {}: {}", path, e))
         }
         
         return path;
@@ -484,7 +486,7 @@ pub fn delete_all_directory_contents(dir: String) {
 
                                     // If it's an error, log it and show on GUI
                                     Err(e) => {
-                                        println!("ERROR: Failed to delete file: {}: {}", count, e);
+                                        log::error(&format!("Failed to delete file: {}: {}", count, e));
                                         update_status(get_message(&locale, "failed-deleting-file", Some(&args)));
                                     }
                                 }
@@ -495,7 +497,7 @@ pub fn delete_all_directory_contents(dir: String) {
     
                                     // If it's an error, log it and show on GUI
                                     Err(e) => {
-                                        println!("ERROR: Failed to delete file: {}: {}", count, e);
+                                        log::error(&format!("Failed to delete file: {}: {}", count, e));
                                         update_status(get_message(&locale, "failed-deleting-file", Some(&args)));
                                     }
                                 }    
@@ -516,11 +518,11 @@ pub fn delete_all_directory_contents(dir: String) {
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
                 update_status(get_message(&get_locale(None), "error-check-logs", None)); 
-                println!("ERROR: Directory detection failed.")
+                log::error("ERROR: Directory detection failed.")
             }
         }
         Err(e) => {
-            println!("WARN: '{}' {}", dir, e);
+            log::warn(&format!("WARN: '{}' {}", dir, e));
             update_status(get_message(&get_locale(None), "idling", None)); 
         }
     }
@@ -604,7 +606,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             if let Some(filename) = path.file_name() {
                                 match &mut fs::File::open(&path) {
                                     Err(why) => {
-                                        println!("ERROR: couldn't open {}: {}", display, why);
+                                        log::error(&format!("Couldn't open {}: {}", display, why));
                                         args.set("error", why.to_string());
                                         update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                     },
@@ -613,7 +615,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                         let mut buffer = vec![0; 2048];
                                         match file.read(&mut buffer) {
                                             Err(why) => {
-                                                println!("ERROR: couldn't open {}: {}", display, why);
+                                                log::error(&format!("Couldn't open {}: {}", display, why));
                                                 update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                             },
                                             Ok(bytes_read) => {
@@ -675,11 +677,11 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
             } else {
                 let mut status = STATUS.lock().unwrap();
                 *status = format!("Error: check logs for more details.");
-                println!("ERROR: Directory detection failed.")
+                log::error(&format!("ERROR: Directory detection failed."))
             }
         }
         Err(e) => {
-            println!("WARN: '{}' {}", dir, e);
+            log::warn(&format!("'{}' {}", dir, e));
             clear_file_list();
             update_file_list("No files to list.".to_owned(), cli_list_mode);
             update_status(get_message(&get_locale(None), "idling", None));
@@ -717,14 +719,14 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
 
                         match fs::write(new_destination.clone(), extracted_bytes) {
                             Ok(_) => (),
-                            Err(e) => eprintln!("Error writing file: {}", e),
+                            Err(e) => log::error(&format!("Error writing file: {}", e)),
                         }
 
                         if let Ok(sys_modified_time) = metadata.modified() {
                             let modified_time = filetime::FileTime::from_system_time(sys_modified_time);
                             match filetime::set_file_times(&new_destination, modified_time, modified_time) {
                                 Ok(_) => (),
-                                Err(e) => eprintln!("Failed to write file modification time {}", e)
+                                Err(e) => log::error(&format!("Failed to write file modification time {}", e))
                             }
                         }                        
 
@@ -734,7 +736,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                     }
                     Err(e) => {
                         update_status(get_message(&get_locale(None), "failed-opening-file", None));
-                        println!("ERROR: Failed to open file: {}", e);
+                        log::error(&format!("Failed to open file: {}", e));
                         return "None".to_string();
                     }
                 }
@@ -745,7 +747,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
                 args.set("file", &file);
 
                 update_status(get_message(&get_locale(None), "failed-not-file", Some(&args)));
-                println!("ERROR: '{}' Not a file.", file);
+                log::error(&format!(" '{}' Not a file.", file));
                 return "None".to_string();
             }
         }
@@ -754,7 +756,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
             let mut args = FluentArgs::new();
             args.set("error", e.to_string());
 
-            println!("Error extracting file: '{}' {}", file, e);
+            log::error(&format!("Error extracting file: '{}' {}", file, e));
             update_status(get_message(&get_locale(None), "idling", Some(&args)));
             return "None".to_string();
         }
@@ -765,7 +767,7 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
     // Create directory if it doesn't exist
     match fs::create_dir(destination.clone()) {
         Ok(_) => (),
-        Err(e) => eprintln!("Error creating directory: {}", e)
+        Err(e) => log::error(&format!("Error creating directory: {}", e))
     };
     // Bunch of error checking to check if it's a valid directory
     match fs::metadata(dir.clone()) {
@@ -832,11 +834,11 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
             // Error handling just so the program doesn't crash for seemingly no reason
             } else {
                 update_status(get_message(&get_locale(None), "error-check-logs", None)); 
-                println!("ERROR: Directory detection failed.")
+                log::error(&format!(" Directory detection failed."))
             }
         }
         Err(e) => {
-            println!("WARN: '{}' {}", dir, e);
+            log::warn(&format!("'{}' {}", dir, e));
             update_status(get_message(&get_locale(None), "idling", None));
         }
     }
@@ -943,7 +945,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
                 if let Some(filename) = path.file_name() {
                     match &mut fs::File::open(&path) {
                         Err(why) => {
-                            println!("ERROR: couldn't open file: {}", why);
+                            log::error(&format!("Couldn't open file: {}", why));
                             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                         },
                         Ok(file) => {
@@ -951,7 +953,7 @@ pub fn extract_all(destination: String, yield_for_thread: bool, use_alias: bool)
                             let mut buffer = vec![0; 2048];
                             match file.read(&mut buffer) {
                                 Err(why) => {
-                                    println!("ERROR: couldn't open file: {}", why);
+                                    log::error(&format!("Couldn't open file: {}", why));
                                     update_status(get_message(&locale, "failed-opening-file", Some(&args)));
                                 },
                                 Ok(bytes_read) => {
@@ -1043,7 +1045,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file '{}': {}", asset_a_path, e);
+            log::error(&format!("Error opening file '{}': {}", asset_a_path, e));
             return
         }
     };
@@ -1057,7 +1059,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file '{}': {}", asset_b_path, e);
+            log::error(&format!("Error opening file '{}': {}", asset_b_path, e));
             return
         }
     };
@@ -1069,7 +1071,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file '{}': {}", asset_a_path, e);
+            log::error(&format!("Error opening file '{}': {}", asset_a_path, e));
         }
     };
 
@@ -1080,7 +1082,7 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             args.set("error", e.to_string());
 
             update_status(get_message(&locale, "failed-opening-file", Some(&args)));
-            println!("Error opening file '{}': {}", asset_b_path, e);
+            log::error(&format!("Error opening file '{}': {}", asset_b_path, e));
         }
     };
 
@@ -1180,11 +1182,11 @@ pub fn set_config(value: Value) {
             Ok(data) => {
                 let result = fs::write(CONFIG_FILE.lock().unwrap().clone(), data);
                 if result.is_err() {
-                    println!("Failed to write config file: {}", result.unwrap_err())
+                    log::error(&format!("Failed to write config file: {}", result.unwrap_err()))
                 }
             },
             Err(e) => {
-                println!("Failed to write config file: {}", e);
+                log::error(&format!("Failed to write config file: {}", e));
             }
         }
         
@@ -1252,12 +1254,12 @@ pub fn set_update_file(file: String) {
 
 pub fn run_install_script(run_afterwards: bool) -> bool {
     if let Some(update_file) = {UPDATE_FILE.lock().unwrap().clone()} {
-        println!("Installing from {}", update_file);
+        log::info(&format!("Installing from {}", update_file));
         if get_system_config_bool("prefer-installers").unwrap_or(false) {
             // Just run the installer
             match open::that(update_file) {
                 Ok(_) => (),
-                Err(e) => eprintln!("Installer failed to launch {} ", e)
+                Err(e) => log::error(&format!("Installer failed to launch {} ", e))
             }
             std::process::exit(0);
 
@@ -1303,7 +1305,7 @@ pub fn clean_up() {
     let temp_dir = get_temp_dir(false);
     // Just in case if it somehow resolves to "/"
     if temp_dir != "" && temp_dir != "/" {
-        println!("Cleaning up {}", temp_dir);
+        log::info(&format!("Cleaning up {}", temp_dir));
         let _ = fs::remove_dir_all(temp_dir); // Not too important, ignore value, and the last thing the program will run
     }
 }
