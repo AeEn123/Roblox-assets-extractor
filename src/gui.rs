@@ -383,7 +383,25 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let logs = log::get_logs();
             let lines = logs.lines();
-            egui::ScrollArea::vertical().show(ui, |ui| {
+
+
+            ui.horizontal(|ui| {
+                if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
+                    ui.output_mut(|o| o.copied_text = logs.clone());
+                }
+                if ui.button(logic::get_message(&self.locale, "button-export-logs", None)).clicked() {
+                    if let Some(path) = FileDialog::new()
+                        .show_save_single_file()
+                        .unwrap()
+                    {
+                        if let Err(e) = std::fs::write(path, logs.clone()) {
+                            log::error(&format!("Failed to save logs: {}", e));
+                        }
+                    }
+                }
+            });
+
+            egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
                 for line in lines {
                     let colour = if line.contains("WARN") {
                         egui::Color32::from_rgb(150,150,0)
@@ -394,26 +412,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     };
                     ui.colored_label(colour, line);
                 }
-            });
-
-            egui::TopBottomPanel::bottom("log-actions").show_inside(ui, |ui| {
-                ui.horizontal(|ui| {
-                    if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
-                        ui.output_mut(|o| o.copied_text = logs.clone());
-                    }
-                    if ui.button(logic::get_message(&self.locale, "button-export-logs", None)).clicked() {
-                        if let Some(path) = FileDialog::new()
-                            .show_save_single_file()
-                            .unwrap()
-                        {
-                            if let Err(e) = std::fs::write(path, logs.clone()) {
-                                log::error(&format!("Failed to save logs: {}", e));
-                            }
-                        }
-                    }
-                });
-
-
             });
 
         } else {
