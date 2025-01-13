@@ -12,6 +12,8 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
+button-open = Open <Return> # TODO: Translate
+button-extract-file = Extract <Ctrl+E> # TODO: Translate
 button-copy = Copy <Ctrl+D> # TODO: Translate
 button-copy-logs = Copy log to clipboard # TODO: Translate
 button-export-logs = Export log to file # TODO: Translate

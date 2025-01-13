@@ -28,6 +28,8 @@ button-swap = Swap assets <F4>
 button-copy-logs = Copy log to clipboard
 button-export-logs = Export log to file
 button-copy = Copy <Ctrl+D>
+button-open = Open <Return>
+button-extract-file = Extract <Ctrl+E>
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation

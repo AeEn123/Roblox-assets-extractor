@@ -77,6 +77,7 @@ fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, c
     }
 }
 
+
 fn delete_this_directory(cache_directory: &str, locale: &FluentBundle<Arc<FluentResource>>) {
     // Confirmation dialog
     let yes = MessageDialog::new()
@@ -139,7 +140,34 @@ fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, local
     }
 }
 
-fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, focus_search_box: &mut bool, copying: &mut bool) {
+fn extract_file_button(name: &str, cache_directory: &str, tab: &str) {
+    let alias = logic::get_asset_alias(name);
+    let origin = format!("{}/{}", cache_directory, name);
+    if let Some(destination) = native_dialog::FileDialog::new().set_filename(&alias).show_save_single_file().unwrap() {
+        logic::extract_file(origin, tab.into(), destination.to_string_lossy().to_string(), false);
+    }
+}
+
+fn asset_buttons(
+    ui: &mut egui::Ui,
+    locale: &FluentBundle<Arc<FluentResource>>,
+    searching: &mut bool, renaming: &mut bool,
+    asset_context_menu_open: &mut Option<usize>,
+    swapping: &mut bool, swapping_asset_a: &mut Option<String>,
+    cache_directory: &str,
+    tab: &str,
+    focus_search_box: &mut bool,
+    copying: &mut bool,
+    name: Option<&str>
+) {
+    if let Some(name) = name {
+        if ui.button(logic::get_message(locale, "button-open", None)).clicked() {
+            double_click(cache_directory.to_string(), name.to_string(), tab.to_string(), swapping, copying, swapping_asset_a);
+        }
+        if ui.button(logic::get_message(locale, "button-extract-file", None)).clicked() {
+            extract_file_button(name, cache_directory, tab);
+        }
+    }
     if ui.button(logic::get_message(locale, "button-search", None)).clicked() {
         *searching = !*searching;
         *focus_search_box = true;
@@ -167,10 +195,23 @@ fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, 
     if ui.button(logic::get_message(locale, "button-swap", None)).clicked() {
         toggle_swap(swapping,swapping_asset_a, locale);
         *asset_context_menu_open = None;
+
+        if let Some(n) = name {
+            *swapping_asset_a = Some(n.to_string());
+        } else {
+            *swapping_asset_a = None;
+        }
+        
     }
     if ui.button(logic::get_message(locale, "button-copy", None)).clicked() {
         toggle_swap(copying,swapping_asset_a, locale);
         *asset_context_menu_open = None;
+
+        if let Some(n) = name {
+            *swapping_asset_a = Some(n.to_string());
+        } else {
+            *swapping_asset_a = None;
+        }
     }
 }
 
@@ -247,7 +288,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 toggle_swap(self.swapping, self.swapping_asset_a, self.locale);
             }
             if ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::D)) {
-                // Ctrl+C (Copy)
+                // Ctrl+D (Copy)
                 toggle_swap(self.copying, self.swapping_asset_a, self.locale);
             }
 
@@ -258,9 +299,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 ui.push_id("Topbar buttons", |ui| {
                     egui::ScrollArea::horizontal().show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            asset_buttons(ui, self.locale, self.searching, self.renaming,
-                                self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
-                                &cache_directory, &tab, &mut focus_search_box, &mut self.copying);
+                            asset_buttons(
+                                ui,
+                                self.locale,
+                                self.searching,
+                                self.renaming,
+                                self.asset_context_menu_open,
+                                self.swapping,
+                                self.swapping_asset_a,
+                                &cache_directory,
+                                &tab,
+                                &mut focus_search_box,
+                                &mut self.copying,
+                                None);
                         });
                     })
                 });
@@ -301,6 +352,16 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         // Get file name after getting the selected value
                         if let Some(file_name) = file_list.get(selected) {
                             double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+                        }                   
+                    }
+                }
+
+                if ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::E)) {
+                    // Ctrl+E (Extract)
+                    if let Some(selected) = *self.selected {
+                        // Get file name after getting the selected value
+                        if let Some(file_name) = file_list.get(selected) {
+                            extract_file_button(&file_name, &cache_directory, tab);
                         }                   
                     }
                 }
@@ -421,15 +482,24 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             if response.secondary_clicked() {
                                 *self.selected = Some(i);
                                 *self.asset_context_menu_open = Some(i);
-                                *self.swapping_asset_a = Some(file_name.to_string());
                             }
 
                             if let Some(asset) = self.asset_context_menu_open {
                                 if *asset == i {
                                     response.context_menu(|ui| {
-                                        asset_buttons(ui, self.locale, self.searching, self.renaming,
-                                            self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
-                                            &cache_directory, &tab, &mut focus_search_box, &mut self.copying);
+                                        asset_buttons(
+                                            ui,
+                                            self.locale,
+                                            self.searching,
+                                            self.renaming,
+                                            self.asset_context_menu_open,
+                                            self.swapping,
+                                            self.swapping_asset_a,
+                                            &cache_directory,
+                                            &tab,
+                                            &mut focus_search_box,
+                                            &mut self.copying,
+                                            Some(&file_name));
                                     });
                                 }
 
