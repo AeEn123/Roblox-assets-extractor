@@ -1085,7 +1085,46 @@ pub fn swap_assets(dir: &str, asset_a: &str, asset_b: &str) {
             log::error(&format!("Error opening file '{}': {}", asset_b_path, e));
         }
     };
+    let mut args= FluentArgs::new();
+    args.set("item_a", asset_a);
+    args.set("item_b", asset_b);
+    update_status(get_message(&locale, "swapped", Some(&args)));
+}
 
+pub fn copy_assets(dir: &str, asset_a: &str, asset_b: &str) {
+    let asset_a_path = format!("{}/{}", dir, asset_a);
+    let asset_b_path = format!("{}/{}", dir, asset_b);
+    let locale = get_locale(None);
+
+    let asset_a_bytes = match fs::read(&asset_a_path) {
+        Ok(bytes) => {
+            bytes
+        },
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            log::error(&format!("Error opening file '{}': {}", asset_a_path, e));
+            return
+        }
+    };
+
+    match fs::write(&asset_b_path, asset_a_bytes) {
+        Ok(_) => (),
+        Err(e) => {
+            let mut args= FluentArgs::new();
+            args.set("error", e.to_string());
+
+            update_status(get_message(&locale, "failed-opening-file", Some(&args)));
+            log::error(&format!("Error opening file '{}': {}", asset_b_path, e));
+        }
+    };
+    
+    let mut args= FluentArgs::new();
+    args.set("item_a", asset_a);
+    args.set("item_b", asset_b);
+    update_status(get_message(&locale, "copied", Some(&args)));
 }
 
 pub fn filter_file_list(query: String) {

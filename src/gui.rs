@@ -47,10 +47,25 @@ struct TabViewer<'a> {
     swapping_asset_a: &'a mut Option<String>,
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: &'a mut Option<usize>,
+    copying: &'a mut bool,
 }
 
-fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, swapping_asset_a: &mut Option<String>) {
-    if !*swapping {
+fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, copying: &mut bool, swapping_asset_a: &mut Option<String>) {
+    if *copying {
+        if swapping_asset_a.is_none() {
+            *swapping_asset_a = Some(value);
+        } else {
+            logic::copy_assets(&dir, &swapping_asset_a.as_ref().unwrap(), &value);
+        }
+    } else if *swapping {
+        if swapping_asset_a.is_none() {
+            *swapping_asset_a = Some(value);
+        } else {
+            logic::swap_assets(&dir, &swapping_asset_a.as_ref().unwrap(), &value);
+            *swapping_asset_a = None;
+            *swapping = false
+        }
+    } else {
         let temp_dir = logic::get_temp_dir(true);
         let alias = logic::get_asset_alias(&value);
         let destination = format!("{}/{}", temp_dir, alias); // Join both paths
@@ -58,14 +73,6 @@ fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, s
         let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
         if new_destination != "None" {
             let _ = open::that(new_destination); // Open when finished
-        }
-    } else {
-        if swapping_asset_a.is_none() {
-            *swapping_asset_a = Some(value);
-        } else {
-            logic::swap_assets(&dir, &swapping_asset_a.as_ref().unwrap(), &value);
-            *swapping_asset_a = None;
-            *swapping = false
         }
     }
 }
@@ -130,10 +137,9 @@ fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, local
         *swapping = !*swapping;
 
     }
-
 }
 
-fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, file_list: &Vec<String>, focus_search_box: &mut bool) {
+fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, file_list: &Vec<String>, focus_search_box: &mut bool, copying: &mut bool) {
     if ui.button(logic::get_message(locale, "button-search", None)).clicked() {
         *searching = !*searching;
         *focus_search_box = true;
@@ -158,9 +164,12 @@ fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, 
         logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
         *asset_context_menu_open = None;
     }
-
     if ui.button(logic::get_message(locale, "button-swap", None)).clicked() {
         toggle_swap(swapping,swapping_asset_a, locale);
+        *asset_context_menu_open = None;
+    }
+    if ui.button(logic::get_message(locale, "button-copy", None)).clicked() {
+        toggle_swap(copying,swapping_asset_a, locale);
         *asset_context_menu_open = None;
     }
 }
@@ -237,15 +246,23 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             if ui.input(|i| i.key_pressed(egui::Key::F4)) {
                 toggle_swap(self.swapping, self.swapping_asset_a, self.locale);
             }
+            if ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::D)) {
+                // Ctrl+C (Copy)
+                toggle_swap(self.copying, self.swapping_asset_a, self.locale);
+            }
 
             // GUI logic below here
 
             // Top UI buttons
             if logic::get_config_bool("use_topbar_buttons").unwrap_or(true) {
-                ui.horizontal(|ui| {
-                    asset_buttons(ui, self.locale, self.searching, self.renaming,
-                        self.asset_context_menu_open, self.swapping,
-                        self.swapping_asset_a, &cache_directory, &tab, &file_list, &mut focus_search_box);
+                ui.push_id("Topbar buttons", |ui| {
+                    egui::ScrollArea::horizontal().show(ui, |ui| {
+                        ui.horizontal(|ui| {
+                            asset_buttons(ui, self.locale, self.searching, self.renaming,
+                                self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
+                                &cache_directory, &tab, &file_list, &mut focus_search_box, &mut self.copying);
+                        });
+                    })
                 });
             }
             
@@ -283,7 +300,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     if let Some(selected) = *self.selected {
                         // Get file name after getting the selected value
                         if let Some(file_name) = file_list.get(selected) {
-                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
+                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
                         }                   
                     }
                 }
@@ -301,6 +318,16 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     let mut args = fluent_bundle::FluentArgs::new();
                     args.set("asset", logic::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
                     ui.heading(logic::get_message(self.locale, "swap-with", Some(&args)));
+                }
+            }
+
+            if *self.copying {
+                if self.swapping_asset_a.as_ref().is_none() {
+                    ui.heading(logic::get_message(self.locale, "copy-choose-file", None));
+                } else {
+                    let mut args = fluent_bundle::FluentArgs::new();
+                    args.set("asset", logic::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
+                    ui.heading(logic::get_message(self.locale, "overwrite-with", Some(&args)));
                 }
             }
 
@@ -401,15 +428,15 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                 if *asset == i {
                                     response.context_menu(|ui| {
                                         asset_buttons(ui, self.locale, self.searching, self.renaming,
-                                            self.asset_context_menu_open, self.swapping,
-                                            self.swapping_asset_a, &cache_directory, &tab, &file_list, &mut focus_search_box);
+                                            self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
+                                            &cache_directory, &tab, &file_list, &mut focus_search_box, &mut self.copying);
                                     });
                                 }
 
                             }
 
                             if response.double_clicked() {
-                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.swapping_asset_a);
+                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
                             }
 
                             // Handle keyboard scrolling
@@ -544,6 +571,7 @@ struct MyApp {
     swapping_asset_a: Option<String>,
     locale: FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: Option<usize>,
+    copying: bool,
 }
 
 impl Default for MyApp {
@@ -571,6 +599,7 @@ impl Default for MyApp {
             swapping_asset_a: None,
             locale: logic::get_locale(None),
             asset_context_menu_open: None,
+            copying: false,
         }
     }
 }
@@ -671,6 +700,7 @@ impl eframe::App for MyApp {
                 current_tab: &mut self.current_tab,
                 locale: &mut self.locale,
                 asset_context_menu_open: &mut self.asset_context_menu_open,
+                copying: &mut self.copying,
             });
         
         {

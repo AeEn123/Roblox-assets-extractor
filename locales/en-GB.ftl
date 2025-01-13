@@ -27,6 +27,7 @@ button-search = Search <Ctrl+F>
 button-swap = Swap assets <F4>
 button-copy-logs = Copy log to clipboard
 button-export-logs = Export log to file
+button-copy = Copy <Ctrl+D>
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation
@@ -63,6 +64,7 @@ behavior = Behavior
 check-for-updates = Check for updates
 automatically-install-updates = Automatically install updates
 use-alias = Export your renamed filenames
+use-topbar-buttons = Enable toolbar
 
 
 # Descriptions
@@ -73,6 +75,8 @@ use-alias-description = Instead of exporting the raw file name for the asset, ch
 swap-choose-file = Double click a file to swap
 swap-with = Double click a file to swap with "{ $asset }"
 logs-description = The logs show how the program is performing, if any errors happen, they will show up here
+copy-choose-file = Double click a file to copy
+overwrite-with = Double click a file to overwrite with "{ $asset }"
 
 
 # Statuses
@@ -83,6 +87,8 @@ extracting-files = Extracting files ({ $item }/{ $total })
 filtering-files = Filtering files ({ $item }/{ $total })
 all-extracted = All files extracted
 stage = Stage { $stage }/{ $max }: { $status }
+swapped = Swapped { $item_a } with { $item_b }
+copied = Overwritten { $item_b } with { $item_a }
 
 # Error Statuses
 failed-deleting-file = ERROR: Failed to delete ({ $item }/{ $total })
