@@ -46,6 +46,7 @@ struct TabViewer<'a> {
     swapping: &'a mut bool,
     swapping_asset_a: &'a mut Option<String>,
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
+    asset_context_menu_open: &'a mut Option<usize>,
 }
 
 fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, swapping_asset_a: &mut Option<String>) {
@@ -67,7 +68,101 @@ fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, s
             *swapping = false
         }
     }
+}
 
+fn delete_this_directory(cache_directory: &str, locale: &FluentBundle<Arc<FluentResource>>) {
+    // Confirmation dialog
+    let yes = MessageDialog::new()
+    .set_type(MessageType::Info)
+    .set_title(&logic::get_message(locale, "confirmation-delete-confirmation-title", None))
+    .set_text(&logic::get_message(locale, "confirmation-delete-confirmation-description", None))
+    .show_confirm()
+    .unwrap();
+
+    if yes {
+        logic::delete_all_directory_contents(cache_directory.to_owned());
+    }
+}
+
+fn extract_all_of_type(cache_directory: &str, mode: &str, file_list: &Vec<String>, locale: &FluentBundle<Arc<FluentResource>>) {
+    let mut no = logic::get_list_task_running();
+
+    // Confirmation dialog, the program is still listing files
+    if no {
+        // NOT result, will become false if user clicks yes
+        no = !MessageDialog::new()
+        .set_type(MessageType::Info)
+        .set_title(&logic::get_message(locale, "confirmation-filter-confirmation-title", None))
+        .set_text(&logic::get_message(locale, "confirmation-filter-confirmation-description", None))
+        .show_confirm()
+        .unwrap();
+    }
+
+    // The user either agreed or the program is not listing files
+    if !no {
+        let option_path = FileDialog::new()
+        .show_open_single_dir()
+        .unwrap();
+
+        // If the user provides a directory, the program will extract the assets to that directory
+        if let Some(path) = option_path {
+            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), mode.to_string(), file_list.clone(), false,logic::get_config_bool("use_alias").unwrap_or(false));
+        }
+    }
+}
+fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, locale: &FluentBundle<Arc<FluentResource>>) {
+    let mut warning_acknoledged = logic::get_config_bool("ban-warning-ack").unwrap_or(false);
+
+    if !warning_acknoledged {
+        warning_acknoledged = MessageDialog::new()
+        .set_type(MessageType::Info)
+        .set_title(&logic::get_message(locale, "confirmation-ban-warning-title", None))
+        .set_text(&logic::get_message(locale, "confirmation-ban-warning-description", None))
+        .show_confirm()
+        .unwrap();
+    }
+
+    if warning_acknoledged {
+        logic::set_config_value("ban-warning-ack", warning_acknoledged.into());
+        if *swapping {
+            *swapping_asset_a = None;
+        }
+        *swapping = !*swapping;
+
+    }
+
+}
+
+fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, file_list: &Vec<String>, focus_search_box: &mut bool) {
+    if ui.button(logic::get_message(locale, "button-search", None)).clicked() {
+        *searching = !*searching;
+        *focus_search_box = true;
+        *asset_context_menu_open = None;
+    }
+    
+    if ui.button(logic::get_message(locale, "button-rename", None)).clicked() {
+        // Rename button
+        *renaming = !*renaming;
+        *asset_context_menu_open = None;
+    }
+
+    if ui.button(logic::get_message(locale, "button-delete-this-dir", None)).clicked() {
+        delete_this_directory(&cache_directory, locale);
+        *asset_context_menu_open = None;
+    }
+    if ui.button(logic::get_message(locale, "button-extract-type", None)).clicked() {
+        extract_all_of_type(&cache_directory, &tab, &file_list, locale);
+        *asset_context_menu_open = None;
+    }
+    if ui.button(logic::get_message(locale, "button-refresh", None)).clicked() {
+        logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
+        *asset_context_menu_open = None;
+    }
+
+    if ui.button(logic::get_message(locale, "button-swap", None)).clicked() {
+        toggle_swap(swapping,swapping_asset_a, locale);
+        *asset_context_menu_open = None;
+    }
 }
 
 fn add_dependency_credit(dependency: [&str;2], ui: &mut egui::Ui, sponsor_message: &str) {
@@ -119,80 +214,40 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             let mut focus_search_box = false; // Focus the search box toggle for this frame
 
+            // Handle key shortcuts here
+            if ui.input(|i| i.key_pressed(egui::Key::F2)) {
+                // Rename hotkey
+                *self.renaming = !*self.renaming;
+            }
+            if ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::F)) {
+                // Ctrl+F (Search)
+                *self.searching = !*self.searching;
+                focus_search_box = true;
+            }
+            if ui.input(|i| i.key_pressed(egui::Key::Delete)) && !*self.renaming {
+                // del key used for editing, don't allow during editing
+                delete_this_directory(&cache_directory, self.locale);
+            }
+            if ui.input(|i| i.key_pressed(egui::Key::F3)) {
+                extract_all_of_type(&cache_directory, &tab, &file_list, self.locale);
+            }
+            if ui.input(|i| i.key_pressed(egui::Key::F5)) {
+                logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
+            }
+            if ui.input(|i| i.key_pressed(egui::Key::F4)) {
+                toggle_swap(self.swapping, self.swapping_asset_a, self.locale);
+            }
+
             // GUI logic below here
-            
+
             // Top UI buttons
-            ui.horizontal(|ui| {
-                if ui.button(logic::get_message(self.locale, "button-search", None)).clicked() || ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::F)) {
-                    *self.searching = !*self.searching;
-                    focus_search_box = true;          
-                }
-                if ui.button(logic::get_message(self.locale, "button-rename", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F2)) {
-                    *self.renaming = !*self.renaming;               
-                }
-                if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::Delete)) && !*self.renaming { // del key used for editing, don't allow during editing
-                    // Confirmation dialog
-                    let yes = MessageDialog::new()
-                    .set_type(MessageType::Info)
-                    .set_title(&logic::get_message(self.locale, "confirmation-delete-confirmation-title", None))
-                    .set_text(&logic::get_message(self.locale, "confirmation-delete-confirmation-description", None))
-                    .show_confirm()
-                    .unwrap();
-                
-                    if yes {
-                        logic::delete_all_directory_contents(cache_directory.to_owned());
-                    }                    
-                }
-                if ui.button(logic::get_message(self.locale, "button-extract-type", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                    let mut no = logic::get_list_task_running();
-
-                    // Confirmation dialog, the program is still listing files
-                    if no {
-                        // NOT result, will become false if user clicks yes
-                        no = !MessageDialog::new()
-                        .set_type(MessageType::Info)
-                        .set_title(&logic::get_message(self.locale, "confirmation-filter-confirmation-title", None))
-                        .set_text(&logic::get_message(self.locale, "confirmation-filter-confirmation-description", None))
-                        .show_confirm()
-                        .unwrap();
-                    }
-
-                    // The user either agreed or the program is not listing files
-                    if !no {
-                        let option_path = FileDialog::new()
-                        .show_open_single_dir()
-                        .unwrap();
-
-                        // If the user provides a directory, the program will extract the assets to that directory
-                        if let Some(path) = option_path {
-                            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), tab.to_string(), file_list.clone(), false,logic::get_config_bool("use_alias").unwrap_or(false));
-                        }
-                    }
-                }
-                if ui.button(logic::get_message(self.locale, "button-refresh", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F5)) {
-                    logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
-                }
-
-                if ui.button(logic::get_message(self.locale, "button-swap", None)).clicked() || ui.input(|i| i.key_pressed(egui::Key::F4)) {
-                    let mut warning_acknoledged = logic::get_config_bool("ban-warning-ack").unwrap_or(false);
-
-                    if !warning_acknoledged {
-                        warning_acknoledged = MessageDialog::new()
-                        .set_type(MessageType::Info)
-                        .set_title(&logic::get_message(self.locale, "confirmation-ban-warning-title", None))
-                        .set_text(&logic::get_message(self.locale, "confirmation-ban-warning-description", None))
-                        .show_confirm()
-                        .unwrap();
-                    }
-
-                    if warning_acknoledged {
-                        logic::set_config_value("ban-warning-ack", warning_acknoledged.into());
-                        *self.swapping = !*self.swapping;
-                    }
-
-                }
-            });
-
+            if logic::get_config_bool("use_topbar_buttons").unwrap_or(true) {
+                ui.horizontal(|ui| {
+                    asset_buttons(ui, self.locale, self.searching, self.renaming,
+                        self.asset_context_menu_open, self.swapping,
+                        self.swapping_asset_a, &cache_directory, &tab, &file_list, &mut focus_search_box);
+                });
+            }
             
             let mut scroll_to: Option<usize> = None; // This is reset every frame, so it doesn't constantly scroll to the same label
             let mut none_selected: bool = false; // Used to scroll to the first value shown when none is selected
@@ -332,8 +387,25 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             ui.painter().rect_filled(rect, 0.0, background_colour);
 
                             // Handle the click/double click
-                            if response.clicked() || response.secondary_clicked() && !*self.renaming {
+                            if response.clicked() && !*self.renaming {
                                 *self.selected = Some(i);
+                            }
+
+                            if response.secondary_clicked() {
+                                *self.selected = Some(i);
+                                *self.asset_context_menu_open = Some(i);
+                                *self.swapping_asset_a = Some(file_name.to_string());
+                            }
+
+                            if let Some(asset) = self.asset_context_menu_open {
+                                if *asset == i {
+                                    response.context_menu(|ui| {
+                                        asset_buttons(ui, self.locale, self.searching, self.renaming,
+                                            self.asset_context_menu_open, self.swapping,
+                                            self.swapping_asset_a, &cache_directory, &tab, &file_list, &mut focus_search_box);
+                                    });
+                                }
+
                             }
 
                             if response.double_clicked() {
@@ -470,7 +542,8 @@ struct MyApp {
     search_query: String,
     swapping: bool,
     swapping_asset_a: Option<String>,
-    locale: FluentBundle<Arc<FluentResource>>
+    locale: FluentBundle<Arc<FluentResource>>,
+    asset_context_menu_open: Option<usize>,
 }
 
 impl Default for MyApp {
@@ -497,6 +570,7 @@ impl Default for MyApp {
             swapping: false,
             swapping_asset_a: None,
             locale: logic::get_locale(None),
+            asset_context_menu_open: None,
         }
     }
 }
@@ -594,6 +668,7 @@ impl eframe::App for MyApp {
                 swapping_asset_a: &mut self.swapping_asset_a,
                 current_tab: &mut self.current_tab,
                 locale: &mut self.locale,
+                asset_context_menu_open: &mut self.asset_context_menu_open,
             });
         
         {
