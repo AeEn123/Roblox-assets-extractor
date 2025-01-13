@@ -113,3 +113,4 @@ button-export-logs = Export log to file # TODO: Translate
 button-copy-logs = Copy log to clipboard # TODO: Translate
 button-copy = Copy <Ctrl+D> # TODO: Translate
 overwrite-with = Double click a file to overwrite with "{ $asset }" # TODO: Translate
+refresh-before-extract = Refresh file list before extracting # TODO: Translate

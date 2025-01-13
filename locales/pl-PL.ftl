@@ -61,6 +61,7 @@ dependencies = Zależności
 behavior = Zachowanie
 
 # Checkboxes
+refresh-before-extract = Refresh file list before extracting # TODO: Translate
 use-topbar-buttons = Enable toolbar # TODO: Translate
 check-for-updates = Poszukaj aktualizacji
 automatically-install-updates = Automatycznie instaluj aktualizacje
