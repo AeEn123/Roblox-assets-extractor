@@ -65,6 +65,7 @@ check-for-updates = Check for updates
 automatically-install-updates = Automatically install updates
 use-alias = Export your renamed filenames
 use-topbar-buttons = Enable toolbar
+refresh-before-extract = Refresh file list before extracting
 
 
 # Descriptions
