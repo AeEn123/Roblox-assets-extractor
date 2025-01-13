@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.39"
 clap = { version = "4.5.26", features = ["derive"] }
-eframe = "0.30.0"
+eframe = { features = ["default_fonts", "x11", "glow", "web_screen_reader"], default-features = false, version = "0.30.0" }
 egui = "0.30"
 egui_commonmark = "0.19.0"
 egui_dock = "0.15.0"
