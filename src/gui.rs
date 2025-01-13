@@ -608,7 +608,7 @@ impl MyApp {
             Some(font_path) => {
                 match std::fs::read(font_path) {
                     Ok(bytes) => {
-                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes));
+                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes).into());
                         font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
                         font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
                         // 3. Configure context with modified `FontDefinitions`.
@@ -658,6 +658,8 @@ impl eframe::App for MyApp {
             .style(Style::from_egui(ctx.style().as_ref()))
             .show_close_buttons(false)
             .draggable_tabs(false)
+            .show_leaf_close_all_buttons(false)
+            .show_leaf_collapse_buttons(false)
             .show(ctx, &mut TabViewer { 
                 // Pass selected as a mutable referance
                 selected: &mut self.selected,

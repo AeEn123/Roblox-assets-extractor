@@ -45,7 +45,7 @@ impl MyApp {
             Some(font_path) => {
                 match std::fs::read(font_path) {
                     Ok(bytes) => {
-                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes));
+                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes).into());
                         font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
                         font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
                         // 3. Configure context with modified `FontDefinitions`.

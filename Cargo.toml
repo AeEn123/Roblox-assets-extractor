@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.39"
 clap = { version = "4.5.26", features = ["derive"] }
-eframe = { features = ["glow"], default-features = false, version = "0.29" }
-egui = "0.29"
-egui_commonmark = "0.18.0"
-egui_dock = "0.14.0"
+eframe = "0.30.0"
+egui = "0.30"
+egui_commonmark = "0.19.0"
+egui_dock = "0.15.0"
 filetime = "0.2.25"
 fluent-bundle = { version = "0.15.3", default-features = false }
 lazy_static = "1.5.0"
