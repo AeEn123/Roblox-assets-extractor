@@ -2,6 +2,7 @@
 language-name = Polski
 
 # Tabs
+logs = Logs # TODO: Translate
 music = Muzyka
 sounds = Dzwięki
 images = Obrazy
@@ -11,6 +12,9 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
+button-copy = Copy <Ctrl+D> # TODO: Translate
+button-copy-logs = Copy log to clipboard # TODO: Translate
+button-export-logs = Export log to file # TODO: Translate
 button-swap = Zamień zasoby <F4>
 button-search = Szukaj <CTRL+F>
 button-delete-this-dir = Usuń ten katalog <Del>
@@ -57,12 +61,16 @@ dependencies = Zależności
 behavior = Zachowanie
 
 # Checkboxes
+use-topbar-buttons = Enable toolbar # TODO: Translate
 check-for-updates = Poszukaj aktualizacji
 automatically-install-updates = Automatycznie instaluj aktualizacje
 use-alias = Eksportuj nazwy alternatywne dla plików
 
 
 # Descriptions
+overwrite-with = Double click a file to overwrite with "{ $asset }" # TODO: Translate
+copy-choose-file = Double click a file to copy # TODO: Translate
+logs-description = The logs show how the program is performing, if any errors happen, they will show up here # TODO: Translate
 swap-with = Podwójnie nacisnij plik aby zamienić zasoby z "{ $asset }"
 swap-choose-file = Podwójnie naciśnij plik do zamienienia
 clear-cache-description = Jeżeli wyświetlanie lub wyodrębnianie plików zajmuje za długo, możesz wyczyścić pamieć podręczną gry Roblox. Usunie to wszystkie pliki z pamięci podręcznej i gra Roblox wygeneruje pliki, kiedy są wymagane.
@@ -71,6 +79,8 @@ custom-cache-dir-description = Jeżeli potrzebujesz dostęp do pamięci potrzebn
 use-alias-description = Zamiast eksportowania zwykłej nazwy dla zasobu, zaznacznie tego wyeksportuje zasob z inną nazwą pliku. Możesz zrobić to w tej aplikacji.
 
 # Statuses
+swapped = Swapped { $item_a } with { $item_b } # TODO: Translate
+copied = Overwritten { $item_b } with { $item_a } # TODO: Translate
 idling = Czuwanie
 deleting-files = Usuwanie plików ({ $item }/{ $total })
 reading-files = Czytanie plików ({ $item }/{ $total })

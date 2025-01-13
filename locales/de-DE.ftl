@@ -3,6 +3,7 @@
 language-name = Deutsch
 
 # Tabs
+logs = Logs # TODO: Translate
 music = Musik
 sounds = Töne
 images = Bilder
@@ -102,3 +103,13 @@ swap-with = Doppelklicke eine Datei um sie mit "{ $asset }" auszutauschen
 
 support-sponsor = ♥ Sponsor
 support-project-donate = ♥ Spenden
+
+logs-description = The logs show how the program is performing, if any errors happen, they will show up here # TODO: Translate
+copied = Overwritten { $item_b } with { $item_a } # TODO: Translate
+use-topbar-buttons = Enable toolbar # TODO: Translate
+copy-choose-file = Double click a file to copy # TODO: Translate
+swapped = Swapped { $item_a } with { $item_b } # TODO: Translate
+button-export-logs = Export log to file # TODO: Translate
+button-copy-logs = Copy log to clipboard # TODO: Translate
+button-copy = Copy <Ctrl+D> # TODO: Translate
+overwrite-with = Double click a file to overwrite with "{ $asset }" # TODO: Translate
