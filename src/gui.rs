@@ -91,7 +91,7 @@ fn delete_this_directory(cache_directory: &str, locale: &FluentBundle<Arc<Fluent
     }
 }
 
-fn extract_all_of_type(cache_directory: &str, mode: &str, file_list: &Vec<String>, locale: &FluentBundle<Arc<FluentResource>>) {
+fn extract_all_of_type(cache_directory: &str, mode: &str, locale: &FluentBundle<Arc<FluentResource>>) {
     let mut no = logic::get_list_task_running();
 
     // Confirmation dialog, the program is still listing files
@@ -113,7 +113,7 @@ fn extract_all_of_type(cache_directory: &str, mode: &str, file_list: &Vec<String
 
         // If the user provides a directory, the program will extract the assets to that directory
         if let Some(path) = option_path {
-            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), mode.to_string(), file_list.clone(), false,logic::get_config_bool("use_alias").unwrap_or(false));
+            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), mode.to_string(), false,logic::get_config_bool("use_alias").unwrap_or(false));
         }
     }
 }
@@ -139,7 +139,7 @@ fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, local
     }
 }
 
-fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, file_list: &Vec<String>, focus_search_box: &mut bool, copying: &mut bool) {
+fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, searching: &mut bool, renaming: &mut bool, asset_context_menu_open: &mut Option<usize>, swapping: &mut bool, swapping_asset_a: &mut Option<String>, cache_directory: &str, tab: &str, focus_search_box: &mut bool, copying: &mut bool) {
     if ui.button(logic::get_message(locale, "button-search", None)).clicked() {
         *searching = !*searching;
         *focus_search_box = true;
@@ -157,7 +157,7 @@ fn asset_buttons(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>, 
         *asset_context_menu_open = None;
     }
     if ui.button(logic::get_message(locale, "button-extract-type", None)).clicked() {
-        extract_all_of_type(&cache_directory, &tab, &file_list, locale);
+        extract_all_of_type(&cache_directory, &tab, locale);
         *asset_context_menu_open = None;
     }
     if ui.button(logic::get_message(locale, "button-refresh", None)).clicked() {
@@ -238,7 +238,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 delete_this_directory(&cache_directory, self.locale);
             }
             if ui.input(|i| i.key_pressed(egui::Key::F3)) {
-                extract_all_of_type(&cache_directory, &tab, &file_list, self.locale);
+                extract_all_of_type(&cache_directory, &tab, self.locale);
             }
             if ui.input(|i| i.key_pressed(egui::Key::F5)) {
                 logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
@@ -260,7 +260,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         ui.horizontal(|ui| {
                             asset_buttons(ui, self.locale, self.searching, self.renaming,
                                 self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
-                                &cache_directory, &tab, &file_list, &mut focus_search_box, &mut self.copying);
+                                &cache_directory, &tab, &mut focus_search_box, &mut self.copying);
                         });
                     })
                 });
@@ -429,7 +429,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     response.context_menu(|ui| {
                                         asset_buttons(ui, self.locale, self.searching, self.renaming,
                                             self.asset_context_menu_open, self.swapping, self.swapping_asset_a,
-                                            &cache_directory, &tab, &file_list, &mut focus_search_box, &mut self.copying);
+                                            &cache_directory, &tab, &mut focus_search_box, &mut self.copying);
                                     });
                                 }
 

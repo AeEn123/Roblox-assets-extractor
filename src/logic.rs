@@ -763,7 +763,7 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
     }
 }
 
-pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Vec<String>, yield_for_thread: bool, use_alias: bool) {
+pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thread: bool, use_alias: bool) {
     // Create directory if it doesn't exist
     match fs::create_dir(destination.clone()) {
         Ok(_) => (),
@@ -784,6 +784,13 @@ pub fn extract_dir(dir: String, destination: String, mode: String, file_list: Ve
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = true; // Stop other threads from running
                         }
+
+                        // User has configured it to refresh before extracting
+                        if get_config_bool("refresh_before_extract").unwrap_or(false) {
+                            refresh(dir.clone(), mode.clone(), false, true); // true because it'll run both and have unfinished file list
+                        }
+
+                        let file_list = get_file_list();
 
                         // Get locale for localised status messages
                         let locale = get_locale(None);
@@ -1120,7 +1127,7 @@ pub fn copy_assets(dir: &str, asset_a: &str, asset_b: &str) {
             log::error(&format!("Error opening file '{}': {}", asset_b_path, e));
         }
     };
-    
+
     let mut args= FluentArgs::new();
     args.set("item_a", asset_a);
     args.set("item_b", asset_b);

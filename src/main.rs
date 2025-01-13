@@ -99,7 +99,7 @@ fn extract(tab: String, asset: Option<String>, destination: Option<String>, add_
     } else {
         if let Some(dest) = destination {
             logic::refresh(cache_directory.clone(), tab.clone(), true, true);
-            logic::extract_dir(cache_directory, dest, tab, logic::get_file_list(), true, false);
+            logic::extract_dir(cache_directory, dest, tab, true, false);
         } else {
             eprintln!("Please provide either a destination path or an asset to extract! --help for more details.")
         }

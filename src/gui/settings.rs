@@ -136,6 +136,10 @@ pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.checkbox(&mut use_alias, logic::get_message(locale, "use-alias", None));
     logic::set_config_value("use_alias", use_alias.into());
 
+    let mut use_alias = logic::get_config_bool("refresh_before_extract").unwrap_or(false);
+    ui.checkbox(&mut use_alias, logic::get_message(locale, "refresh-before-extract", None));
+    logic::set_config_value("refresh_before_extract", use_alias.into());
+
     let mut use_topbar_buttons = logic::get_config_bool("use_topbar_buttons").unwrap_or(true);
     ui.checkbox(&mut use_topbar_buttons, logic::get_message(locale, "use-topbar-buttons", None));
     logic::set_config_value("use_topbar_buttons", use_topbar_buttons.into());

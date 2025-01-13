@@ -26,11 +26,12 @@
 
 ## 0.1.5
 - [x] - Make search case insensitive
-- [ ] - Allow user to toggle refresh before extract
-- [ ] - Move asset-specific operations into right click menu
+- [x] - Allow user to toggle refresh before extract
+- [x] - Move asset-specific operations into right click menu
+- [x] - Implement asset copying
+- [ ] - Wait for translations
 
 ## Future releases
-- [ ] - Implement asset copying
 - [ ] - Make it into a table with specific details e.g size, type, time created
 - [ ] - Finish CLI mode documentation
 - [ ] - Built-in media player/image decoder to quickly preview assets
