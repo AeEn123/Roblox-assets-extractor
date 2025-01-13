@@ -21,12 +21,14 @@ See [FAQ.md](/docs/en-GB/FAQ.MD)
 # Usage
 ## Tabs
 You can see multiple tabs. Roblox Assets Extractor catagorises the files into multiple catagories. You can filter them by clicking on the tab.
-## Delete this directory
-If you click delete this directory, it will delete the files within the directory where the tab is shown. This makes easy to extract assets from specific games, by clicking this button before joining into the game you want to extract from.
-## Extract all assets
-There is also an extract all assets of this type button, you can use this button to extract all the assets of that type and put that into a folder of your liking.<br>
+## The toolbar
+Each item in the toolbar allows you to do different operations with the directory or the asset, you can also access the toolbar as a context menu by right clicking. You can disable the toolbar at the top of the screen in the settings, **Enable toolbar** under the **Behaviour** section.
+## Keyboard navigation and shortcuts
+The program is designed to be easy to use with a mouse but also allow for keyboard navigation and shortcuts for more advanced users, the shortcuts are shown on the buttons to show how you can access them quickly.<br>
+
+You can cycle through the tabs with Alt (or ctrl) + 1-8 allowing you to navigate between tabs only using the keyboard, you can select assets with tab and confirm with enter.
 ## Settings menu
-There are similar buttons in the settings menu, where you can delete your cache or extract all assets, where it will automatically create folders within a folder you choose.
+In the settings menu you will find general customization options as well as actions to do with your roblox cache. Here you can extract all of your roblox cache, change the directory or clear the cache.
 
 # CLI mode
 CLI is work-in-progress.
