@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use std::collections::HashMap; // Used for input
 use crate::{log, logic, updater}; // Used for functionality
+use eframe::egui::TextureHandle;
 
 mod welcome;
 mod settings;
@@ -48,6 +49,7 @@ struct TabViewer<'a> {
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: &'a mut Option<usize>,
     copying: &'a mut bool,
+    images: &'a mut HashMap<String, TextureHandle>
 }
 
 fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, copying: &mut bool, swapping_asset_a: &mut Option<String>) {
@@ -145,6 +147,23 @@ fn extract_file_button(name: &str, cache_directory: &str, tab: &str) {
     let origin = format!("{}/{}", cache_directory, name);
     if let Some(destination) = native_dialog::FileDialog::new().set_filename(&alias).show_save_single_file().unwrap() {
         logic::extract_file(origin, tab.into(), destination.to_string_lossy().to_string(), false);
+    }
+}
+
+fn load_image(id: &str, data: &[u8], images: &mut HashMap<String, TextureHandle>, ctx: egui::Context) -> Result<TextureHandle, image::ImageError> {
+    if let Some(texture) = images.get(id) {
+        Ok(texture.clone())
+    } else {
+        let icon_image = image::load_from_memory(data)?;
+        let icon_rgba = icon_image.to_rgba8();
+        let icon_size = [icon_rgba.width() as usize, icon_rgba.height() as usize];
+        let texture = ctx.load_texture(
+            id,
+            egui::ColorImage::from_rgba_unmultiplied(icon_size, icon_rgba.as_flat_samples().as_slice()),
+            Default::default(),
+        );
+        images.insert(id.to_string(), texture.clone());
+        return Ok(texture);
     }
 }
 
@@ -585,18 +604,27 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
         } else {
             // This is only shown in the about tab
-            ui.heading("Roblox Assets Extractor");
 
-            let mut args = fluent_bundle::FluentArgs::new();
-            args.set("version", VERSION);
-            args.set("date", COMPILE_DATE);
-
+            // Display logo and name side by side
             ui.horizontal(|ui| {
-                ui.label(logic::get_message(self.locale, "version", Some(&args)));
-                ui.label("|");         
-                ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
+                if let Ok(texture) = load_image("ICON", ICON, &mut self.images, ui.ctx().clone()) {
+                    ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(40.0, 40.0)));
+                }
+                ui.vertical(|ui| {
+                    ui.heading("Roblox Assets Extractor");
+            
+                    let mut args = fluent_bundle::FluentArgs::new();
+                    args.set("version", VERSION);
+                    args.set("date", COMPILE_DATE);
+        
+                    ui.horizontal(|ui| {
+                        ui.label(logic::get_message(self.locale, "version", Some(&args)));
+                        ui.label("|");         
+                        ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
+                    });
+        
+                })
             });
-
 
             ui.separator();
 
@@ -642,6 +670,7 @@ struct MyApp {
     locale: FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: Option<usize>,
     copying: bool,
+    images: HashMap<String, TextureHandle>
 }
 
 impl Default for MyApp {
@@ -670,6 +699,7 @@ impl Default for MyApp {
             locale: logic::get_locale(None),
             asset_context_menu_open: None,
             copying: false,
+            images: HashMap::new()
         }
     }
 }
@@ -771,6 +801,7 @@ impl eframe::App for MyApp {
                 locale: &mut self.locale,
                 asset_context_menu_open: &mut self.asset_context_menu_open,
                 copying: &mut self.copying,
+                images: &mut self.images
             });
         
         {
