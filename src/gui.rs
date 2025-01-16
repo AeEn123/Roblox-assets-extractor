@@ -3,11 +3,15 @@ use eframe::egui;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 use fluent_bundle::{FluentBundle, FluentResource};
-use std::sync::Arc;
+use std::sync::Mutex;
+use std::time::Duration;
+use std::{sync::Arc, thread};
 
 use std::collections::HashMap; // Used for input
 use crate::{log, logic, updater}; // Used for functionality
 use eframe::egui::TextureHandle;
+
+use lazy_static::lazy_static;
 
 mod welcome;
 mod settings;
@@ -37,6 +41,11 @@ const DEPENDENCIES: [[&str; 2]; 13] = [
     ["https://github.com/serde-rs/json", ""],
 ];
 
+lazy_static! {
+    static ref IMAGES: Mutex<HashMap<String, TextureHandle>> = Mutex::new(HashMap::new());
+    static ref ASSETS_LOADING: Mutex<Vec<String>> = Mutex::new(Vec::new());
+}
+
 struct TabViewer<'a> {
     // passing selected label to TabViewer
     selected: &'a mut Option<usize>,
@@ -49,7 +58,6 @@ struct TabViewer<'a> {
     locale: &'a mut FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: &'a mut Option<usize>,
     copying: &'a mut bool,
-    images: &'a mut HashMap<String, TextureHandle>
 }
 
 fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, copying: &mut bool, swapping_asset_a: &mut Option<String>) {
@@ -150,7 +158,8 @@ fn extract_file_button(name: &str, cache_directory: &str, tab: &str) {
     }
 }
 
-fn load_image(id: &str, data: &[u8], images: &mut HashMap<String, TextureHandle>, ctx: egui::Context) -> Result<TextureHandle, image::ImageError> {
+fn load_image(id: &str, data: &[u8], ctx: egui::Context) -> Result<TextureHandle, image::ImageError> {
+    let images = {IMAGES.lock().unwrap().clone()};
     if let Some(texture) = images.get(id) {
         Ok(texture.clone())
     } else {
@@ -162,8 +171,46 @@ fn load_image(id: &str, data: &[u8], images: &mut HashMap<String, TextureHandle>
             egui::ColorImage::from_rgba_unmultiplied(icon_size, icon_rgba.as_flat_samples().as_slice()),
             Default::default(),
         );
+        let mut images = IMAGES.lock().unwrap();
         images.insert(id.to_string(), texture.clone());
         return Ok(texture);
+    }
+}
+
+fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui::Context) -> Option<TextureHandle> {
+    let images = {IMAGES.lock().unwrap().clone()};
+    if let Some(texture) = images.get(&id) {
+        Some(texture.clone())
+    } else {
+        {
+            let assets_loading = ASSETS_LOADING.lock().unwrap().clone();
+            if assets_loading.contains(&id) {
+                return None // Don't load multiple at a time
+            }
+        }
+        thread::spawn(move || {
+            log::info(&format!("{}", &id));
+            {
+                let mut assets_loading = ASSETS_LOADING.lock().unwrap();
+                assets_loading.push(id.clone()); // Add the asset to the loading set
+            }
+            let path = format!("{}/{}", cache_directory, id);
+            let bytes = logic::extract_file_to_bytes(&path, &tab);
+            match load_image(&id, &bytes.as_slice(), ctx) {
+                Ok(_) => {
+                    let mut assets_loading = ASSETS_LOADING.lock().unwrap();
+                    assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
+                },
+                Err(_) => {
+                    log::error(&format!("Failed to load {}, cooldown for 250 ms", &id));
+                    thread::sleep(Duration::from_millis(250));
+                    let mut assets_loading = ASSETS_LOADING.lock().unwrap();
+                    assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
+                }
+            }
+
+        });
+        None
     }
 }
 
@@ -541,6 +588,12 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                 egui::TextStyle::Body.resolve(ui.style()),
                                 text_colour,
                             );
+
+                            // if tab == "images" {
+                            //     if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
+                            //         ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(40.0, 40.0)));
+                            //     }
+                            // }
                         }
                         first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                     }
@@ -607,7 +660,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             // Display logo and name side by side
             ui.horizontal(|ui| {
-                if let Ok(texture) = load_image("ICON", ICON, &mut self.images, ui.ctx().clone()) {
+                if let Ok(texture) = load_image("ICON", ICON, ui.ctx().clone()) {
                     ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(40.0, 40.0)));
                 }
                 ui.vertical(|ui| {
@@ -670,7 +723,6 @@ struct MyApp {
     locale: FluentBundle<Arc<FluentResource>>,
     asset_context_menu_open: Option<usize>,
     copying: bool,
-    images: HashMap<String, TextureHandle>
 }
 
 impl Default for MyApp {
@@ -699,7 +751,6 @@ impl Default for MyApp {
             locale: logic::get_locale(None),
             asset_context_menu_open: None,
             copying: false,
-            images: HashMap::new()
         }
     }
 }
@@ -801,13 +852,12 @@ impl eframe::App for MyApp {
                 locale: &mut self.locale,
                 asset_context_menu_open: &mut self.asset_context_menu_open,
                 copying: &mut self.copying,
-                images: &mut self.images
             });
         
         {
             // Allow for different threads to request refresh
             if logic::get_request_repaint() {
-                ctx.request_repaint_after(std::time::Duration::from_millis(250)); // Delay added here to prevent refreshes from stopping
+                ctx.request_repaint_after(Duration::from_millis(250)); // Delay added here to prevent refreshes from stopping
             }
         }
     }

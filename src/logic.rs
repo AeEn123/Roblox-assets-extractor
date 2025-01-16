@@ -763,6 +763,55 @@ pub fn extract_file(file: String, mode: String, destination: String, add_extenti
     }
 }
 
+pub fn extract_file_to_bytes(file: &str, mode: &str) -> Vec<u8> {
+    match fs::metadata(file) {
+        Ok(metadata) => {
+            if metadata.is_file() {
+                // This can return an error result
+                let bytes_error = fs::read(file);
+                match bytes_error {
+                    // Remove the error result so the extract_bytes function can read it
+                    Ok(bytes) => {
+                        let header = find_header(mode.to_string(), bytes.clone());
+                        let extracted_bytes = if header != "INVALID" {
+                            extract_bytes(header.clone(), bytes.clone())
+                        } else {
+                            bytes.clone()
+                        };
+
+                        return extracted_bytes;
+
+                    }
+                    Err(e) => {
+                        update_status(get_message(&get_locale(None), "failed-opening-file", None));
+                        log::error(&format!("Failed to open file: {}", e));
+                        return "None".as_bytes().to_vec();
+                    }
+                }
+            // Error handling just so the program doesn't crash for seemingly no reason
+            } else {
+                // Args for formatting
+                let mut args = FluentArgs::new();
+                args.set("file", file);
+
+                update_status(get_message(&get_locale(None), "failed-not-file", Some(&args)));
+                log::error(&format!(" '{}' Not a file.", file));
+                return "None".as_bytes().to_vec();
+            }
+        }
+        Err(e) => {
+            // Args for formatting
+            let mut args = FluentArgs::new();
+            args.set("error", e.to_string());
+
+            log::error(&format!("Error extracting file: '{}' {}", file, e));
+            update_status(get_message(&get_locale(None), "idling", Some(&args)));
+            return "None".as_bytes().to_vec();
+        }
+    }
+}
+
+
 pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thread: bool, use_alias: bool) {
     // Create directory if it doesn't exist
     match fs::create_dir(destination.clone()) {
