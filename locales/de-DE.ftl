@@ -3,7 +3,7 @@
 language-name = Deutsch
 
 # Tabs
-logs = Logs # TODO: Translate
+logs = Protokolle
 music = Musik
 sounds = Töne
 images = Bilder
@@ -104,15 +104,15 @@ swap-with = Doppelklicke eine Datei um sie mit "{ $asset }" auszutauschen
 support-sponsor = ♥ Sponsor
 support-project-donate = ♥ Spenden
 
-logs-description = The logs show how the program is performing, if any errors happen, they will show up here # TODO: Translate
-copied = Overwritten { $item_b } with { $item_a } # TODO: Translate
-use-topbar-buttons = Enable toolbar # TODO: Translate
-copy-choose-file = Double click a file to copy # TODO: Translate
-swapped = Swapped { $item_a } with { $item_b } # TODO: Translate
-button-export-logs = Export log to file # TODO: Translate
-button-copy-logs = Copy log to clipboard # TODO: Translate
-button-copy = Copy <Ctrl+D> # TODO: Translate
-overwrite-with = Double click a file to overwrite with "{ $asset }" # TODO: Translate
-refresh-before-extract = Refresh file list before extracting # TODO: Translate
-button-extract-file = Extract <Ctrl+E> # TODO: Translate
-button-open = Open <Return> # TODO: Translate
+logs-description = Die Protokolle zeigen wie das Program arbeitet, falls irgendwelche Fehler passieren, werden sie hier angezeigt
+copied = { $item_b } wurde mit { $item_a } überschrieben
+use-topbar-buttons = Toolbar aktivieren
+copy-choose-file = Doppelklicke eine Datei um sie zu kopieren
+swapped = { $item_a } wurde mit { $item_b } ausgetauscht
+button-export-logs = Exportiere Protokoll zur Datei
+button-copy-logs = Kopiere Protokoll zur Zwischenablage
+button-copy = Kopieren <Ctrl+D>
+overwrite-with = Doppelklicke eine Datei um sie mit "{ $asset }" zu überschreiben
+refresh-before-extract = Refresh file list before extracting
+button-extract-file = Extrahieren <Ctrl+E>
+button-open = Öffnen <Return>
