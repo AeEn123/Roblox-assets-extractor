@@ -1,4 +1,4 @@
-### The program can't run because VCRUNTIME140.dll is missing
+### The program can't run because VCRUNTIME140.dll is missing 
 Install [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist)
 
 ### Does this interfere with the roblox client?
