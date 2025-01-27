@@ -6,6 +6,10 @@ body {
     text-align: center;
 }
 
+a {
+    color: lightblue;
+}
+
 main {
     padding-left: 10px;
     padding-right: 10px;
