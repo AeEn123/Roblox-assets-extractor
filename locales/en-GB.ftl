@@ -32,6 +32,7 @@ button-open = Open <Return>
 button-extract-file = Extract <Ctrl+E>
 button-display-image-preview = Display image previews
 button-disable-display-image-preview = Stop displaying image previews
+input-preview-size = Preview size
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation

@@ -1,5 +1,5 @@
 use crate::logic;
-use std::sync::Arc;
+use std::{ops::RangeInclusive, sync::Arc};
 use fluent_bundle::{FluentBundle, FluentResource, FluentArgs};
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 
@@ -143,6 +143,15 @@ pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     let mut use_topbar_buttons = logic::get_config_bool("use_topbar_buttons").unwrap_or(true);
     ui.checkbox(&mut use_topbar_buttons, logic::get_message(locale, "use-topbar-buttons", None));
     logic::set_config_value("use_topbar_buttons", use_topbar_buttons.into());
+
+    let mut display_image_preview = logic::get_config_bool("display_image_preview").unwrap_or(false);
+    ui.checkbox(&mut display_image_preview, logic::get_message(locale, "button-display-image-preview", None));
+    logic::set_config_value("display_image_preview", display_image_preview.into());
+
+    let mut image_preview_size = logic::get_config_u64("image_preview_size").unwrap_or(128);
+    ui.add(egui::widgets::Slider::new(&mut image_preview_size, (16 as u64)..=(512 as u64))
+    .text(logic::get_message(locale, "input-preview-size", None)));
+    logic::set_config_value("image_preview_size", image_preview_size.into());
     
 }
 

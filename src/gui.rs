@@ -202,8 +202,8 @@ fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui:
                     assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
                 },
                 Err(_) => {
-                    log::error(&format!("Failed to load {}, cooldown for 250 ms", &id));
-                    thread::sleep(Duration::from_millis(250));
+                    log::error(&format!("Failed to load {}, cooldown for 1000 ms", &id));
+                    thread::sleep(Duration::from_millis(1000));
                     let mut assets_loading = ASSETS_LOADING.lock().unwrap();
                     assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
                 }
@@ -231,9 +231,11 @@ impl TabViewer<'_> {
         if let Some(name) = name {
             if ui.button(logic::get_message(self.locale, "button-open", None)).clicked() {
                 double_click(cache_directory.to_string(), name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+                *self.asset_context_menu_open = None;
             }
             if ui.button(logic::get_message(self.locale, "button-extract-file", None)).clicked() {
                 extract_file_button(name, cache_directory, tab);
+                *self.asset_context_menu_open = None;
             }
         }
         if ui.button(logic::get_message(self.locale, "button-search", None)).clicked() {
@@ -279,6 +281,19 @@ impl TabViewer<'_> {
                 *self.swapping_asset_a = Some(n.to_string());
             } else {
                 *self.swapping_asset_a = None;
+            }
+        }
+
+        if tab == "images" {
+            let message = if logic::get_config_bool("display_image_preview").unwrap_or(false) {
+                logic::get_message(self.locale, "button-disable-display-image-preview", None)
+            } else {
+                logic::get_message(self.locale, "button-display-image-preview", None)
+            };
+    
+            if ui.button(message).clicked() {
+                logic::set_config_value("display_image_preview", (!logic::get_config_bool("display_image_preview").unwrap_or(false)).into());
+                *self.asset_context_menu_open = None;
             }
         }
     }
@@ -458,111 +473,135 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 file_list
             };
 
+            let display_image_preview = logic::get_config_bool("display_image_preview").unwrap_or(false) && tab == "images";
+
+            let row_height = if display_image_preview {
+                logic::get_config_u64("image_preview_size").unwrap() as f32
+            } else {
+                ui.text_style_height(&egui::TextStyle::Body)
+            };
+
+            let amount_per_row = if display_image_preview {
+                ui.available_width() as usize / row_height as usize
+            } else {
+                1
+            };
+
+            let total_rows = if display_image_preview {
+                let amount = ui.available_width() / row_height;
+                file_list.len()/ amount as usize
+            } else {
+                file_list.len()
+            };
+
             // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
                 ui,
-                ui.text_style_height(&egui::TextStyle::Body),
-                file_list.len(),
+                row_height,
+                total_rows,
                 |ui, row_range| {
-                for i in row_range {
-                    if let Some(file_name) = file_list.get(i) {
-                        let alias = logic::get_asset_alias(&file_name);
-
-                        let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
-                            *self.selected = Some(i); // If there is none selected, Set selected and return true
-                            none_selected = false; // Will select everything if this is not set to false immediately
-                            true
-                        } else {
-                            *self.selected == Some(i) // Check if this current one is selected
-                        };
-
-                        // Draw the text
-                        if is_selected && *self.renaming {
-                            let mut mutable_name = alias.to_string();
-                            let response = ui.text_edit_singleline(&mut mutable_name);
-
-                            if mutable_name != *alias {
-                                logic::set_asset_alias(&file_name, &mutable_name);
-                            }
-
-                            if response.lost_focus() {
-                                *self.renaming = false;
-                                if mutable_name == "" {
-                                    logic::set_asset_alias(&file_name, &file_name); // Set it to file name if blank
-                                }
+                for row_idx in row_range {
+                    for amount in 0..amount_per_row {
+                        let i = row_idx+amount;
+                        if let Some(file_name) = file_list.get(i) {
+                            let alias = logic::get_asset_alias(&file_name);
+    
+                            let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
+                                *self.selected = Some(i); // If there is none selected, Set selected and return true
+                                none_selected = false; // Will select everything if this is not set to false immediately
+                                true
                             } else {
-                                response.request_focus(); // Request focus if it hasn't lost focus
-                            }
-                        } else {
-                            let visuals = ui.visuals();
-
-                            // Highlight the background when selected
-                            let background_colour = if is_selected {
-                                visuals.selection.bg_fill // Primary colour
-                            } else {
-                                egui::Color32::TRANSPARENT // No background colour
+                                *self.selected == Some(i) // Check if this current one is selected
                             };
     
-                            // Make the text have more contrast when selected
-                            let text_colour = if is_selected {
-                                visuals.strong_text_color() // Brighter
-                            } else {
-                                visuals.text_color() // Normal
-                            };
+                            // Draw the text
+                            if is_selected && *self.renaming {
+                                let mut mutable_name = alias.to_string();
+                                let response = ui.text_edit_singleline(&mut mutable_name);
     
-                    
-                            // Using a rect to allow the user to click across the entire list, not just the text
-                            let full_width = ui.available_width();
-                            let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
-                            let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-    
-                            // Draw the background colour
-                            ui.painter().rect_filled(rect, 0.0, background_colour);
-
-                            // Handle the click/double click
-                            if response.clicked() && !*self.renaming {
-                                *self.selected = Some(i);
-                            }
-
-                            if response.secondary_clicked() {
-                                *self.selected = Some(i);
-                                *self.asset_context_menu_open = Some(i);
-                            }
-
-                            if let Some(asset) = self.asset_context_menu_open {
-                                if *asset == i {
-                                    response.context_menu(|ui| {
-                                        self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, Some(&file_name));
-                                    });
+                                if mutable_name != *alias {
+                                    logic::set_asset_alias(&file_name, &mutable_name);
                                 }
-
+    
+                                if response.lost_focus() {
+                                    *self.renaming = false;
+                                    if mutable_name == "" {
+                                        logic::set_asset_alias(&file_name, &file_name); // Set it to file name if blank
+                                    }
+                                } else {
+                                    response.request_focus(); // Request focus if it hasn't lost focus
+                                }
+                            } else {
+                                let visuals = ui.visuals();
+    
+                                // Highlight the background when selected
+                                let background_colour = if is_selected {
+                                    visuals.selection.bg_fill // Primary colour
+                                } else {
+                                    egui::Color32::TRANSPARENT // No background colour
+                                };
+        
+                                // Make the text have more contrast when selected
+                                let text_colour = if is_selected {
+                                    visuals.strong_text_color() // Brighter
+                                } else {
+                                    visuals.text_color() // Normal
+                                };
+        
+                        
+                                // Using a rect to allow the user to click across the entire list, not just the text
+                                let full_width = ui.available_width();
+                                let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
+                                let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+        
+                                // Draw the background colour
+                                ui.painter().rect_filled(rect, 0.0, background_colour);
+    
+                                // Handle the click/double click
+                                if response.clicked() && !*self.renaming {
+                                    *self.selected = Some(i);
+                                }
+    
+                                if response.secondary_clicked() {
+                                    *self.selected = Some(i);
+                                    *self.asset_context_menu_open = Some(i);
+                                }
+    
+                                if let Some(asset) = self.asset_context_menu_open {
+                                    if *asset == i {
+                                        response.context_menu(|ui| {
+                                            self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, Some(&file_name));
+                                        });
+                                    }
+    
+                                }
+    
+                                if response.double_clicked() {
+                                    double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+                                }
+    
+                                // Handle keyboard scrolling
+                                if scroll_to == Some(i) {
+                                    navigation_accepted = true;
+                                    response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
+                                }
+    
+                                ui.painter().text(
+                                    rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
+                                    egui::Align2::LEFT_TOP,
+                                    alias, // Text is the file name or the alias. Alias is user-defined
+                                    egui::TextStyle::Body.resolve(ui.style()),
+                                    text_colour,
+                                );
+    
+                                // if tab == "images" {
+                                //     if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
+                                //         ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(40.0, 40.0)));
+                                //     }
+                                // }
                             }
-
-                            if response.double_clicked() {
-                                double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
-                            }
-
-                            // Handle keyboard scrolling
-                            if scroll_to == Some(i) {
-                                navigation_accepted = true;
-                                response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
-                            }
-
-                            ui.painter().text(
-                                rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
-                                egui::Align2::LEFT_TOP,
-                                alias, // Text is the file name or the alias. Alias is user-defined
-                                egui::TextStyle::Body.resolve(ui.style()),
-                                text_colour,
-                            );
-
-                            // if tab == "images" {
-                            //     if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
-                            //         ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(40.0, 40.0)));
-                            //     }
-                            // }
+                            first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                         }
-                        first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                     }
                 }
             });

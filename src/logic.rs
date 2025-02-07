@@ -1253,7 +1253,22 @@ pub fn get_config_bool(key: &str) -> Option<bool> {
     } else {
         return None;
     }
-   
+}
+
+// pub fn get_config_i64(key: &str) -> Option<i64> {
+//     if let Some(value) = get_config().get(key) {
+//         return Some(value.as_i64()?);
+//     } else {
+//         return None;
+//     }
+// }
+
+pub fn get_config_u64(key: &str) -> Option<u64> {
+    if let Some(value) = get_config().get(key) {
+        return Some(value.as_u64()?);
+    } else {
+        return None;
+    }
 }
 
 pub fn get_asset_alias(asset: &str) -> String {
