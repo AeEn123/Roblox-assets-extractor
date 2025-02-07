@@ -30,6 +30,8 @@ button-export-logs = Export log to file
 button-copy = Copy <Ctrl+D>
 button-open = Open <Return>
 button-extract-file = Extract <Ctrl+E>
+button-display-image-preview = Display image previews
+button-disable-display-image-preview = Stop displaying image previews
 
 # Confirmations
 confirmation-generic-confirmation-title = Confirmation

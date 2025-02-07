@@ -21,8 +21,8 @@ const COMPILE_DATE: &str = env!("COMPILE_DATE");
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
 const CONTRIBUTERS: [&str; 4] = [
     "AeEn123",
-    "MarcelDev",
     "Vonercent",
+    "MarcelDev",
     "aaditkumar2009",
 ];
 const DEPENDENCIES: [[&str; 2]; 13] = [
@@ -214,73 +214,6 @@ fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui:
     }
 }
 
-fn asset_buttons(
-    ui: &mut egui::Ui,
-    locale: &FluentBundle<Arc<FluentResource>>,
-    searching: &mut bool, renaming: &mut bool,
-    asset_context_menu_open: &mut Option<usize>,
-    swapping: &mut bool, swapping_asset_a: &mut Option<String>,
-    cache_directory: &str,
-    tab: &str,
-    focus_search_box: &mut bool,
-    copying: &mut bool,
-    name: Option<&str>
-) {
-    if let Some(name) = name {
-        if ui.button(logic::get_message(locale, "button-open", None)).clicked() {
-            double_click(cache_directory.to_string(), name.to_string(), tab.to_string(), swapping, copying, swapping_asset_a);
-        }
-        if ui.button(logic::get_message(locale, "button-extract-file", None)).clicked() {
-            extract_file_button(name, cache_directory, tab);
-        }
-    }
-    if ui.button(logic::get_message(locale, "button-search", None)).clicked() {
-        *searching = !*searching;
-        *focus_search_box = true;
-        *asset_context_menu_open = None;
-    }
-    
-    if ui.button(logic::get_message(locale, "button-rename", None)).clicked() {
-        // Rename button
-        *renaming = !*renaming;
-        *asset_context_menu_open = None;
-    }
-
-    if ui.button(logic::get_message(locale, "button-delete-this-dir", None)).clicked() {
-        delete_this_directory(&cache_directory, locale);
-        *asset_context_menu_open = None;
-    }
-    if ui.button(logic::get_message(locale, "button-extract-type", None)).clicked() {
-        extract_all_of_type(&cache_directory, &tab, locale);
-        *asset_context_menu_open = None;
-    }
-    if ui.button(logic::get_message(locale, "button-refresh", None)).clicked() {
-        logic::refresh(cache_directory.to_owned(), tab.to_owned(), false, false);
-        *asset_context_menu_open = None;
-    }
-    if ui.button(logic::get_message(locale, "button-swap", None)).clicked() {
-        toggle_swap(swapping,swapping_asset_a, locale);
-        *asset_context_menu_open = None;
-
-        if let Some(n) = name {
-            *swapping_asset_a = Some(n.to_string());
-        } else {
-            *swapping_asset_a = None;
-        }
-        
-    }
-    if ui.button(logic::get_message(locale, "button-copy", None)).clicked() {
-        toggle_swap(copying,swapping_asset_a, locale);
-        *asset_context_menu_open = None;
-
-        if let Some(n) = name {
-            *swapping_asset_a = Some(n.to_string());
-        } else {
-            *swapping_asset_a = None;
-        }
-    }
-}
-
 fn add_dependency_credit(dependency: [&str;2], ui: &mut egui::Ui, sponsor_message: &str) {
     if dependency[1] != "" {
         ui.horizontal(|ui| {
@@ -290,6 +223,64 @@ fn add_dependency_credit(dependency: [&str;2], ui: &mut egui::Ui, sponsor_messag
         });
     } else {
         ui.hyperlink_to(dependency[0].replace("https://github.com/", ""), dependency[0]);
+    }
+}
+
+impl TabViewer<'_> {
+    fn asset_buttons(&mut self, ui: &mut egui::Ui, cache_directory: &str, tab: &str, focus_search_box: &mut bool, name: Option<&str>) {
+        if let Some(name) = name {
+            if ui.button(logic::get_message(self.locale, "button-open", None)).clicked() {
+                double_click(cache_directory.to_string(), name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+            }
+            if ui.button(logic::get_message(self.locale, "button-extract-file", None)).clicked() {
+                extract_file_button(name, cache_directory, tab);
+            }
+        }
+        if ui.button(logic::get_message(self.locale, "button-search", None)).clicked() {
+            *self.searching = !*self.searching;
+            *focus_search_box = true;
+            *self.asset_context_menu_open = None;
+        }
+        
+        if ui.button(logic::get_message(self.locale, "button-rename", None)).clicked() {
+            // Rename button
+            *self.renaming = !*self.renaming;
+            *self.asset_context_menu_open = None;
+        }
+    
+        if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() {
+            delete_this_directory(cache_directory, self.locale);
+            *self.asset_context_menu_open = None;
+        }
+        if ui.button(logic::get_message(self.locale, "button-extract-type", None)).clicked() {
+            extract_all_of_type(cache_directory, tab, self.locale);
+            *self.asset_context_menu_open = None;
+        }
+        if ui.button(logic::get_message(self.locale, "button-refresh", None)).clicked() {
+            logic::refresh(cache_directory.to_string(), tab.to_string(), false, false);
+            *self.asset_context_menu_open = None;
+        }
+        if ui.button(logic::get_message(self.locale, "button-swap", None)).clicked() {
+            toggle_swap(self.swapping, self.swapping_asset_a, self.locale);
+            *self.asset_context_menu_open = None;
+    
+            if let Some(n) = name {
+                *self.swapping_asset_a = Some(n.to_string());
+            } else {
+                *self.swapping_asset_a = None;
+            }
+            
+        }
+        if ui.button(logic::get_message(self.locale, "button-copy", None)).clicked() {
+            toggle_swap(self.copying, self.swapping_asset_a, self.locale);
+            *self.asset_context_menu_open = None;
+    
+            if let Some(n) = name {
+                *self.swapping_asset_a = Some(n.to_string());
+            } else {
+                *self.swapping_asset_a = None;
+            }
+        }
     }
 }
 
@@ -365,19 +356,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 ui.push_id("Topbar buttons", |ui| {
                     egui::ScrollArea::horizontal().show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            asset_buttons(
-                                ui,
-                                self.locale,
-                                self.searching,
-                                self.renaming,
-                                self.asset_context_menu_open,
-                                self.swapping,
-                                self.swapping_asset_a,
-                                &cache_directory,
-                                &tab,
-                                &mut focus_search_box,
-                                &mut self.copying,
-                                None);
+                            self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, None);
                         });
                     })
                 });
@@ -553,19 +532,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             if let Some(asset) = self.asset_context_menu_open {
                                 if *asset == i {
                                     response.context_menu(|ui| {
-                                        asset_buttons(
-                                            ui,
-                                            self.locale,
-                                            self.searching,
-                                            self.renaming,
-                                            self.asset_context_menu_open,
-                                            self.swapping,
-                                            self.swapping_asset_a,
-                                            &cache_directory,
-                                            &tab,
-                                            &mut focus_search_box,
-                                            &mut self.copying,
-                                            Some(&file_name));
+                                        self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, Some(&file_name));
                                     });
                                 }
 
