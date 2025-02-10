@@ -189,7 +189,6 @@ fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui:
             }
         }
         thread::spawn(move || {
-            log::info(&format!("{}", &id));
             {
                 let mut assets_loading = ASSETS_LOADING.lock().unwrap();
                 assets_loading.push(id.clone()); // Add the asset to the loading set
@@ -538,7 +537,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
 
                                     if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
-                                        egui::Image::new(&texture).fit_to_exact_size(egui::vec2(row_height, row_height)).paint_at(ui, rect);
+                                        egui::Image::new(&texture).maintain_aspect_ratio(true).max_height(row_height).paint_at(ui, rect);
                                     }
 
                                     let visuals = ui.visuals();
@@ -562,7 +561,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
     
                                     // Handle the click/double click
                                     if response.clicked() && !*self.renaming {
-                                        println!("clicked {}", i);
                                         *self.selected = Some(i);
                                     }
     
@@ -590,14 +588,14 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                         response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
                                     }
     
-                                    // ui.put(
-                                    //     rect,
-                                    //     egui::Label::new(
-                                    //         egui::RichText::new(alias)
-                                    //             .text_style(egui::TextStyle::Body)
-                                    //             .color(text_colour)
-                                    //     ).truncate()
-                                    // );
+                                    ui.put(
+                                        rect,
+                                        egui::Label::new(
+                                            egui::RichText::new(alias)
+                                                .text_style(egui::TextStyle::Body)
+                                                .color(text_colour)
+                                        ).truncate().selectable(false)
+                                    );
                                 }
                             }
                         }    
