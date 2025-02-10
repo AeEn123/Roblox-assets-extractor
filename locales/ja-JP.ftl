@@ -108,3 +108,6 @@ overwrite-with = Double click a file to overwrite with "{ $asset }" # TODO: Tran
 refresh-before-extract = Refresh file list before extracting # TODO: Translate
 button-extract-file = Extract <Ctrl+E> # TODO: Translate
 button-open = Open <Return> # TODO: Translate
+input-preview-size = Preview size # TODO: Translate
+button-display-image-preview = Display image previews # TODO: Translate
+button-disable-display-image-preview = Stop displaying image previews # TODO: Translate

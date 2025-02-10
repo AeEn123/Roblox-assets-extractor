@@ -12,6 +12,9 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
+button-disable-display-image-preview = Stop displaying image previews # TODO: Translate
+button-display-image-preview = Display image previews # TODO: Translate
+input-preview-size = Preview size # TODO: Translate
 button-open = Otwórz <Return>
 button-extract-file = Wyodrębnij <Ctrl+E>
 button-copy = Kopiuj <Ctrl+D>
