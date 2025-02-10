@@ -1,5 +1,5 @@
 use crate::logic;
-use std::{ops::RangeInclusive, sync::Arc};
+use std::sync::Arc;
 use fluent_bundle::{FluentBundle, FluentResource, FluentArgs};
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 

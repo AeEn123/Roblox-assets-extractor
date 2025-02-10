@@ -534,69 +534,69 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                         response.request_focus(); // Request focus if it hasn't lost focus
                                     }
                                 } else {
+                                    let desired_size = egui::vec2(row_height, row_height); // Set height to the text style height
+                                    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
                                     if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
-                                        ui.add(egui::Image::new(&texture).fit_to_exact_size(egui::vec2(row_height, row_height)));
+                                        egui::Image::new(&texture).fit_to_exact_size(egui::vec2(row_height, row_height)).paint_at(ui, rect);
                                     }
-                                    // let visuals = ui.visuals();
+
+                                    let visuals = ui.visuals();
     
-                                    // // Highlight the background when selected
-                                    // let background_colour = if is_selected {
-                                    //     visuals.selection.bg_fill // Primary colour
-                                    // } else {
-                                    //     egui::Color32::TRANSPARENT // No background colour
-                                    // };
+                                    // Highlight the background when selected
+                                    let background_colour = if is_selected {
+                                        visuals.selection.bg_fill // Primary colour
+                                    } else {
+                                        visuals.faint_bg_color // No background colour
+                                    };
             
-                                    // // Make the text have more contrast when selected
-                                    // let text_colour = if is_selected {
-                                    //     visuals.strong_text_color() // Brighter
-                                    // } else {
-                                    //     visuals.text_color() // Normal
-                                    // };
+                                    // Make the text have more contrast when selected
+                                    let text_colour = if is_selected {
+                                        visuals.strong_text_color() // Brighter
+                                    } else {
+                                        visuals.text_color() // Normal
+                                    };
             
-                            
-                                    // // Using a rect to allow the user to click across the entire list, not just the text
-                                    // let full_width = ui.available_width();
-                                    // let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
-                                    // let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-            
-                                    // // Draw the background colour
-                                    // ui.painter().rect_filled(rect, 0.0, background_colour);
+                                    // Draw the background colour
+                                    ui.painter().rect_filled(rect, 0.0, background_colour);
     
-                                    // // Handle the click/double click
-                                    // if response.clicked() && !*self.renaming {
-                                    //     *self.selected = Some(i);
-                                    // }
+                                    // Handle the click/double click
+                                    if response.clicked() && !*self.renaming {
+                                        println!("clicked {}", i);
+                                        *self.selected = Some(i);
+                                    }
     
-                                    // if response.secondary_clicked() {
-                                    //     *self.selected = Some(i);
-                                    //     *self.asset_context_menu_open = Some(i);
-                                    // }
+                                    if response.secondary_clicked() {
+                                        *self.selected = Some(i);
+                                        *self.asset_context_menu_open = Some(i);
+                                    }
     
-                                    // if let Some(asset) = self.asset_context_menu_open {
-                                    //     if *asset == i {
-                                    //         response.context_menu(|ui| {
-                                    //             self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, Some(&file_name));
-                                    //         });
-                                    //     }
+                                    if let Some(asset) = self.asset_context_menu_open {
+                                        if *asset == i {
+                                            response.context_menu(|ui| {
+                                                self.asset_buttons(ui, &cache_directory, tab, &mut focus_search_box, Some(&file_name));
+                                            });
+                                        }
     
-                                    // }
+                                    }
     
-                                    // if response.double_clicked() {
-                                    //     double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
-                                    // }
+                                    if response.double_clicked() {
+                                        double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+                                    }
     
-                                    // // Handle keyboard scrolling
-                                    // if scroll_to == Some(i) {
-                                    //     navigation_accepted = true;
-                                    //     response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
-                                    // }
+                                    // Handle keyboard scrolling
+                                    if scroll_to == Some(i) {
+                                        navigation_accepted = true;
+                                        response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
+                                    }
     
-                                    // ui.painter().text(
-                                    //     rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
-                                    //     egui::Align2::LEFT_TOP,
-                                    //     alias, // Text is the file name or the alias. Alias is user-defined
-                                    //     egui::TextStyle::Body.resolve(ui.style()),
-                                    //     text_colour,
+                                    // ui.put(
+                                    //     rect,
+                                    //     egui::Label::new(
+                                    //         egui::RichText::new(alias)
+                                    //             .text_style(egui::TextStyle::Body)
+                                    //             .color(text_colour)
+                                    //     ).truncate()
                                     // );
                                 }
                             }
