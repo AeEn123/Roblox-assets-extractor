@@ -24,17 +24,21 @@
 ## 0.1.4
 - [x] - Copy/swap assets around
 
-## 0.1.5
+## 1.0.0
 - [x] - Make search case insensitive
 - [x] - Allow user to toggle refresh before extract
 - [x] - Move asset-specific operations into right click menu
 - [x] - Implement asset copying
+- [x] - image decoder to quickly preview assets
+- [x] - Use versioning numbers better major.minor.patch
 - [ ] - Wait for translations
 
-## Future releases
+## 1.1.0
 - [ ] - Make it into a table with specific details e.g size, type, time created
+- [ ] - Built-in media player to quickly previw sounds
+
+## Future releases
 - [ ] - Finish CLI mode documentation
-- [ ] - Built-in media player/image decoder to quickly preview assets
 - [ ] - Community-made resource packs
 - [ ] - Automatic command line generation for [Bloxstrap](https://github.com/pizzaboxer/bloxstrap)
 - [ ] - Docs available in different languages

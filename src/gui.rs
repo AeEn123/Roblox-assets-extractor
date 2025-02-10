@@ -201,7 +201,7 @@ fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui:
                     assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
                 },
                 Err(_) => {
-                    log::error(&format!("Failed to load {}, cooldown for 1000 ms", &id));
+                    log::warn(&format!("Failed to load {} as image, cooldown for 1000 ms", &id));
                     thread::sleep(Duration::from_millis(1000));
                     let mut assets_loading = ASSETS_LOADING.lock().unwrap();
                     assets_loading.retain(|x| x != &id); // Remove the asset from the loading set
