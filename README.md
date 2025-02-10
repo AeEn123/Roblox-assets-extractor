@@ -9,6 +9,8 @@
 [![Windows Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_win.yml)
 [![Linux Build](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml/badge.svg)](https://github.com/AeEn123/Roblox-assets-extractor/actions/workflows/build_linux.yml)
 [![Discord invite](https://img.shields.io/discord/470242481582243860?label=Discord)](https://discord.gg/xqNA5jt6DN)
+![Total downloads](https://img.shields.io/github/downloads/AeEn123/Roblox-assets-extractor/total?label=Total%20Downloads)
+
 
 # Roblox Assets Extractor
 This tool extracts cached data from your Roblox installation by looking at the headers of cached files.
