@@ -597,15 +597,15 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     let text_size = ui.text_style_height(&egui::TextStyle::Body);
 
                                     let text_rect = egui::Rect::from_min_size(
-                                        rect.min + egui::vec2(5.0, (rect.height() - text_size) / 2.0),
+                                        rect.min + egui::vec2(0.0, (rect.height() - text_size) / 2.0),
                                         egui::vec2(row_height, text_size)
                                     );
 
                                     // Background to make text easier to read
                                     let background_colour = if visuals.dark_mode {
-                                        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 128) // Dark mode
+                                        egui::Color32::from_rgba_unmultiplied(27, 27, 27, 160) // Dark mode
                                     } else {
-                                        egui::Color32::from_rgba_unmultiplied(255, 255, 255, 128) // Light mode
+                                        egui::Color32::from_rgba_unmultiplied(248, 248, 248, 160) // Light mode
                                     };
                                     ui.painter().rect_filled(text_rect, 0.0, background_colour);
 
