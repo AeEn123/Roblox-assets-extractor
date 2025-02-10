@@ -428,8 +428,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
 
             let mut navigation_accepted: bool = false; // Used to check if the selected label is available to accept the keyboard navigation
-            let mut first_iterated: bool = false; // Used to track if the first entry iterated.
-
 
             if *self.swapping {
                 if self.swapping_asset_a.as_ref().is_none() {
@@ -507,7 +505,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                             if let Some(file_name) = file_list.get(i) {
                                 let alias = logic::get_asset_alias(&file_name);
         
-                                let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
+                                let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
                                     *self.selected = Some(i); // If there is none selected, Set selected and return true
                                     none_selected = false; // Will select everything if this is not set to false immediately
                                     true
@@ -557,7 +555,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     };
             
                                     // Draw the background colour
-                                    ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(row_height/8.0, background_colour), egui::StrokeKind::Middle);
+                                    ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(row_height/8.0, background_colour), egui::StrokeKind::Inside);
     
                                     // Handle the click/double click
                                     if response.clicked() && !*self.renaming {
@@ -620,7 +618,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     if let Some(file_name) = file_list.get(i) {
                         let alias = logic::get_asset_alias(&file_name);
 
-                        let is_selected  = if none_selected && first_iterated { // Selecting the very first causes some issues
+                        let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
                             *self.selected = Some(i); // If there is none selected, Set selected and return true
                             none_selected = false; // Will select everything if this is not set to false immediately
                             true
@@ -708,7 +706,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                 text_colour,
                             );
                         }
-                        first_iterated = true // Set first_iterated to true to show that the first one has iterated, no difference if it happens for all
                     }
                 }
                 }
