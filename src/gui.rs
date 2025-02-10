@@ -546,7 +546,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     let background_colour = if is_selected {
                                         visuals.selection.bg_fill // Primary colour
                                     } else {
-                                        visuals.faint_bg_color // No background colour
+                                        egui::Color32::TRANSPARENT // No background colour
                                     };
             
                                     // Make the text have more contrast when selected
@@ -557,7 +557,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     };
             
                                     // Draw the background colour
-                                    ui.painter().rect_filled(rect, 0.0, background_colour);
+                                    ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(row_height/8.0, background_colour), egui::StrokeKind::Middle);
     
                                     // Handle the click/double click
                                     if response.clicked() && !*self.renaming {
@@ -588,14 +588,28 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                         response.scroll_to_me(Some(egui::Align::Center)) // Align to center to prevent scrolling off the edge
                                     }
     
-                                    ui.put(
-                                        rect,
-                                        egui::Label::new(
-                                            egui::RichText::new(alias)
-                                                .text_style(egui::TextStyle::Body)
-                                                .color(text_colour)
-                                        ).truncate().selectable(false)
+                                    let text = egui::Label::new(
+                                        egui::RichText::new(alias)
+                                            .text_style(egui::TextStyle::Body)
+                                            .color(text_colour)
+                                    ).truncate().selectable(false);
+
+                                    let text_size = ui.text_style_height(&egui::TextStyle::Body);
+
+                                    let text_rect = egui::Rect::from_min_size(
+                                        rect.min + egui::vec2(5.0, (rect.height() - text_size) / 2.0),
+                                        egui::vec2(row_height, text_size)
                                     );
+
+                                    // Background to make text easier to read
+                                    let background_colour = if visuals.dark_mode {
+                                        egui::Color32::from_rgba_unmultiplied(0, 0, 0, 128) // Dark mode
+                                    } else {
+                                        egui::Color32::from_rgba_unmultiplied(255, 255, 255, 128) // Light mode
+                                    };
+                                    ui.painter().rect_filled(text_rect, 0.0, background_colour);
+
+                                    ui.put(text_rect, text);
                                 }
                             }
                         }    
