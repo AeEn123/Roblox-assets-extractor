@@ -41,6 +41,7 @@ The program only comes portable on Windows for now, this may change in the futur
 
 # Installing for Linux
 Installing for Linux varies for each distro. We hope we can eventually create a flatpak for universal installation.
+We would greatly welcome a pull request for a flatpak.
 ## Arch Linux
 You can install on Arch Linux by using the PKGBUILD located in `packages/arch`
 An example installation script:
