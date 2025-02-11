@@ -739,7 +739,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.horizontal(|ui| {
                 if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
-                    ui.output_mut(|o| o.copied_text = logs.clone());
+                    ui.ctx().copy_text(logs.clone());
                 }
                 if ui.button(logic::get_message(&self.locale, "button-export-logs", None)).clicked() {
                     if let Some(path) = FileDialog::new()
