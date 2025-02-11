@@ -12,9 +12,9 @@ settings = Ustawienia
 about = Informacje
 
 # Buttons
-button-disable-display-image-preview = Stop displaying image previews # TODO: Translate
-button-display-image-preview = Display image previews # TODO: Translate
-input-preview-size = Preview size # TODO: Translate
+button-disable-display-image-preview = Przestań wyświetlać podgląd obrazu
+button-display-image-preview = Wyświetl podgląd obrazu
+input-preview-size = Rozmiar podglądu
 button-open = Otwórz <Return>
 button-extract-file = Wyodrębnij <Ctrl+E>
 button-copy = Kopiuj <Ctrl+D>
@@ -50,11 +50,11 @@ confirmation-custom-directory-description = Czy chcesz wybrać inny katalog pami
 # Errors
 no-files = Brak plików do wyświetlenia.
 error-directory-detection-title = Nie udało się wykryć katalogu
-error-directory-detection-description = Wykrycie katalogu nieudane! Czy gra Roblox jest zainstalowana i czy uruchomileś(aś) ją raz?
+error-directory-detection-description = Wykrycie katalogu nieudane! Czy gra Roblox jest zainstalowana i czy uruchomiłeś(aś) ją raz?
 error-temporary-directory-title = Nie udało się utworzyć katalogu tymczasowego.
-error-temporary-directory-description = Błąd: Nie udało się stworzyć katalogu tymczasowego! Czy masz pozwolenia do odczytu/zapisu plików? Jeżeli ten błąd pojawia się ponownie sprobój uruchomić program jako administrator.
+error-temporary-directory-description = Błąd: Nie udało się stworzyć katalogu tymczasowego! Czy masz pozwolenia do odczytu/zapisu plików? Jeżeli ten błąd pojawia się ponownie spróbuj uruchomić program jako administrator.
 error-invalid-directory-title = Nieprawidłowy katalog
-error-invalid-directory-description = Upewnij się, że ścieżka którą podaleś(aś) jest katalogiem
+error-invalid-directory-description = Upewnij się, że ścieżka którą podałeś(aś) jest katalogiem
 
 # Headings
 actions = Akcje
@@ -76,10 +76,10 @@ use-alias = Eksportuj alternatywne nazwy plików
 # Descriptions
 overwrite-with = Podwójnie kliknij plik aby nadpisać z "{ $asset }"
 copy-choose-file = Podwójnie kliknij plik do skopiowania.
-logs-description = Dziennik pokazuję wydajność programu. Jeżeli wystąpują jakieś blędy, tutaj one się pojawią.
+logs-description = Dziennik pokazuję wydajność programu. Jeżeli występują jakieś błędy, tutaj one się pojawią.
 swap-with = Podwójnie naciśnij plik aby zamienić zasoby z "{ $asset }"
 swap-choose-file = Podwójnie naciśnij plik do zamienienia
-clear-cache-description = Jeżeli wyświetlanie lub wyodrębnianie plików zajmuje za długo, możesz wyczyścić pamieć podręczną gry Roblox. Usunie to wszystkie pliki z pamięci podręcznej i gra Roblox wygeneruje pliki, kiedy są wymagane.
+clear-cache-description = Jeżeli wyświetlanie lub wyodrębnianie plików zajmuje za długo, możesz wyczyścić pamięć podręczną gry Roblox. Usunie to wszystkie pliki z pamięci podręcznej i gra Roblox wygeneruje pliki, kiedy są wymagane.
 extract-all-description = Ten przycisk skopiuje wszystkie zasoby i stworzy katalogi np. /sounds, /images aby je kategoryzować. Możesz zmienić folder do wypakowania przed startem.
 custom-cache-dir-description = Jeżeli potrzebujesz dostęp do pamięci potrzebnej innej instalacji gry Roblox, możesz zmienić katalog pamięci podręcznej poniżej, a możesz ustawić go z powrotem do domyślnego ustawienia klikając inny przycisk.
 use-alias-description = Zamiast eksportowania zwykłej nazwy dla zasobu, zaznaczenie tej opcji wyeksportuje zasób z inną nazwą pliku. Możesz zrobić to w tej aplikacji.
@@ -100,7 +100,7 @@ failed-deleting-file = BŁĄD: Nie udało się usunąć ({ $item }/{ $total })
 failed-opening-file = BŁĄD: Nie udało się otworzyć pliku: { $error }
 failed-not-file = BŁĄD: '{ $file }' Nie jest plikiem.
 error-extracting-file = BŁĄD: Nie udało się wyodrębnić plików: { $error }
-error-check-logs = BŁĄD: Sprawdź dziennikdziennik po więcej informacji.
+error-check-logs = BŁĄD: Sprawdź dziennik po więcej informacji.
 
 # Misc
 support-project-donate = ♥ Wesprzyj projekt darowizną
