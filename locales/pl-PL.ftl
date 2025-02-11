@@ -14,7 +14,7 @@ about = Informacje
 # Buttons
 button-disable-display-image-preview = Przestań wyświetlać podgląd obrazu
 button-display-image-preview = Wyświetl podgląd obrazu
-input-preview-size = Preview size # TODO: Translate
+input-preview-size = Rozmiar podglądu
 button-open = Otwórz <Return>
 button-extract-file = Wyodrębnij <Ctrl+E>
 button-copy = Kopiuj <Ctrl+D>
