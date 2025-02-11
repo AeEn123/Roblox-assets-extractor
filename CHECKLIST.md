@@ -51,7 +51,7 @@ The option to refresh before extracting all assets can be enabled to make sure y
 
 ## 1.1.0
 - [ ] - Make it into a table with specific details e.g size, type, time created
-- [ ] - Built-in media player to quickly previw sounds
+- [ ] - Built-in media player to quickly preview sounds
 
 ## Future releases
 - [ ] - Finish CLI mode documentation
