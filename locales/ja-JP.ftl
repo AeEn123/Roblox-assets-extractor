@@ -53,7 +53,7 @@ actions = アクション
 updates = 更新
 language-settings = 言語設定
 new-updates = 新しい更新があります
-contributers = 貢献者
+contributors = 貢献者
 dependencies = 依存関係
 behavior = 動作
 

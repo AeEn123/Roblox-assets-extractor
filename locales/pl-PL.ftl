@@ -61,7 +61,7 @@ actions = Akcje
 updates = Aktualizacje
 language-settings = Ustawienia języka
 new-updates = Nowa aktualizacja dostępna
-contributers = Współtwórcy
+contributors = Współtwórcy
 dependencies = Zależności
 behavior = Zachowanie
 

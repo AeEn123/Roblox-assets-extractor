@@ -19,7 +19,7 @@ mod settings;
 const VERSION: &str = env!("CARGO_PKG_VERSION"); // Get version for use in the filename
 const COMPILE_DATE: &str = env!("COMPILE_DATE");
 const ICON: &[u8; 11400] = include_bytes!("../assets/icon.png");
-const CONTRIBUTERS: [&str; 4] = [
+const CONTRIBUTORS: [&str; 4] = [
     "AeEn123",
     "Vonercent",
     "MarcelDev",
@@ -803,9 +803,9 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.separator();
 
-            ui.heading(logic::get_message(self.locale, "contributers", None));
-            for contributer in CONTRIBUTERS {
-                ui.hyperlink_to(format!("@{}",contributer), format!("https://github.com/{}", contributer));
+            ui.heading(logic::get_message(self.locale, "contributors", None));
+            for contributor in CONTRIBUTORS {
+                ui.hyperlink_to(format!("@{}",contributor), format!("https://github.com/{}", contributor));
             }
 
             ui.separator();
