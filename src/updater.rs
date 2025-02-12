@@ -110,7 +110,7 @@ pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
                         } else if run_gui {
                             match gui::run_gui(json.body, json.name, correct_asset.browser_download_url.clone()) {
                                 Ok(_) => log::info("User exited GUI"),
-                                Err(e) => log::error(&format!("GUI failed: {}",e))
+                                Err(e) => log::critical_error(&format!("GUI failed: {}",e))
                             }
                         }
                     } else {

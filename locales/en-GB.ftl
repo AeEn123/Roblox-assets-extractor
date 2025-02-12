@@ -55,6 +55,7 @@ error-temporary-directory-title = Failed to create a temporary directory!
 error-temporary-directory-description = Error: Failed to create a temporary directory! Do you have read/write access to your temp folder? If this error continues, try running as administrator
 error-invalid-directory-title = Invalid directory!
 error-invalid-directory-description = Please make sure the path you provided is a directory
+generic-error-critical = Critical error
 
 # Headings
 actions = Actions

@@ -260,7 +260,7 @@ fn save_install_script() -> String {
     if temp_dir != "" {
         match fs::write(&path, include_str!("installer/installer.sh")) {
             Ok(_) => log::info(&format!("File written to {}", path)),
-            Err(e) => log::error(&format!("Failed to write to {}: {}", path, e))
+            Err(e) => log::critical_error(&format!("Failed to write to {}: {}", path, e))
         }
         
         return path;
@@ -277,7 +277,7 @@ fn save_install_script() -> String {
     if temp_dir != "" {
         match fs::write(&path, include_str!("installer/installer.bat")) {
             Ok(_) => log::info(&format!("File written to {}", path)),
-            Err(e) => log::error(&format!("Failed to write to {}: {}", path, e))
+            Err(e) => log::critical_error(&format!("Failed to write to {}: {}", path, e))
         }
         
         return path;

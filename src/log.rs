@@ -1,6 +1,8 @@
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
+use crate::logic;
+
 lazy_static! {
     static ref LOG: Mutex<String> = Mutex::new(String::new());
 }
@@ -26,6 +28,16 @@ pub fn warn(message: &str) {
 
 pub fn error(message: &str) {
     log("ERROR: ", message)
+}
+
+pub fn critical_error(message: &str) {
+    log("CRITICAL: ", message);
+
+    let _ = native_dialog::MessageDialog::new()
+    .set_type(native_dialog::MessageType::Error)
+    .set_title(&logic::get_message(&logic::get_locale(None), "generic-error-critical", None))
+    .set_text(message)
+    .show_alert();
 }
 
 pub fn get_logs() -> String {

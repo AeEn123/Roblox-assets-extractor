@@ -724,7 +724,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         .unwrap()
                     {
                         if let Err(e) = std::fs::write(path, logs.clone()) {
-                            log::error(&format!("Failed to save logs: {}", e));
+                            log::critical_error(&format!("Failed to save logs: {}", e));
                         }
                     }
                 }
@@ -883,7 +883,7 @@ impl MyApp {
                         cc.egui_ctx.set_fonts(font);
                     }
                     Err(e) => {
-                        log::warn(&format!("Error loading Japanese fonts: {e}"))
+                        log::error(&format!("Error loading Japanese fonts: {e}"))
                     }
                 }
             }
@@ -980,7 +980,7 @@ pub fn run_gui() {
         );
 
         if result.is_err() {
-            log::error(&format!("GUI failed: {}", result.unwrap_err()))
+            log::critical_error(&format!("GUI failed: {}", result.unwrap_err()))
         }
     }
 
