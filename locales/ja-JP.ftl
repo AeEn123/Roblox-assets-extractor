@@ -111,3 +111,4 @@ button-open = Open <Return> # TODO: Translate
 input-preview-size = Preview size # TODO: Translate
 button-display-image-preview = Display image previews # TODO: Translate
 button-disable-display-image-preview = Stop displaying image previews # TODO: Translate
+generic-error-critical = Critical error # TODO: Translate
