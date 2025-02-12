@@ -4,6 +4,7 @@ use egui::Color32;
 use native_dialog::{MessageDialog, FileDialog, MessageType};
 use egui_dock::{DockArea, NodeIndex, DockState, SurfaceIndex, Style};
 use fluent_bundle::{FluentBundle, FluentResource};
+use std::num::NonZero;
 use std::sync::Mutex;
 use std::time::Duration;
 use std::{sync::Arc, thread};
@@ -184,9 +185,9 @@ fn load_asset_image(id: String, tab: String, cache_directory: String, ctx: egui:
         Some(texture.clone())
     } else {
         {
-            let assets_loading = ASSETS_LOADING.lock().unwrap().clone();
-            if assets_loading.contains(&id) {
-                return None // Don't load multiple at a time
+            let assets_loading = ASSETS_LOADING.lock().unwrap().clone();                            // Default to 2 CPU threads
+            if assets_loading.contains(&id) || assets_loading.len() >= thread::available_parallelism().unwrap_or(NonZero::new(2).unwrap()).into() {
+                return None // Don't load multiple at a time or more than CPU threads
             }
         }
         thread::spawn(move || {
@@ -558,7 +559,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             };
 
             let amount_per_row = if display_image_preview {
-                ui.available_width() as usize / row_height as usize
+                ui.available_width() as usize / (row_height + 7.5) as usize // Account for padding because ui.horizontal adds padding
             } else {
                 1
             };
