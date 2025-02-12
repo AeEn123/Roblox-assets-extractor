@@ -54,11 +54,9 @@ makepkg -si
 Other distros will hopefully be supported soon. If you know how to make one and want it merged in this project, create a pull request!
 
 # Testing development builds
-The development builds can be downloaded below
+The development builds can be downloaded from the [releases](github.com/AeEn123/Roblox-assets-extractor/releases/) page.
 
-[![Development build | Windows](https://img.shields.io/badge/Development_build-Windows-blue)](https://nightly.link/AeEn123/Roblox-assets-extractor/workflows/build_win/main/artifact.zip)
-[![Development build | Linux](https://img.shields.io/badge/Development_build-Linux-yellow)](https://nightly.link/AeEn123/Roblox-assets-extractor/workflows/build_linux/main/artifact.zip)
-
+If you already have the latest development build of Roblox Assets Extractor installed, you can enable development builds in settings 
 # More Info
 This is my first project written in rust/egui so bugs may appear, in the circumstance that a bug does appear, report an issue and use the legacy python version if the bug makes it unusable.
 
