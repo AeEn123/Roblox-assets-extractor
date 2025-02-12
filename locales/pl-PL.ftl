@@ -48,7 +48,7 @@ confirmation-custom-directory-title = Wybierz inny katalog
 confirmation-custom-directory-description = Czy chcesz wybrać inny katalog pamięci podręcznej?
 
 # Errors
-generic-error-critical = Critical error # TODO: Translate
+generic-error-critical = Błąd krytyczny
 no-files = Brak plików do wyświetlenia.
 error-directory-detection-title = Nie udało się wykryć katalogu
 error-directory-detection-description = Wykrycie katalogu nieudane! Czy gra Roblox jest zainstalowana i czy uruchomiłeś(aś) ją raz?
