@@ -8,15 +8,16 @@ use crate::{log, logic};
 mod gui;
 
 static URL: &str = "https://api.github.com/repos/AeEn123/Roblox-assets-extractor/releases/latest";
+static PRERELEASE_URL: &str = "https://api.github.com/repos/AeEn123/Roblox-assets-extractor/releases";
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 struct Asset {
     name: String,
     browser_download_url: String,
 }
 
-#[derive(Deserialize)]
-struct Release {
+#[derive(Deserialize, Debug, Clone)]
+pub struct Release {
     name: String,
     tag_name: String,
     body: String,
@@ -49,7 +50,29 @@ fn detect_download_binary(assets: &Vec<Asset>) -> &Asset {
     return &assets[0];
 }
 
-pub fn download_update(url: &str) {
+fn update_action(json: Release, run_gui: bool, auto_download_update: bool) {
+    log::info("An update is available.");
+    log::info(&json.name);
+    log::info(&json.body);
+
+    let correct_asset = detect_download_binary(&json.assets);
+
+    if auto_download_update {
+        let tag_name = if json.tag_name.contains("dev-build") {
+            Some(json.tag_name.as_str())
+        } else {
+            None
+        };
+        download_update(&correct_asset.browser_download_url, tag_name);
+    } else if run_gui {
+        match gui::run_gui(json.clone(), correct_asset.browser_download_url.clone()) {
+            Ok(_) => log::info("User exited GUI"),
+            Err(e) => log::critical_error(&format!("GUI failed: {}",e))
+        }
+    }
+}
+
+pub fn download_update(url: &str, tag_name: Option<&str>) {
     if !logic::get_system_config_bool("allow-updates").unwrap_or(true) {
         log::warn("Updating has been disabled by the system.");
         return
@@ -72,7 +95,10 @@ pub fn download_update(url: &str) {
                     #[cfg(target_family = "unix")]
                     let path = format!("{}/{}", temp_dir, filename);
                     match fs::write(path.clone(), bytes) {
-                        Ok(_) => logic::set_update_file(path),
+                        Ok(_) => {
+                            logic::set_update_file(path);
+                            logic::set_config_value("current_tag_name", tag_name.clone().into());
+                        },
                         Err(e) => log::error(&format!("Failed to write file: {}", e))
                     }
                 }
@@ -84,40 +110,49 @@ pub fn download_update(url: &str) {
 }
 
 pub fn check_for_updates(run_gui: bool, auto_download_update: bool) {
+    let include_prerelease = logic::get_config_bool("include_prerelease").unwrap_or(false);
+
     let client = Client::new();
 
-    let response = client
+    let response = if include_prerelease {
+        client
+        .get(PRERELEASE_URL)
+        .header("User-Agent", "Roblox-assets-extractor (Rust)")
+        .send()
+    } else {
+        client
         .get(URL)
         .header("User-Agent", "Roblox-assets-extractor (Rust)") // Set a User-Agent otherwise it returns 403
-        .send();
+        .send()
+    };
 
     match response {
         Ok(data) => {
             let text = data.text().unwrap_or("No text".to_string());
-            match serde_json::from_str::<Release>(&text) {
-                Ok(json) => {
-                    let clean_tag_name = clean_version_number(&json.tag_name);
-                    let clean_version = clean_version_number(env!("CARGO_PKG_VERSION"));
-                    if clean_tag_name != clean_version {
-                        log::info("An update is available.");
-                        log::info(&json.name);
-                        log::info(&json.body);
-
-                        let correct_asset = detect_download_binary(&json.assets);
-
-                        if auto_download_update {
-                            download_update(&correct_asset.browser_download_url);
-                        } else if run_gui {
-                            match gui::run_gui(json.body, json.name, correct_asset.browser_download_url.clone()) {
-                                Ok(_) => log::info("User exited GUI"),
-                                Err(e) => log::critical_error(&format!("GUI failed: {}",e))
-                            }
+            if include_prerelease {
+                match serde_json::from_str::<Vec<Release>>(&text) {
+                    Ok(data) => {
+                      let json = data[0].clone();
+                      let current_tag = logic::get_config_string("current_tag_name").unwrap_or("None".to_string());
+                      if current_tag != json.tag_name {
+                        update_action(json, run_gui, auto_download_update);
+                      }                      
+                    },
+                    Err(e) => log::error(&format!("Failed to parse json: {}", e))
+                };
+            } else {
+                match serde_json::from_str::<Release>(&text) {
+                    Ok(json) => {
+                        let clean_tag_name = clean_version_number(&json.tag_name);
+                        let clean_version = clean_version_number(env!("CARGO_PKG_VERSION"));
+                        if (clean_tag_name != clean_version) | logic::get_config_string("current_tag_name").is_some() { // Update back to stable version if user has opted out of development builds
+                            update_action(json, run_gui, auto_download_update);
+                        } else {
+                            log::info("No updates are available.")
                         }
-                    } else {
-                        log::info("No updates are available.")
                     }
+                    Err(e) => log::error(&format!("Failed to parse json: {}", e))
                 }
-                Err(e) => log::error(&format!("Failed to parse json: {}", e))
             }
         }
         Err(e) => log::error(&format!("Failed to check for update: {}", e)),

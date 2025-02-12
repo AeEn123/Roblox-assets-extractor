@@ -72,6 +72,7 @@ automatically-install-updates = Automatically install updates
 use-alias = Export your renamed filenames
 use-topbar-buttons = Enable toolbar
 refresh-before-extract = Refresh file list before extracting
+download-development-build = Use development builds to get the latest features early (These builds may be unstable)
 
 
 # Descriptions
@@ -113,3 +114,4 @@ download-update-question = Would you like to download the update?
 update-changelog = Update changelog below
 support-sponsor = ♥ Sponsor
 support-project-donate = ♥ Donate
+setting-below-restart-required = Note: Changing the setting below requires restarting the program for it to apply.

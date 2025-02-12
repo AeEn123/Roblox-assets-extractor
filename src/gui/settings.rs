@@ -106,16 +106,21 @@ pub fn updates(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {
     ui.separator();
     ui.heading(logic::get_message(locale, "updates", None));
 
-    // Get check_for_updates and automatically_install_updates into a variable for use for checkboxes
+    // Get configurations for use in checkboxes
     let mut check_for_updates = logic::get_config_bool("check_for_updates").unwrap_or(true);
     let mut automatically_install_updates = logic::get_config_bool("automatically_install_updates").unwrap_or(false);
+    let mut include_prerelease = logic::get_config_bool("include_prerelease").unwrap_or(false);
 
     ui.checkbox(&mut check_for_updates, logic::get_message(locale, "check-for-updates", None));
     ui.checkbox(&mut automatically_install_updates, logic::get_message(locale, "automatically-install-updates", None));
+    
+    ui.label(logic::get_message(locale, "setting-below-restart-required", None)); // Restart is required to change this setting
+    ui.checkbox(&mut include_prerelease, logic::get_message(locale, "download-development-build", None));
 
     // Add them to the config again
     logic::set_config_value("check_for_updates", check_for_updates.into());
     logic::set_config_value("automatically_install_updates", automatically_install_updates.into());
+    logic::set_config_value("include_prerelease", include_prerelease.into());
 }
 
 pub fn behavior(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) {

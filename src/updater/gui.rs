@@ -9,9 +9,8 @@ use std::sync::Arc;
 struct App {
     locale: FluentBundle<Arc<FluentResource>>,
     cache: CommonMarkCache,
-    changelog: String,
     url: String,
-    name: String,
+    json: updater::Release
 }
 
 fn detect_japanese_font() -> Option<String> {
@@ -37,7 +36,7 @@ fn detect_japanese_font() -> Option<String> {
 
 // https://users.rust-lang.org/t/is-posible-egui-change-fonts-to-japanese-how/59662/5
 impl App {
-    pub fn new(cc: &eframe::CreationContext<'_>, text: String, name: String, url: String) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>, json:updater::Release, url: String) -> Self {
         //Custom font install
         // 1. Create a `FontDefinitions` object.
         let mut font = egui::FontDefinitions::default();
@@ -73,10 +72,9 @@ impl App {
         // Return self
         Self {
             cache: CommonMarkCache::default(),
-            changelog: text,
             locale: logic::get_locale(None),
-            name: name,
-            url: url
+            url: url,
+            json: json
         }
     }
 }
@@ -92,12 +90,12 @@ impl eframe::App for App {
 
             ui.separator();
 
-            ui.heading(&self.name);
+            ui.heading(&self.json.name);
 
             egui::ScrollArea::vertical().show(ui, |ui| {
                 CommonMarkViewer::new()
                     .max_image_width(Some(512))
-                    .show(ui, &mut self.cache, &self.changelog);
+                    .show(ui, &mut self.cache, &self.json.body);
             });
         });
         egui::TopBottomPanel::bottom("buttons").show(ctx, |ui| {
@@ -108,7 +106,13 @@ impl eframe::App for App {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                     if ui.button(logic::get_message(&self.locale, "button-yes", None)).clicked() {
-                        updater::download_update(&self.url);
+                        let tag_name = if self.json.tag_name.contains("dev-build") {
+                            Some(self.json.tag_name.as_str())
+                        } else {
+                            None
+                        };
+                        
+                        updater::download_update(&self.url, tag_name);
                         logic::run_install_script(true);
                     }
                 })
@@ -118,7 +122,7 @@ impl eframe::App for App {
     }
 }
 
-pub fn run_gui(text: String, name: String, url: String) -> eframe::Result {
+pub fn run_gui(json: updater::Release, url: String) -> eframe::Result {
     eframe::run_native(
         &format!("Roblox Assets Extractor Updater v{}", VERSION),
         eframe::NativeOptions::default(),
@@ -128,7 +132,7 @@ pub fn run_gui(text: String, name: String, url: String) -> eframe::Result {
                 style.url_in_tooltip = true;
             });
 
-            Ok(Box::new(App::new(cc, text, name, url)))
+            Ok(Box::new(App::new(cc, json, url)))
         }),
     )
 }

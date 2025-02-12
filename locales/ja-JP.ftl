@@ -112,3 +112,5 @@ input-preview-size = Preview size # TODO: Translate
 button-display-image-preview = Display image previews # TODO: Translate
 button-disable-display-image-preview = Stop displaying image previews # TODO: Translate
 generic-error-critical = Critical error # TODO: Translate
+download-development-build = Use development builds to get the latest features early (These builds may be unstable) # TODO: Translate
+setting-below-restart-required = Note: Changing the setting below requires restarting the program for it to apply. # TODO: Translate

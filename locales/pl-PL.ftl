@@ -67,6 +67,7 @@ dependencies = Zależności
 behavior = Zachowanie
 
 # Checkboxes
+download-development-build = Use development builds to get the latest features early (These builds may be unstable) # TODO: Translate
 refresh-before-extract = Odśwież listę plików przed wyodrębnieniem
 use-topbar-buttons = Włącz pasek narzędzi
 check-for-updates = Poszukaj aktualizacji
@@ -104,6 +105,7 @@ error-extracting-file = BŁĄD: Nie udało się wyodrębnić plików: { $error }
 error-check-logs = BŁĄD: Sprawdź dziennik po więcej informacji.
 
 # Misc
+setting-below-restart-required = Note: Changing the setting below requires restarting the program for it to apply. # TODO: Translate
 support-project-donate = ♥ Wesprzyj projekt darowizną
 support-sponsor = ♥ Sponsoruj
 no-function = (Nie działa)
