@@ -734,7 +734,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 for line in lines {
                     let colour = if line.contains("WARN") {
                         egui::Color32::from_rgb(150,150,0)
-                    } else if line.contains("ERROR") {
+                    } else if line.contains("ERROR") | line.contains("CRITICAL") {
                         egui::Color32::RED
                     } else {
                         ui.visuals().text_color()
