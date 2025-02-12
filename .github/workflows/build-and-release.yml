@@ -56,7 +56,7 @@ jobs:
     steps:
       - name: Get timestamp
         id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        run: echo "date=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
       
       - name: Download Windows Artifact
         uses: actions/download-artifact@v4

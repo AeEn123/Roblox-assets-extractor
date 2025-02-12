@@ -54,7 +54,7 @@ makepkg -si
 Other distros will hopefully be supported soon. If you know how to make one and want it merged in this project, create a pull request!
 
 # Testing development builds
-The development builds can be downloaded from the [releases](github.com/AeEn123/Roblox-assets-extractor/releases/) page.
+The development builds can be downloaded from the [releases](https://github.com/AeEn123/Roblox-assets-extractor/releases) page.
 
 If you already have the latest development build of Roblox Assets Extractor installed, you can enable development builds in settings 
 # More Info
