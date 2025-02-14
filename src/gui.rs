@@ -565,8 +565,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             };
 
             let total_rows = if display_image_preview {
-                let amount = ui.available_width() / row_height;
-                f32::ceil(file_list.len() as f32 / amount) as usize // Show even unfilled rows
+                f32::ceil(file_list.len() as f32 / amount_per_row as f32) as usize // Show even unfilled rows
             } else {
                 file_list.len()
             };
