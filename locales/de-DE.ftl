@@ -117,9 +117,9 @@ refresh-before-extract = Refresh file list before extracting
 button-extract-file = Extrahieren <Ctrl+E>
 button-open = Öffnen <Return>
 
-input-preview-size = Preview size # TODO: Translate
-button-display-image-preview = Display image previews # TODO: Translate
-button-disable-display-image-preview = Stop displaying image previews # TODO: Translate
-generic-error-critical = Critical error # TODO: Translate
-download-development-build = Use development builds to get the latest features early (These builds may be unstable) # TODO: Translate
-setting-below-restart-required = Note: Changing the setting below requires restarting the program for it to apply. # TODO: Translate
+input-preview-size = Größenvorschau
+button-display-image-preview = Bildervorschau anzeigen
+button-disable-display-image-preview = Bildervorschau nicht mehr anzeigen
+generic-error-critical = Kritischer Fehler
+download-development-build = Benutze Entwicklungsversionen um die neusten Funktionen früher zu bekommen (Diese Versionen können nicht stabil sein)
+setting-below-restart-required = Info: Ändern der unteren Einstellung benötigt ein Neustart des Programmes, damit es angewendet wird
