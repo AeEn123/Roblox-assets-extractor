@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use std::time::UNIX_EPOCH;
+use std::time::SystemTime;
 use std::{fs, sync::Arc};
 use std::collections::HashMap;
 use std::io::Read;
@@ -91,7 +91,7 @@ const DEFAULT_CONFIG_FILE: &str = "Roblox-assets-extractor-config.json";
 pub struct AssetInfo {
     pub name: String,
     pub size: u64,
-    pub last_modified: Option<u64>
+    pub last_modified: Option<SystemTime>
 }
 
 // Define local functions
@@ -302,14 +302,14 @@ fn create_asset_info(path: &PathBuf, file: &str) -> AssetInfo {
         Ok(metadata) => {
             let size = metadata.len();
             let last_modified = match metadata.modified() {
-                Ok(system_time) => system_time.duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                Err(_) => 0
+                Ok(system_time) => Some(system_time),
+                Err(_) => None
             };
 
             return AssetInfo {
                 name: file.to_string(),
                 size: size,
-                last_modified: Some(last_modified)
+                last_modified: last_modified
             }
         }
         Err(e) => {
@@ -702,7 +702,11 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             let path = entry.unwrap().path();
                             if let Some(filename) = path.file_name() {
                                 update_file_list(create_asset_info(&path, &filename.to_string_lossy()), cli_list_mode);
-                                update_status(format!("Reading files ({count}/{total})"));
+                                
+                                let mut args = FluentArgs::new();
+                                args.set("item", count);
+                                args.set("total", total);
+                                update_status(get_message(&locale, "reading-files", Some(&args)));
                             }
                             
                         }

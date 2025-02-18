@@ -227,6 +227,23 @@ fn add_dependency_credit(dependency: [&str;2], ui: &mut egui::Ui, sponsor_messag
     }
 }
 
+fn format_size(bytes: u64) -> String {
+    const UNITS: [&str; 4] = ["KB", "MB", "GB", "TB"];
+    let mut size = bytes as f64 / 1024.0;
+    let mut unit_idx = 0;
+
+    while size >= 1024.0 && unit_idx < UNITS.len() - 1 {
+        size /= 1024.0;
+        unit_idx += 1;
+    }
+    format!("{:.1} {}", size, UNITS[unit_idx])
+}
+
+fn format_modified(time: std::time::SystemTime) -> String {
+    let datetime: chrono::DateTime<chrono::Local> = time.into();
+    datetime.format("%Y-%m-%d %H:%M").to_string()
+}
+
 impl TabViewer<'_> {
     fn asset_buttons(&mut self, ui: &mut egui::Ui, cache_directory: &str, tab: &str, focus_search_box: &mut bool, name: Option<&str>) {
         if let Some(name) = name {
@@ -576,118 +593,147 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 row_height,
                 total_rows,
                 |ui, row_range| {
-                if display_image_preview {
-                for row_idx in row_range {
-                    ui.horizontal(|ui| {
-                        for amount in 0..amount_per_row {
-                            let i = (row_idx*amount_per_row)+amount;
-                            if let Some(asset) = file_list.get(i) {
-                                let file_name = &asset.name;
-                                let alias = logic::get_asset_alias(&file_name);
+                    if display_image_preview {
+                        for row_idx in row_range {
+                            ui.horizontal(|ui| {
+                                for amount in 0..amount_per_row {
+                                    let i = (row_idx*amount_per_row)+amount;
+                                    if let Some(asset) = file_list.get(i) {
+                                        let file_name = &asset.name;
+                                        let alias = logic::get_asset_alias(&file_name);
+                
+                                        let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
+                                            *self.selected = Some(i); // If there is none selected, Set selected and return true
+                                            none_selected = false; // Will select everything if this is not set to false immediately
+                                            true
+                                        } else {
+                                            *self.selected == Some(i) // Check if this current one is selected
+                                        };
+            
+                                        // Draw the text
+                                        if is_selected && *self.renaming {
+                                            self.handle_text_edit(ui, &alias, &file_name); // Allow user to edit
+                                        } else {
+                                            let desired_size = egui::vec2(row_height, row_height); // Set height to the text style height
+                                            let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
         
-                                let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
-                                    *self.selected = Some(i); // If there is none selected, Set selected and return true
-                                    none_selected = false; // Will select everything if this is not set to false immediately
+                                            if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
+                                                egui::Image::new(&texture).maintain_aspect_ratio(true).max_height(row_height).paint_at(ui, rect);
+                                            }
+        
+                                            let visuals = ui.visuals();
+        
+                                            // Get colours and handle response
+                                            let colours = self.handle_asset_response(response, visuals, is_selected, i, scroll_to, &mut navigation_accepted, &cache_directory, &tab, &mut focus_search_box, &file_name);
+        
+                                            let text_colour = colours.1;
+                                            let background_colour = colours.0;
+        
+                                            // Draw the background colour
+                                            ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(row_height/8.0, background_colour), egui::StrokeKind::Inside);
+            
+                                            // Draw text ontop of image
+                                            let text = egui::Label::new(
+                                                egui::RichText::new(alias)
+                                                    .text_style(egui::TextStyle::Body)
+                                                    .color(text_colour)
+                                            ).truncate().selectable(false);
+        
+                                            let text_size = ui.text_style_height(&egui::TextStyle::Body);
+        
+                                            let text_rect = egui::Rect::from_min_size(
+                                                rect.min + egui::vec2(0.0, (rect.height() - text_size) / 2.0),
+                                                egui::vec2(row_height, text_size)
+                                            );
+        
+                                            // Background to make text easier to read
+                                            let background_colour = if visuals.dark_mode {
+                                                egui::Color32::from_rgba_unmultiplied(27, 27, 27, 160) // Dark mode
+                                            } else {
+                                                egui::Color32::from_rgba_unmultiplied(248, 248, 248, 160) // Light mode
+                                            };
+                                            ui.painter().rect_filled(text_rect, 0.0, background_colour);
+        
+                                            ui.put(text_rect, text);
+                                        }
+                                    }
+                                }    
+                            });
+                        }
+                        } else {
+                        for i in row_range {
+                            if let Some(asset) = file_list.get(i) {
+                                let alias = logic::get_asset_alias(&asset.name);
+                                let is_selected = if none_selected && i != 0 {
+                                    *self.selected = Some(i);
+                                    none_selected = false;
                                     true
                                 } else {
-                                    *self.selected == Some(i) // Check if this current one is selected
+                                    *self.selected == Some(i)
                                 };
-    
-                                // Draw the text
+            
                                 if is_selected && *self.renaming {
-                                    self.handle_text_edit(ui, &alias, &file_name); // Allow user to edit
+                                    self.handle_text_edit(ui, &alias, &asset.name);
                                 } else {
-                                    let desired_size = egui::vec2(row_height, row_height); // Set height to the text style height
+                                    let full_width = ui.available_width();
+                                    let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body));
                                     let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-
-                                    if let Some(texture) = load_asset_image(file_name.to_string(), tab.to_string(), cache_directory.clone(), ui.ctx().clone()) {
-                                        egui::Image::new(&texture).maintain_aspect_ratio(true).max_height(row_height).paint_at(ui, rect);
-                                    }
-
+            
                                     let visuals = ui.visuals();
-
-                                    // Get colours and handle response
-                                    let colours = self.handle_asset_response(response, visuals, is_selected, i, scroll_to, &mut navigation_accepted, &cache_directory, &tab, &mut focus_search_box, &file_name);
-
+                                    let colours = self.handle_asset_response(
+                                        response, visuals, is_selected, i, scroll_to, 
+                                        &mut navigation_accepted, &cache_directory, &tab, 
+                                        &mut focus_search_box, &asset.name
+                                    );
+            
                                     let text_colour = colours.1;
                                     let background_colour = colours.0;
-
-                                    // Draw the background colour
-                                    ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(row_height/8.0, background_colour), egui::StrokeKind::Inside);
-    
-                                    // Draw text ontop of image
-                                    let text = egui::Label::new(
-                                        egui::RichText::new(alias)
-                                            .text_style(egui::TextStyle::Body)
-                                            .color(text_colour)
-                                    ).truncate().selectable(false);
-
-                                    let text_size = ui.text_style_height(&egui::TextStyle::Body);
-
-                                    let text_rect = egui::Rect::from_min_size(
-                                        rect.min + egui::vec2(0.0, (rect.height() - text_size) / 2.0),
-                                        egui::vec2(row_height, text_size)
-                                    );
-
-                                    // Background to make text easier to read
-                                    let background_colour = if visuals.dark_mode {
-                                        egui::Color32::from_rgba_unmultiplied(27, 27, 27, 160) // Dark mode
+            
+                                    ui.painter().rect_filled(rect, 0.0, background_colour);
+            
+                                    // Format metadata
+                                    let size = format_size(asset.size);
+                                    let modified = if asset.last_modified.is_some() {
+                                        format_modified(asset.last_modified.unwrap())
                                     } else {
-                                        egui::Color32::from_rgba_unmultiplied(248, 248, 248, 160) // Light mode
+                                        "".to_string()
                                     };
-                                    ui.painter().rect_filled(text_rect, 0.0, background_colour);
 
-                                    ui.put(text_rect, text);
+                                    // Column positions
+                                    let alias_x = rect.min.x + 5.0;
+                                    let size_x = rect.min.x + rect.width() * 0.7;
+                                    let modified_x = rect.min.x + rect.width() * 1.0 - 5.0; // adjust for padding
+            
+                                    // Draw all columns
+                                    ui.painter().text(
+                                        egui::pos2(alias_x, rect.min.y),
+                                        egui::Align2::LEFT_TOP,
+                                        alias,
+                                        egui::TextStyle::Body.resolve(ui.style()),
+                                        text_colour,
+                                    );
+            
+                                    ui.painter().text(
+                                        egui::pos2(size_x, rect.min.y),
+                                        egui::Align2::RIGHT_TOP,
+                                        size,
+                                        egui::TextStyle::Body.resolve(ui.style()),
+                                        text_colour,
+                                    );
+            
+                                    ui.painter().text(
+                                        egui::pos2(modified_x, rect.min.y),
+                                        egui::Align2::RIGHT_TOP,
+                                        modified,
+                                        egui::TextStyle::Body.resolve(ui.style()),
+                                        text_colour,
+                                    );
                                 }
                             }
-                        }    
-                    });
-                }
-                } else {
-                for i in row_range {
-                    if let Some(asset) = file_list.get(i) {
-                        let alias = logic::get_asset_alias(&asset.name);
-
-                        let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
-                            *self.selected = Some(i); // If there is none selected, Set selected and return true
-                            none_selected = false; // Will select everything if this is not set to false immediately
-                            true
-                        } else {
-                            *self.selected == Some(i) // Check if this current one is selected
-                        };
-
-                        // Draw the text
-                        if is_selected && *self.renaming {
-                            self.handle_text_edit(ui, &alias, &asset.name); // Allow user to edit
-
-                        } else {
-                            // Using a rect to allow the user to click across the entire list, not just the text
-                            let full_width = ui.available_width();
-                            let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body)); // Set height to the text style height
-                            let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
-
-                            // Get colours and handle response
-                            let visuals = ui.visuals(); 
-                            let colours = self.handle_asset_response(response, visuals, is_selected, i, scroll_to, &mut navigation_accepted, &cache_directory, &tab, &mut focus_search_box, &asset.name);
-
-                            let text_colour = colours.1;
-                            let background_colour = colours.0; 
-    
-                            // Draw the background colour
-                            ui.painter().rect_filled(rect, 0.0, background_colour);
-
-                            ui.painter().text(
-                                rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
-                                egui::Align2::LEFT_TOP,
-                                alias, // Text is the file name or the alias. Alias is user-defined
-                                egui::TextStyle::Body.resolve(ui.style()),
-                                text_colour,
-                            );
                         }
                     }
                 }
-                }
-            });
+            );
 
             if !navigation_accepted && scroll_to.is_some() {
                 // If the keyboard navigation wasn't accepted and there is keyboard navigation then...
