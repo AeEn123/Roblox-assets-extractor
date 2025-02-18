@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::time::UNIX_EPOCH;
 use std::{fs, sync::Arc};
 use std::collections::HashMap;
@@ -296,8 +297,8 @@ fn save_install_script() -> String {
 
 }
 
-fn create_asset_info(file: &str) -> AssetInfo {
-    match fs::metadata(file) {
+fn create_asset_info(path: &PathBuf, file: &str) -> AssetInfo {
+    match fs::metadata(path) {
         Ok(metadata) => {
             let size = metadata.len();
             let last_modified = match metadata.modified() {
@@ -671,7 +672,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                                     if header != "" {
                                                         // Add the file if the file contains the header
                                                         if bytes_contains(&buffer, header.as_bytes()) {
-                                                            update_file_list(create_asset_info(&filename.to_string_lossy()), false);
+                                                            update_file_list(create_asset_info(&path, &filename.to_string_lossy()), false);
                                                         }
                                                     }
       
@@ -700,7 +701,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             update_progress(count as f32/total as f32);
                             let path = entry.unwrap().path();
                             if let Some(filename) = path.file_name() {
-                                update_file_list(create_asset_info(&filename.to_string_lossy()), cli_list_mode);
+                                update_file_list(create_asset_info(&path, &filename.to_string_lossy()), cli_list_mode);
                                 update_status(format!("Reading files ({count}/{total})"));
                             }
                             
