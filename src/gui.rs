@@ -378,7 +378,10 @@ impl TabViewer<'_> {
 
     fn handle_text_edit(&mut self, ui: &mut egui::Ui, alias: &str, file_name: &str) {
         let mut mutable_name = alias.to_string();
-        let response = ui.text_edit_singleline(&mut mutable_name);
+        let response = egui::TextEdit::singleline(&mut mutable_name)
+            .hint_text(file_name)
+            .show(ui)
+            .response;
 
         if mutable_name != *alias {
             logic::set_asset_alias(file_name, &mutable_name);

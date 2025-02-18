@@ -31,15 +31,18 @@
 - [x] - Implement asset copying
 - [x] - image decoder to quickly preview assets
 - [x] - Use versioning numbers better major.minor.patch
+- [ ] - Make it into a table with specific details e.g size, type, time created
 - [ ] - Wait for translations
 
 ### Changelog for 1.0.0
 Name: The actually major update
+# File list
+The file list has seen major improvements, now having a table-like layout.
 # Images tab
 Major improvements are made to the images tab, allowing you to preview the images within the application
 The images will appear in a grid-like interface just like any file manager.
 # Translations
-Thanks to @MarcelDev for keeping translations up to date
+Thanks to @MarcelDev and @Vonercecnt for keeping translations up to date
 # Minor changes
 You can now right-click on assets to see the properties, because of this, a setting has been added to remove the toolbar
 
@@ -49,8 +52,11 @@ Version numbers now follow major.minor.patch
 
 The option to refresh before extracting all assets can be enabled to make sure you get the latest assets extracted
 
+The search is now case-insensitive.
+
+Leaving the box blank for asset name edit blank will fill in with the original name as the placeholder text. This is to make it more obvious on how to remove custom names from assets.
+
 ## 1.1.0
-- [ ] - Make it into a table with specific details e.g size, type, time created
 - [ ] - Built-in media player to quickly preview sounds
 
 ## Future releases
