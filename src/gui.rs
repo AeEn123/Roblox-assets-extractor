@@ -489,8 +489,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 if ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                     if let Some(selected) = *self.selected {
                         // Get file name after getting the selected value
-                        if let Some(file_name) = file_list.get(selected) {
-                            double_click(cache_directory.clone(), file_name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
+                        if let Some(asset) = file_list.get(selected) {
+                            double_click(cache_directory.clone(), asset.name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
                         }                   
                     }
                 }
@@ -499,8 +499,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     // Ctrl+E (Extract)
                     if let Some(selected) = *self.selected {
                         // Get file name after getting the selected value
-                        if let Some(file_name) = file_list.get(selected) {
-                            extract_file_button(&file_name, &cache_directory, tab);
+                        if let Some(asset) = file_list.get(selected) {
+                            extract_file_button(&asset.name, &cache_directory, tab);
                         }                   
                     }
                 }
@@ -581,7 +581,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     ui.horizontal(|ui| {
                         for amount in 0..amount_per_row {
                             let i = (row_idx*amount_per_row)+amount;
-                            if let Some(file_name) = file_list.get(i) {
+                            if let Some(asset) = file_list.get(i) {
+                                let file_name = &asset.name;
                                 let alias = logic::get_asset_alias(&file_name);
         
                                 let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
@@ -644,8 +645,8 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 }
                 } else {
                 for i in row_range {
-                    if let Some(file_name) = file_list.get(i) {
-                        let alias = logic::get_asset_alias(&file_name);
+                    if let Some(asset) = file_list.get(i) {
+                        let alias = logic::get_asset_alias(&asset.name);
 
                         let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
                             *self.selected = Some(i); // If there is none selected, Set selected and return true
@@ -657,7 +658,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                         // Draw the text
                         if is_selected && *self.renaming {
-                            self.handle_text_edit(ui, &alias, &file_name); // Allow user to edit
+                            self.handle_text_edit(ui, &alias, &asset.name); // Allow user to edit
 
                         } else {
                             // Using a rect to allow the user to click across the entire list, not just the text
@@ -667,7 +668,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
                             // Get colours and handle response
                             let visuals = ui.visuals(); 
-                            let colours = self.handle_asset_response(response, visuals, is_selected, i, scroll_to, &mut navigation_accepted, &cache_directory, &tab, &mut focus_search_box, &file_name);
+                            let colours = self.handle_asset_response(response, visuals, is_selected, i, scroll_to, &mut navigation_accepted, &cache_directory, &tab, &mut focus_search_box, &asset.name);
 
                             let text_colour = colours.1;
                             let background_colour = colours.0; 

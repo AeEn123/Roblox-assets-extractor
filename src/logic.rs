@@ -1,3 +1,4 @@
+use std::time::UNIX_EPOCH;
 use std::{fs, sync::Arc};
 use std::collections::HashMap;
 use std::io::Read;
@@ -18,7 +19,7 @@ lazy_static! {
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(detect_directory());
     static ref STATUS: Mutex<String> = Mutex::new(get_message(&get_locale(None), "idling", None));
-    static ref FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    static ref FILE_LIST: Mutex<Vec<AssetInfo>> = Mutex::new(Vec::new());
     static ref UPDATE_FILE: Mutex<Option<String>> = Mutex::new(None);
     static ref CONFIG: Mutex<Value> = Mutex::new(read_config_file());
     static ref SYSTEM_CONFIG: Mutex<Value> = Mutex::new(read_system_config());
@@ -28,7 +29,7 @@ lazy_static! {
     static ref LIST_TASK_RUNNING: Mutex<bool> = Mutex::new(false);
     static ref STOP_LIST_RUNNING: Mutex<bool> = Mutex::new(false);
 
-    static ref FILTERED_FILE_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    static ref FILTERED_FILE_LIST: Mutex<Vec<AssetInfo>> = Mutex::new(Vec::new());
 
     static ref TASK_RUNNING: Mutex<bool> = Mutex::new(false); // Delete/extract
 
@@ -84,6 +85,13 @@ lazy_static! {
 const DEFAULT_DIRECTORIES: [&str; 2] = ["%Temp%\\Roblox", "~/.var/app/org.vinegarhq.Sober/cache/sober"]; // For windows and linux (sober)
 const SYSTEM_CONFIG_FILE: &str = "Roblox-assets-extractor-system.json";
 const DEFAULT_CONFIG_FILE: &str = "Roblox-assets-extractor-config.json";
+
+#[derive(Debug, Clone)]
+pub struct AssetInfo {
+    pub name: String,
+    pub size: u64,
+    pub last_modified: Option<u64>
+}
 
 // Define local functions
 fn detect_config_file() -> String {
@@ -171,11 +179,11 @@ fn update_progress(value: f32) {
     *request = true;
 }
 
-fn update_file_list(value: String, cli_list_mode: bool) {
+fn update_file_list(value: AssetInfo, cli_list_mode: bool) {
     // cli_list_mode will print out to console
     // It is done this way so it can read files and print to console in the same stage
     if cli_list_mode {
-        println!("{}", value);
+        println!("{}", value.name);
     }
     let mut file_list = FILE_LIST.lock().unwrap();
     file_list.push(value)
@@ -286,6 +294,39 @@ fn save_install_script() -> String {
     }
     
 
+}
+
+fn create_asset_info(file: &str) -> AssetInfo {
+    match fs::metadata(file) {
+        Ok(metadata) => {
+            let size = metadata.len();
+            let last_modified = match metadata.modified() {
+                Ok(system_time) => system_time.duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                Err(_) => 0
+            };
+
+            return AssetInfo {
+                name: file.to_string(),
+                size: size,
+                last_modified: Some(last_modified)
+            }
+        }
+        Err(e) => {
+            log::warn(&format!("Failed to get asset info: {}", e));
+            return AssetInfo {
+                name: file.to_string(),
+                size: 0,
+                last_modified: None
+            }
+        }
+    }
+}
+fn create_no_files(locale: &FluentBundle<Arc<FluentResource>>) -> AssetInfo {
+    AssetInfo {
+        name: get_message(&locale, "no-files", None),
+        size: 0,
+        last_modified: None
+    }
 }
 
 // Define public functions
@@ -507,7 +548,8 @@ pub fn delete_all_directory_contents(dir: String) {
                         }
                         // Clear the file list for visual feedback to the user that the files are actually deleted
                         clear_file_list();
-                        update_file_list(get_message(&locale, "no-files", None), false);
+                        
+                        update_file_list(create_no_files(&locale), false);
                         { 
                             let mut task = TASK_RUNNING.lock().unwrap();
                             *task = false; // Allow other threads to run again
@@ -569,7 +611,11 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
 
                     // Tell the user that there is no files to list to make it easy to tell that the program is working and it isn't broken
                     if total == 0 {
-                        update_file_list(get_message(&locale, "no-files", None).to_owned(), cli_list_mode);
+                        update_file_list(AssetInfo {
+                            name: get_message(&locale, "no-files", None),
+                            size: 0,
+                            last_modified: None
+                        }, cli_list_mode);
                     }
 
                     if mode != "music" { // Music lists files directly and others filter.
@@ -625,7 +671,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                                                     if header != "" {
                                                         // Add the file if the file contains the header
                                                         if bytes_contains(&buffer, header.as_bytes()) {
-                                                            update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
+                                                            update_file_list(create_asset_info(&filename.to_string_lossy()), false);
                                                         }
                                                     }
       
@@ -654,7 +700,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
                             update_progress(count as f32/total as f32);
                             let path = entry.unwrap().path();
                             if let Some(filename) = path.file_name() {
-                                update_file_list(filename.to_string_lossy().to_string(), cli_list_mode);
+                                update_file_list(create_asset_info(&filename.to_string_lossy()), cli_list_mode);
                                 update_status(format!("Reading files ({count}/{total})"));
                             }
                             
@@ -683,7 +729,7 @@ pub fn refresh(dir: String, mode: String, cli_list_mode: bool, yield_for_thread:
         Err(e) => {
             log::warn(&format!("'{}' {}", dir, e));
             clear_file_list();
-            update_file_list("No files to list.".to_owned(), cli_list_mode);
+            update_file_list(create_no_files(&get_locale(None)), cli_list_mode);
             update_status(get_message(&get_locale(None), "idling", None));
         }
     }
@@ -851,12 +897,12 @@ pub fn extract_dir(dir: String, destination: String, mode: String, yield_for_thr
                         for entry in file_list {
                             count += 1; // Increase counter for progress
                             update_progress(count as f32/total as f32); // Convert to f32 to allow floating point output
-                            let origin = format!("{}/{}", dir, entry);
+                            let origin = format!("{}/{}", dir, entry.name);
 
                             let alias = if use_alias {
-                                get_asset_alias(&entry)
+                                get_asset_alias(&entry.name)
                             } else {
-                                entry
+                                entry.name
                             };
 
                             let dest = format!("{}/{}", destination, alias); // Local variable destination
@@ -1192,7 +1238,7 @@ pub fn filter_file_list(query: String) {
     }
     let file_list = get_file_list(); // Clone file list
     for file in file_list {
-        if file.contains(&query_lower) || get_asset_alias(&file).to_lowercase().contains(&query_lower) {
+        if file.name.contains(&query_lower) || get_asset_alias(&file.name).to_lowercase().contains(&query_lower) {
             {
                 let mut filtered_file_list = FILTERED_FILE_LIST.lock().unwrap();
                 filtered_file_list.push(file);
@@ -1201,11 +1247,11 @@ pub fn filter_file_list(query: String) {
     }
 }
 
-pub fn get_file_list() -> Vec<String> {
+pub fn get_file_list() -> Vec<AssetInfo> {
     FILE_LIST.lock().unwrap().clone()
 }
 
-pub fn get_filtered_file_list() -> Vec<String> {
+pub fn get_filtered_file_list() -> Vec<AssetInfo> {
     FILTERED_FILE_LIST.lock().unwrap().clone()
 }
 
@@ -1349,6 +1395,7 @@ pub fn get_request_repaint() -> bool {
     return old_request_repaint
 }
 
+// TODO: what the heck is this why is this here remove it if unecessary
 pub fn get_categories() -> Vec<String> {
     let mut catagories = Vec::new();
     for key in HEADERS.lock().unwrap().keys() {
