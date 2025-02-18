@@ -56,6 +56,8 @@ The search is now case-insensitive.
 
 Leaving the box blank for asset name edit blank will fill in with the original name as the placeholder text. This is to make it more obvious on how to remove custom names from assets.
 
+You can now test minor builds within the settings
+
 ## 1.1.0
 - [ ] - Built-in media player to quickly preview sounds
 
