@@ -760,11 +760,19 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             ui.heading(logic::get_message(self.locale, "logs", None));
             ui.label(logic::get_message(self.locale, "logs-description", None));
 
-            let logs = log::get_logs();
+            let mut hide_username_from_logs = logic::get_config_bool("hide_username_from_logs").unwrap_or(true);
+
+            let logs = if hide_username_from_logs {
+                log::get_anonymous_logs()
+            } else {
+                log::get_logs()
+            };
             let lines = logs.lines();
 
-
             ui.horizontal(|ui| {
+                ui.checkbox(&mut hide_username_from_logs, "Hide username from logs");
+                logic::set_config_value("hide_username_from_logs", hide_username_from_logs.into());
+
                 if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
                     ui.ctx().copy_text(logs.clone());
                 }

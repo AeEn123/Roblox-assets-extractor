@@ -43,3 +43,12 @@ pub fn critical_error(message: &str) {
 pub fn get_logs() -> String {
     return LOG.lock().unwrap().clone();
 }
+
+pub fn get_anonymous_logs() -> String {
+    let logs = LOG.lock().unwrap().clone();
+    // Remove all possible information
+    let logs = logs.replace(&whoami::username(), "username");
+    let logs = logs.replace(&whoami::realname(), "Real Name");
+    let logs = logs.replace(&whoami::devicename(), "devicename");
+    logs
+}
