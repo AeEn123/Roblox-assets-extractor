@@ -17,7 +17,7 @@ This tool extracts cached data from your Roblox installation by looking at the h
 ![Screenshot](/assets/screenshot.png)
 
 # FAQ
-See [FAQ.md](/docs/en-GB/FAQ.MD)
+See [FAQ.md](/docs/en-GB/FAQ.md)
 
 # Usage
 ## Tabs
