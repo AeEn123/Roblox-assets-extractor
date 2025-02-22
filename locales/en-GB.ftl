@@ -73,12 +73,13 @@ use-alias = Export your renamed filenames
 use-topbar-buttons = Enable toolbar
 refresh-before-extract = Refresh file list before extracting
 download-development-build = Use development builds to get the latest features early (These builds may be unstable)
+checkbox-hide-user-logs = Hide username from logs
 
 
 # Descriptions
 clear-cache-description = If it is taking too long to list files and extracting all from a directory, you can clear your Roblox cache with the button below. This removes all files from your cache and your Roblox client will automatically recreate these files when needed.
 extract-all-description = The button below will copy all assets and create folders e.g /sounds, /images to catagorize them. You can choose the root folder when starting.
-custom-cache-dir-description = If you want to access the cache in a different Roblox installation, change your cache directory below, you can set it back to default with the other button.
+custom-cache-dir-description = If you want to access a different cache, change your cache directory below, you can set it back to default with the other button. This is different from your Roblox installation folder
 use-alias-description = Instead of exporting the raw file name for the asset, checking this checkbox will export the filename you choose instead. You can do this by renaming within the application itself.
 swap-choose-file = Double click a file to swap
 swap-with = Double click a file to swap with "{ $asset }"
