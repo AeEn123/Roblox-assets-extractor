@@ -16,7 +16,7 @@ include!(concat!(env!("OUT_DIR"), "/locale_data.rs")); // defines get_locale_res
 
 // Define mutable static values
 lazy_static! {
-    static ref LANGUAGE_LIST: Mutex<HashMap<String,String>> = Mutex::new(init_language_list());
+    static ref LANGUAGE_LIST: Mutex<Vec<(String,String)>> = Mutex::new(init_language_list());
     static ref TEMP_DIRECTORY: Mutex<Option<tempfile::TempDir>> = Mutex::new(None);
     static ref CACHE_DIRECTORY: Mutex<String> = Mutex::new(detect_directory());
     static ref STATUS: Mutex<String> = Mutex::new(get_message(&get_locale(None), "idling", None));
@@ -148,7 +148,7 @@ fn read_system_config() -> Value {
     }
 }
 
-fn init_language_list() -> HashMap<String,String> {
+fn init_language_list() -> Vec<(String,String)> {
     let mut languages = LOCALES.to_vec();
 
     // Move the default language to the top of the language list
@@ -158,10 +158,11 @@ fn init_language_list() -> HashMap<String,String> {
         languages.insert(0, default_lang);
     }
 
-    let mut m = HashMap::new();
+    let mut m = Vec::new();
     for lang in languages {
-        m.insert(lang.to_owned(), get_message(&get_locale(Some(lang)), "language-name", None));
+        m.push((lang.to_owned(),get_message(&get_locale(Some(lang)), "language-name", None)));
     }
+
     return m
     
 }
@@ -1281,7 +1282,7 @@ pub fn get_list_task_running() -> bool {
     LIST_TASK_RUNNING.lock().unwrap().clone()
 }
 
-pub fn get_language_list() -> HashMap<String,String> {
+pub fn get_language_list() -> Vec<(String,String)> {
     LANGUAGE_LIST.lock().unwrap().clone()
 }
 

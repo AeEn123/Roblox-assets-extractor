@@ -166,15 +166,15 @@ pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -
     let mut user_clicked = false;
 
     let languages = logic::get_language_list();
-    let language_keys: Vec<&String> = languages.keys().collect();
     egui::ScrollArea::vertical().show_rows(
         ui,
         ui.text_style_height(&egui::TextStyle::Body),
         languages.len(),
         |ui, row_range| {
         for i in row_range {
-            let lang = language_keys[i];
-            let is_selected = *lang == locale.locales[0].to_string();
+            let language = languages[i].clone();
+            let lang_code = language.0;
+            let is_selected = *lang_code == locale.locales[0].to_string();
 
             let visuals = ui.visuals();
 
@@ -205,14 +205,14 @@ pub fn language(ui: &mut egui::Ui, locale: &FluentBundle<Arc<FluentResource>>) -
             ui.painter().text(
                 rect.min + egui::vec2(5.0, 0.0), // Add a bit of padding for the label text
                 egui::Align2::LEFT_TOP,
-                languages[lang].clone(), // Text is the file name
+                language.1.clone(), // Text is the file name
                 egui::TextStyle::Body.resolve(ui.style()),
                 text_colour,
             );
 
             // Handle the click/double click
             if response.clicked() {
-                logic::set_config_value("language", lang.to_string().into());
+                logic::set_config_value("language", lang_code.to_string().into());
                 user_clicked = true; // Refresh locales
             }
         }
