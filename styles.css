@@ -1,13 +1,12 @@
+html {
+    color-scheme: light dark;
+}
 body {
-    background-color: #1b1b1b;
+    /* background-color: #1b1b1b; */
     font-family: Arial, Helvetica, sans-serif;
-    color: white;
+    /* color: white; */
     font-size: x-large;
     text-align: center;
-}
-
-a {
-    color: lightblue;
 }
 
 main {
@@ -36,6 +35,7 @@ h1 {
     padding-top: 2px;
     padding-bottom: 2px;
     transition: 500ms;
+    fill: #000
 }
 
 .links *:hover {
@@ -77,8 +77,14 @@ h1 {
     top: 0px;
     left: 0px;
     user-select: none;
-    color: #222;
+    color: light-dark(#eee, #333) ;
     z-index: -100;
     white-space: pre;
     position: fixed;
+}
+
+@media (prefers-color-scheme: light) {
+    .svg-monochrome {
+        filter: invert(100%);
+    }
 }
