@@ -16,6 +16,18 @@ main {
     margin: 20px auto;; 
 }
 
+details {
+    background:light-dark(#CCCCCC44, #00000044);
+    border: none;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding-top: 5px; 
+    padding-bottom: 5px; 
+}
+
 #faq {
     text-align: left;
 }
