@@ -4,11 +4,11 @@ version = "0.1.4"
 edition = "2021"
 
 [dependencies]
-chrono = "0.4.39"
-clap = { version = "4.5.30", features = ["derive"] }
-eframe = { features = ["default_fonts", "x11", "glow", "web_screen_reader"], default-features = false, version = "0.31.0" }
-egui = "0.31"
-egui_commonmark = "0.20.0"
+chrono = { features = ["clock"], default-features = false, version = "0.4.40" }
+clap = { version = "4.5.32", features = ["std", "derive"], default-features = false }
+eframe = { features = ["default_fonts", "x11", "glow"], default-features = false, version = "0.31.1" }
+egui = { default-features = false, version = "0.31" }
+egui_commonmark = { default-features = false, version = "0.20.0" }
 egui_dock = "0.16.0"
 filetime = "0.2.25"
 fluent-bundle = { version = "0.15.3", default-features = false }
@@ -16,17 +16,17 @@ image = { version = "0.25.5", default-features = false, features = ["png","webp"
 lazy_static = "1.5.0"
 native-dialog = "0.7.0"
 open = "5.3.2"
-reqwest = { version = "0.12.12", features = ["blocking"] }
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = { version = "1.0.138", features=["std"], default-features = false }
+reqwest = { version = "0.12.14", features = ["blocking"] }
+serde = { version = "1.0.219", features = ["derive"], default-features = false }
+serde_json = { version = "1.0.140", features=["std"], default-features = false }
 sys-locale = "0.3.2"
-tempfile = "3"
+tempfile = { default-features = false, version = "3" }
 unic-langid = "0.9.5"
 whoami = { version = "1.5.2", default-features = false }
 
 [build-dependencies]
-chrono = "0.4.39"
-winresource = "0.1.19"
+chrono = "0.4.40"
+winresource = "0.1.20"
 
 # Minimize executable size (Target size < 10MB)
 [profile.release.package."*"]
