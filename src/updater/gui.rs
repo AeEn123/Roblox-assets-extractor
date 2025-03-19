@@ -1,6 +1,6 @@
 use eframe::egui;
-use crate::{log, logic};
-use crate::logic::get_config_string;
+use crate::{locale, log, logic};
+use crate::config::get_config_string;
 use crate::updater;
 use egui_commonmark::*;
 use fluent_bundle::{FluentBundle, FluentResource};
@@ -72,7 +72,7 @@ impl App {
         // Return self
         Self {
             cache: CommonMarkCache::default(),
-            locale: logic::get_locale(None),
+            locale: locale::get_locale(None),
             url: url,
             json: json
         }
@@ -85,8 +85,8 @@ impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
 
-            ui.heading(logic::get_message(&self.locale, "new-updates", None));
-            ui.label(logic::get_message(&self.locale, "update-changelog", None));
+            ui.heading(locale::get_message(&self.locale, "new-updates", None));
+            ui.label(locale::get_message(&self.locale, "update-changelog", None));
 
             ui.separator();
 
@@ -100,12 +100,12 @@ impl eframe::App for App {
         });
         egui::TopBottomPanel::bottom("buttons").show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.heading(logic::get_message(&self.locale, "download-update-question", None));
+                ui.heading(locale::get_message(&self.locale, "download-update-question", None));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
-                    if ui.button(logic::get_message(&self.locale, "button-no", None)).clicked() {
+                    if ui.button(locale::get_message(&self.locale, "button-no", None)).clicked() {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
-                    if ui.button(logic::get_message(&self.locale, "button-yes", None)).clicked() {
+                    if ui.button(locale::get_message(&self.locale, "button-yes", None)).clicked() {
                         let tag_name = if self.json.tag_name.contains("dev-build") {
                             Some(self.json.tag_name.as_str())
                         } else {
@@ -113,7 +113,7 @@ impl eframe::App for App {
                         };
                         
                         updater::download_update(&self.url, tag_name);
-                        logic::run_install_script(true);
+                        updater::run_install_script(true);
                     }
                 })
             });

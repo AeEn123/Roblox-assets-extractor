@@ -1,6 +1,6 @@
 use eframe::egui;
 use crate::{gui::settings, log};
-use crate::logic;
+use crate::{config, locale, logic};
 use fluent_bundle::{FluentBundle, FluentResource};
 use std::sync::Arc;
 
@@ -67,22 +67,22 @@ impl MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading(logic::get_message(&self.locale, "welcome", None));
+            ui.heading(locale::get_message(&self.locale, "welcome", None));
 
             if settings::language(ui, &self.locale) {
                 // This returns true if the locales need to be refreshed
-                self.locale = logic::get_locale(None);
+                self.locale = locale::get_locale(None);
             }
             settings::behavior(ui, &self.locale);
             settings::updates(ui, &self.locale);
             if self.first_frame {
-                logic::set_config_value("welcomed", false.into());
+                config::set_config_value("welcomed", false.into());
                 self.first_frame = false
             }
 
 
-            if ui.button(logic::get_message(&self.locale, "button-finish", None)).clicked() {
-                logic::set_config_value("welcomed", true.into());
+            if ui.button(locale::get_message(&self.locale, "button-finish", None)).clicked() {
+                config::set_config_value("welcomed", true.into());
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
 
@@ -95,7 +95,7 @@ impl Default for MyApp {
     fn default() -> Self {
         Self {
             first_frame: true,
-            locale: logic::get_locale(None),
+            locale: locale::get_locale(None),
         }
     }
 }

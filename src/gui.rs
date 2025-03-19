@@ -10,7 +10,7 @@ use std::time::Duration;
 use std::{sync::Arc, thread};
 
 use std::collections::HashMap; // Used for input
-use crate::{log, logic, updater}; // Used for functionality
+use crate::{config, locale, log, logic, updater}; // Used for functionality
 use eframe::egui::TextureHandle;
 
 use lazy_static::lazy_static;
@@ -79,7 +79,7 @@ fn double_click(dir: String, value: String, mode: String, swapping: &mut bool, c
         }
     } else {
         let temp_dir = logic::get_temp_dir(true);
-        let alias = logic::get_asset_alias(&value);
+        let alias = config::get_asset_alias(&value);
         let destination = format!("{}/{}", temp_dir, alias); // Join both paths
         let origin = format!("{}/{}", dir, value);
         let new_destination = logic::extract_file(origin, mode, destination.clone(), true);
@@ -94,8 +94,8 @@ fn delete_this_directory(cache_directory: &str, locale: &FluentBundle<Arc<Fluent
     // Confirmation dialog
     let yes = MessageDialog::new()
     .set_type(MessageType::Info)
-    .set_title(&logic::get_message(locale, "confirmation-delete-confirmation-title", None))
-    .set_text(&logic::get_message(locale, "confirmation-delete-confirmation-description", None))
+    .set_title(&locale::get_message(locale, "confirmation-delete-confirmation-title", None))
+    .set_text(&locale::get_message(locale, "confirmation-delete-confirmation-description", None))
     .show_confirm()
     .unwrap();
 
@@ -112,8 +112,8 @@ fn extract_all_of_type(cache_directory: &str, mode: &str, locale: &FluentBundle<
         // NOT result, will become false if user clicks yes
         no = !MessageDialog::new()
         .set_type(MessageType::Info)
-        .set_title(&logic::get_message(locale, "confirmation-filter-confirmation-title", None))
-        .set_text(&logic::get_message(locale, "confirmation-filter-confirmation-description", None))
+        .set_title(&locale::get_message(locale, "confirmation-filter-confirmation-title", None))
+        .set_text(&locale::get_message(locale, "confirmation-filter-confirmation-description", None))
         .show_confirm()
         .unwrap();
     }
@@ -126,24 +126,24 @@ fn extract_all_of_type(cache_directory: &str, mode: &str, locale: &FluentBundle<
 
         // If the user provides a directory, the program will extract the assets to that directory
         if let Some(path) = option_path {
-            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), mode.to_string(), false,logic::get_config_bool("use_alias").unwrap_or(false));
+            logic::extract_dir(cache_directory.to_string(), path.to_string_lossy().to_string(), mode.to_string(), false,config::get_config_bool("use_alias").unwrap_or(false));
         }
     }
 }
 fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, locale: &FluentBundle<Arc<FluentResource>>) {
-    let mut warning_acknoledged = logic::get_config_bool("ban-warning-ack").unwrap_or(false);
+    let mut warning_acknoledged = config::get_config_bool("ban-warning-ack").unwrap_or(false);
 
     if !warning_acknoledged {
         warning_acknoledged = MessageDialog::new()
         .set_type(MessageType::Info)
-        .set_title(&logic::get_message(locale, "confirmation-ban-warning-title", None))
-        .set_text(&logic::get_message(locale, "confirmation-ban-warning-description", None))
+        .set_title(&locale::get_message(locale, "confirmation-ban-warning-title", None))
+        .set_text(&locale::get_message(locale, "confirmation-ban-warning-description", None))
         .show_confirm()
         .unwrap();
     }
 
     if warning_acknoledged {
-        logic::set_config_value("ban-warning-ack", warning_acknoledged.into());
+        config::set_config_value("ban-warning-ack", warning_acknoledged.into());
         if *swapping {
             *swapping_asset_a = None;
         }
@@ -153,7 +153,7 @@ fn toggle_swap(swapping: &mut bool, swapping_asset_a: &mut Option<String>, local
 }
 
 fn extract_file_button(name: &str, cache_directory: &str, tab: &str) {
-    let alias = logic::get_asset_alias(name);
+    let alias = config::get_asset_alias(name);
     let origin = format!("{}/{}", cache_directory, name);
     if let Some(destination) = native_dialog::FileDialog::new().set_filename(&alias).show_save_single_file().unwrap() {
         logic::extract_file(origin, tab.into(), destination.to_string_lossy().to_string(), false);
@@ -247,40 +247,40 @@ fn format_modified(time: std::time::SystemTime) -> String {
 impl TabViewer<'_> {
     fn asset_buttons(&mut self, ui: &mut egui::Ui, cache_directory: &str, tab: &str, focus_search_box: &mut bool, name: Option<&str>) {
         if let Some(name) = name {
-            if ui.button(logic::get_message(self.locale, "button-open", None)).clicked() {
+            if ui.button(locale::get_message(self.locale, "button-open", None)).clicked() {
                 double_click(cache_directory.to_string(), name.to_string(), tab.to_string(), self.swapping, self.copying, self.swapping_asset_a);
                 *self.asset_context_menu_open = None;
             }
-            if ui.button(logic::get_message(self.locale, "button-extract-file", None)).clicked() {
+            if ui.button(locale::get_message(self.locale, "button-extract-file", None)).clicked() {
                 extract_file_button(name, cache_directory, tab);
                 *self.asset_context_menu_open = None;
             }
         }
-        if ui.button(logic::get_message(self.locale, "button-search", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-search", None)).clicked() {
             *self.searching = !*self.searching;
             *focus_search_box = true;
             *self.asset_context_menu_open = None;
         }
         
-        if ui.button(logic::get_message(self.locale, "button-rename", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-rename", None)).clicked() {
             // Rename button
             *self.renaming = !*self.renaming;
             *self.asset_context_menu_open = None;
         }
     
-        if ui.button(logic::get_message(self.locale, "button-delete-this-dir", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-delete-this-dir", None)).clicked() {
             delete_this_directory(cache_directory, self.locale);
             *self.asset_context_menu_open = None;
         }
-        if ui.button(logic::get_message(self.locale, "button-extract-type", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-extract-type", None)).clicked() {
             extract_all_of_type(cache_directory, tab, self.locale);
             *self.asset_context_menu_open = None;
         }
-        if ui.button(logic::get_message(self.locale, "button-refresh", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-refresh", None)).clicked() {
             logic::refresh(cache_directory.to_string(), tab.to_string(), false, false);
             *self.asset_context_menu_open = None;
         }
-        if ui.button(logic::get_message(self.locale, "button-swap", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-swap", None)).clicked() {
             toggle_swap(self.swapping, self.swapping_asset_a, self.locale);
             *self.asset_context_menu_open = None;
     
@@ -291,7 +291,7 @@ impl TabViewer<'_> {
             }
             
         }
-        if ui.button(logic::get_message(self.locale, "button-copy", None)).clicked() {
+        if ui.button(locale::get_message(self.locale, "button-copy", None)).clicked() {
             toggle_swap(self.copying, self.swapping_asset_a, self.locale);
             *self.asset_context_menu_open = None;
     
@@ -303,14 +303,14 @@ impl TabViewer<'_> {
         }
 
         if tab == "images" {
-            let message = if logic::get_config_bool("display_image_preview").unwrap_or(false) {
-                logic::get_message(self.locale, "button-disable-display-image-preview", None)
+            let message = if config::get_config_bool("display_image_preview").unwrap_or(false) {
+                locale::get_message(self.locale, "button-disable-display-image-preview", None)
             } else {
-                logic::get_message(self.locale, "button-display-image-preview", None)
+                locale::get_message(self.locale, "button-display-image-preview", None)
             };
     
             if ui.button(message).clicked() {
-                logic::set_config_value("display_image_preview", (!logic::get_config_bool("display_image_preview").unwrap_or(false)).into());
+                config::set_config_value("display_image_preview", (!config::get_config_bool("display_image_preview").unwrap_or(false)).into());
                 *self.asset_context_menu_open = None;
             }
         }
@@ -384,13 +384,13 @@ impl TabViewer<'_> {
             .response;
 
         if mutable_name != *alias {
-            logic::set_asset_alias(file_name, &mutable_name);
+            config::set_asset_alias(file_name, &mutable_name);
         }
 
         if response.lost_focus() {
             *self.renaming = false;
             if mutable_name == "" {
-                logic::set_asset_alias(file_name, file_name); // Set it to file name if blank
+                config::set_asset_alias(file_name, file_name); // Set it to file name if blank
             }
         } else {
             response.request_focus(); // Request focus if it hasn't lost focus
@@ -402,7 +402,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = String;
 
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
-        logic::get_message(self.locale, &*tab, None).into()
+        locale::get_message(self.locale, &*tab, None).into()
         
     }
 
@@ -466,7 +466,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             // GUI logic below here
 
             // Top UI buttons
-            if logic::get_config_bool("use_topbar_buttons").unwrap_or(true) {
+            if config::get_config_bool("use_topbar_buttons").unwrap_or(true) {
                 ui.push_id("Topbar buttons", |ui| {
                     egui::ScrollArea::horizontal().show(ui, |ui| {
                         ui.horizontal(|ui| {
@@ -531,21 +531,21 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             if *self.swapping {
                 if self.swapping_asset_a.as_ref().is_none() {
-                    ui.heading(logic::get_message(self.locale, "swap-choose-file", None));
+                    ui.heading(locale::get_message(self.locale, "swap-choose-file", None));
                 } else {
                     let mut args = fluent_bundle::FluentArgs::new();
-                    args.set("asset", logic::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
-                    ui.heading(logic::get_message(self.locale, "swap-with", Some(&args)));
+                    args.set("asset", config::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
+                    ui.heading(locale::get_message(self.locale, "swap-with", Some(&args)));
                 }
             }
 
             if *self.copying {
                 if self.swapping_asset_a.as_ref().is_none() {
-                    ui.heading(logic::get_message(self.locale, "copy-choose-file", None));
+                    ui.heading(locale::get_message(self.locale, "copy-choose-file", None));
                 } else {
                     let mut args = fluent_bundle::FluentArgs::new();
-                    args.set("asset", logic::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
-                    ui.heading(logic::get_message(self.locale, "overwrite-with", Some(&args)));
+                    args.set("asset", config::get_asset_alias(self.swapping_asset_a.as_ref().unwrap()));
+                    ui.heading(locale::get_message(self.locale, "overwrite-with", Some(&args)));
                 }
             }
 
@@ -570,10 +570,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 file_list
             };
 
-            let display_image_preview = logic::get_config_bool("display_image_preview").unwrap_or(false) && tab == "images";
+            let display_image_preview = config::get_config_bool("display_image_preview").unwrap_or(false) && tab == "images";
 
             let row_height = if display_image_preview {
-                logic::get_config_u64("image_preview_size").unwrap_or(128) as f32
+                config::get_config_u64("image_preview_size").unwrap_or(128) as f32
             } else {
                 ui.text_style_height(&egui::TextStyle::Body)
             };
@@ -660,7 +660,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     let i = (row_idx*amount_per_row)+amount;
                                     if let Some(asset) = file_list.get(i) {
                                         let file_name = &asset.name;
-                                        let alias = logic::get_asset_alias(&file_name);
+                                        let alias = config::get_asset_alias(&file_name);
                 
                                         let is_selected  = if none_selected && i != 0 { // Selecting the very first causes some issues
                                             *self.selected = Some(i); // If there is none selected, Set selected and return true
@@ -723,7 +723,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                         } else {
                         for i in row_range {
                             if let Some(asset) = file_list.get(i) {
-                                let alias = logic::get_asset_alias(&asset.name);
+                                let alias = config::get_asset_alias(&asset.name);
                                 let is_selected = if none_selected && i != 0 {
                                     *self.selected = Some(i);
                                     none_selected = false;
@@ -810,14 +810,14 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             if settings::language(ui, self.locale) {
                 // This returns true if the locales need to be refreshed
-                *self.locale = logic::get_locale(None);
+                *self.locale = locale::get_locale(None);
             }
 
         } else if tab == "logs" {
-            ui.heading(logic::get_message(self.locale, "logs", None));
-            ui.label(logic::get_message(self.locale, "logs-description", None));
+            ui.heading(locale::get_message(self.locale, "logs", None));
+            ui.label(locale::get_message(self.locale, "logs-description", None));
 
-            let mut hide_username_from_logs = logic::get_config_bool("hide_username_from_logs").unwrap_or(true);
+            let mut hide_username_from_logs = config::get_config_bool("hide_username_from_logs").unwrap_or(true);
 
             let logs = if hide_username_from_logs {
                 log::get_anonymous_logs()
@@ -827,13 +827,13 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             let lines = logs.lines();
 
             ui.horizontal(|ui| {
-                ui.checkbox(&mut hide_username_from_logs, logic::get_message(&self.locale, "checkbox-hide-user-logs", None));
-                logic::set_config_value("hide_username_from_logs", hide_username_from_logs.into());
+                ui.checkbox(&mut hide_username_from_logs, locale::get_message(&self.locale, "checkbox-hide-user-logs", None));
+                config::set_config_value("hide_username_from_logs", hide_username_from_logs.into());
 
-                if ui.button(logic::get_message(&self.locale, "button-copy-logs", None)).clicked() {
+                if ui.button(locale::get_message(&self.locale, "button-copy-logs", None)).clicked() {
                     ui.ctx().copy_text(logs.clone());
                 }
-                if ui.button(logic::get_message(&self.locale, "button-export-logs", None)).clicked() {
+                if ui.button(locale::get_message(&self.locale, "button-export-logs", None)).clicked() {
                     if let Some(path) = FileDialog::new()
                         .show_save_single_file()
                         .unwrap()
@@ -874,7 +874,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                     args.set("date", COMPILE_DATE);
         
                     ui.horizontal(|ui| {
-                        ui.label(logic::get_message(self.locale, "version", Some(&args)));
+                        ui.label(locale::get_message(self.locale, "version", Some(&args)));
                         ui.label("|");         
                         ui.hyperlink_to("Discord", "https://discord.gg/xqNA5jt6DN");
                     });
@@ -884,10 +884,10 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.separator();
 
-            ui.heading(logic::get_message(self.locale, "support-project-donate", None));
+            ui.heading(locale::get_message(self.locale, "support-project-donate", None));
 
             ui.horizontal(|ui| {
-                ui.hyperlink_to(logic::get_message(self.locale, "support-sponsor", None), "https://github.com/sponsors/AeEn123");
+                ui.hyperlink_to(locale::get_message(self.locale, "support-sponsor", None), "https://github.com/sponsors/AeEn123");
                 ui.label("|");
                 ui.hyperlink_to("Roblox", "https://www.roblox.com/communities/10808976/Alfie-Likes-Computers#!/store")
 
@@ -895,16 +895,16 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
             ui.separator();
 
-            ui.heading(logic::get_message(self.locale, "contributors", None));
+            ui.heading(locale::get_message(self.locale, "contributors", None));
             for contributor in CONTRIBUTORS {
                 ui.hyperlink_to(format!("@{}",contributor), format!("https://github.com/{}", contributor));
             }
 
             ui.separator();
 
-            ui.heading(logic::get_message(self.locale, "dependencies", None));
+            ui.heading(locale::get_message(self.locale, "dependencies", None));
 
-            let sponsor_message = logic::get_message(self.locale, "support-sponsor", None);
+            let sponsor_message = locale::get_message(self.locale, "support-sponsor", None);
             for dependency in DEPENDENCIES {
                 add_dependency_credit(dependency, ui, &sponsor_message);
             } 
@@ -951,7 +951,7 @@ impl Default for MyApp {
             search_query: "".to_owned(),
             swapping: false,
             swapping_asset_a: None,
-            locale: logic::get_locale(None),
+            locale: locale::get_locale(None),
             asset_context_menu_open: None,
             copying: false,
         }
@@ -1008,7 +1008,7 @@ impl MyApp {
         }
         
         // Get theme from config
-        match logic::get_config_string("theme").unwrap_or("system".to_owned()).as_str() {
+        match config::get_config_string("theme").unwrap_or("system".to_owned()).as_str() {
             "dark" => cc.egui_ctx.set_theme(egui::Theme::Dark),
             "light" => cc.egui_ctx.set_theme(egui::Theme::Light),
             _ => ()
@@ -1068,15 +1068,15 @@ impl eframe::App for MyApp {
 
 pub fn run_gui() {
     // If the user is not welcomed before, welcome them
-    if !logic::get_config_bool("welcomed").unwrap_or(false) {
+    if !config::get_config_bool("welcomed").unwrap_or(false) {
         let _ = welcome::run_gui();
     }
     
     // Only run GUI after user has been welcomed
-    if logic::get_config_bool("welcomed").unwrap_or(true) {
+    if config::get_config_bool("welcomed").unwrap_or(true) {
         // Check for updates when running GUI
-        if logic::get_config_bool("check_for_updates").unwrap_or(false) {
-            updater::check_for_updates(true, logic::get_config_bool("automatically_install_updates").unwrap_or(false));
+        if config::get_config_bool("check_for_updates").unwrap_or(false) {
+            updater::check_for_updates(true, config::get_config_bool("automatically_install_updates").unwrap_or(false));
         }
 
         let options = eframe::NativeOptions {

@@ -4,6 +4,8 @@ mod log;
 mod gui;
 mod logic;
 mod updater;
+mod config;
+mod locale;
 
 use clap::{Parser, ValueEnum};
 
@@ -156,7 +158,7 @@ fn main() {
         gui::run_gui();
     }
     
-    if !logic::run_install_script(false) {
+    if !updater::run_install_script(false) {
         // Only run if the install script hasn't ran
         logic::clean_up(); // Remove the temporary directory if one has been created
     }

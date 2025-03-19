@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
-use crate::logic;
+use crate::locale;
 
 lazy_static! {
     static ref LOG: Mutex<String> = Mutex::new(String::new());
@@ -35,7 +35,7 @@ pub fn critical_error(message: &str) {
 
     let _ = native_dialog::MessageDialog::new()
     .set_type(native_dialog::MessageType::Error)
-    .set_title(&logic::get_message(&logic::get_locale(None), "generic-error-critical", None))
+    .set_title(&locale::get_message(&locale::get_locale(None), "generic-error-critical", None))
     .set_text(message)
     .show_alert();
 }
