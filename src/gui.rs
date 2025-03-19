@@ -590,6 +590,63 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 file_list.len()
             };
 
+            let mut table_properties = Vec::new();
+            table_properties.push(("name", 0.0));
+            table_properties.push(("size", 0.5));
+            table_properties.push(("modified", 0.75));
+
+
+
+            if !display_image_preview {
+                let visuals = ui.visuals().clone();
+                // Display table headers
+                let full_width = ui.available_width();
+                let desired_size = egui::vec2(full_width, row_height);
+                let rect = ui.allocate_exact_size(desired_size, egui::Sense::hover()).0;
+
+                for property in table_properties {
+                    let size = rect.size();
+                    println!("{}", property.1*size.x);
+                    let property_rect = egui::Rect::from_min_size(
+                        rect.min + egui::vec2(property.1*size.x, 0.0),
+                        egui::vec2((1.0-property.1)*size.x, size.y)
+                    );
+
+                    ui.put(property_rect,
+                    egui::Label::new(property.0).truncate().selectable(false));
+                }
+
+                // // Column positions
+                // let alias_x = rect.min.x + 5.0;
+                // let size_x = rect.min.x + rect.width() * 0.7;
+                // let modified_x = rect.min.x + rect.width() * 1.0 - 5.0; // adjust for padding
+
+                // // Draw all columns
+                // ui.painter().text(
+                //     egui::pos2(alias_x+5, rect.min.y),
+                //     egui::Align2::LEFT_TOP,
+                //     "Name",
+                //     egui::TextStyle::Body.resolve(ui.style()),
+                //     visuals.text_color(),
+                // );
+
+                // ui.painter().text(
+                //     egui::pos2(size_x+5, rect.min.y),
+                //     egui::Align2::LEFT_TOP,
+                //     "Size",
+                //     egui::TextStyle::Body.resolve(ui.style()),
+                //     visuals.text_color(),
+                // );
+
+                // ui.painter().text(
+                //     egui::pos2(modified_x+5, rect.min.y),
+                //     egui::Align2::LEFT_TOP,
+                //     "Modified",
+                //     egui::TextStyle::Body.resolve(ui.style()),
+                //     visuals.text_color(),
+                // );
+            }
+
             // File list for assets
             egui::ScrollArea::vertical().auto_shrink(false).show_rows(
                 ui,
@@ -679,7 +736,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                                     self.handle_text_edit(ui, &alias, &asset.name);
                                 } else {
                                     let full_width = ui.available_width();
-                                    let desired_size = egui::vec2(full_width, ui.text_style_height(&egui::TextStyle::Body));
+                                    let desired_size = egui::vec2(full_width, row_height);
                                     let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
             
                                     let visuals = ui.visuals();
