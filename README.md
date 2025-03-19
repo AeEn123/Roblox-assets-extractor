@@ -114,3 +114,7 @@ Wait for it to build all the dependencies and the application. After that you sh
 
 # Python version
 See [python.md](/docs/en-GB/python.md)
+
+# Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AeEn123/Roblox-assets-extractor&type=Date)](https://www.star-history.com/#AeEn123/Roblox-assets-extractor&Date)
