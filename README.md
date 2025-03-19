@@ -38,6 +38,9 @@ Some media players may not support the format that the file is in. If that is th
 ### Why is KTX files in a different tab? Shouldn't it be in the Textures tab?
 Technically it should, but most image viewers don't support KTX files, so it is best to move this aside to a different tab to avoid compatability issues, this tab should be used for more advanced users.
 
+### Why are RBXM files just an "Instance" in Roblox Studio?
+Roblox Studio doesn't have support for cached RBXM files. These files may contain data from games, but we haven't looked into it yet.
+
 ### Does this take up storage overtime?
 Your Roblox cache itself does take up storage overtime, this tool itself does not add any storage use overtime unless you are extracting many files overtime, which you can delete easily. 
 

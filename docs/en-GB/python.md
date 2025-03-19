@@ -15,7 +15,7 @@ The python version is no longer getting feature updates. Important updates may t
   pip install requests
   ```
 Screenshot of the python version
-![Screenshot of the python version](./assets/python-screenshot.png)
+![Screenshot of the python version](/assets/python-screenshot.png)
 
 ## More Info
 I am quite new to Tkinter, so the UI looks pretty bad messy.
