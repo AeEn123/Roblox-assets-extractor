@@ -598,7 +598,6 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 
 
             if !display_image_preview {
-                let visuals = ui.visuals().clone();
                 // Display table headers
                 let full_width = ui.available_width();
                 let desired_size = egui::vec2(full_width, row_height);
@@ -979,40 +978,48 @@ fn detect_japanese_font() -> Option<String> {
     return None;
 }
 
+// Some code in the function below is taken from this URL
 // https://users.rust-lang.org/t/is-posible-egui-change-fonts-to-japanese-how/59662/5
-impl MyApp {
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        //Custom font install
-        // 1. Create a `FontDefinitions` object.
-        let mut font = egui::FontDefinitions::default();
-        // Install my own font (maybe supporting non-latin characters):
-        // 2. register the font content with a name.
-        match detect_japanese_font() {
-            Some(font_path) => {
-                match std::fs::read(font_path) {
-                    Ok(bytes) => {
-                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes).into());
-                        font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
-                        font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
-                        // 3. Configure context with modified `FontDefinitions`.
-                        cc.egui_ctx.set_fonts(font);
-                    }
-                    Err(e) => {
-                        log::error(&format!("Error loading Japanese fonts: {e}"))
-                    }
+fn init_japanese_font(cc: &eframe::CreationContext<'_>) {
+    //Custom font install
+    // 1. Create a `FontDefinitions` object.
+    let mut font = egui::FontDefinitions::default();
+    // Install my own font (maybe supporting non-latin characters):
+    // 2. register the font content with a name.
+    match detect_japanese_font() {
+        Some(font_path) => {
+            match std::fs::read(font_path) {
+                Ok(bytes) => {
+                    font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes).into());
+                    font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
+                    font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
+                    // 3. Configure context with modified `FontDefinitions`.
+                    cc.egui_ctx.set_fonts(font);
+                }
+                Err(e) => {
+                    log::error(&format!("Error loading Japanese fonts: {e}"))
                 }
             }
-            None => {
-                log::warn("No Japanese fonts detected, Japanese characters will not render.")
-            }
         }
-        
-        // Get theme from config
-        match config::get_config_string("theme").unwrap_or("system".to_owned()).as_str() {
-            "dark" => cc.egui_ctx.set_theme(egui::Theme::Dark),
-            "light" => cc.egui_ctx.set_theme(egui::Theme::Light),
-            _ => ()
+        None => {
+            log::warn("No Japanese fonts detected, Japanese characters will not render.")
         }
+    }
+}
+
+pub fn gui_setup(cc: &eframe::CreationContext<'_>) {
+    init_japanese_font(cc);
+
+    // Get theme from config
+    match config::get_config_string("theme").unwrap_or("system".to_owned()).as_str() {
+        "dark" => cc.egui_ctx.set_theme(egui::Theme::Dark),
+        "light" => cc.egui_ctx.set_theme(egui::Theme::Light),
+        _ => ()
+    }
+}
+impl MyApp {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        gui_setup(cc);
 
         Default::default()
     }

@@ -1,6 +1,6 @@
 use eframe::egui;
-use crate::{gui::settings, log};
-use crate::{config, locale, logic};
+use crate::gui::settings;
+use crate::{config, locale, gui};
 use fluent_bundle::{FluentBundle, FluentResource};
 use std::sync::Arc;
 
@@ -12,54 +12,9 @@ pub struct MyApp {
     locale: FluentBundle<Arc<FluentResource>>,
 }
 
-fn detect_japanese_font() -> Option<String> {
-    let font_dirs = ["C:\\Windows\\Fonts\\msgothic.ttc", "/usr/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.local/share/fonts/noto-cjk/NotoSerifCJK-Regular.ttc", "~/.fonts/noto-cjk/NotoSerifCJK-Regular.ttc"];
-    
-    for font in font_dirs {
-        let resolved_font = logic::resolve_path(&font);
-        match std::fs::metadata(&resolved_font) {
-            Ok(metadata) => {
-                if metadata.is_file() {
-                    log::info(&format!("{}: valid", resolved_font));
-                    return Some(resolved_font);
-                }
-            }
-            Err(e) => {
-                log::warn(&format!("{}: invalid - {}", resolved_font, e))
-            }
-        }
-        
-    };
-    return None;
-}
-
-// https://users.rust-lang.org/t/is-posible-egui-change-fonts-to-japanese-how/59662/5
 impl MyApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        //Custom font install
-        // 1. Create a `FontDefinitions` object.
-        let mut font = egui::FontDefinitions::default();
-        // Install my own font (maybe supporting non-latin characters):
-        // 2. register the font content with a name.
-        match detect_japanese_font() {
-            Some(font_path) => {
-                match std::fs::read(font_path) {
-                    Ok(bytes) => {
-                        font.font_data.insert("japanese".to_owned(),egui::FontData::from_owned(bytes).into());
-                        font.families.get_mut(&egui::FontFamily::Monospace).unwrap().push("japanese".to_owned());
-                        font.families.get_mut(&egui::FontFamily::Proportional).unwrap().push("japanese".to_owned());
-                        // 3. Configure context with modified `FontDefinitions`.
-                        cc.egui_ctx.set_fonts(font);
-                    }
-                    Err(e) => {
-                        log::error(&format!("Error loading Japanese fonts: {e}"))
-                    }
-                }
-            }
-            None => {
-                log::warn("No Japanese fonts detected, Japanese characters will not render.")
-            }
-        }    
+        gui::gui_setup(cc);
         Default::default()
     }
 }
