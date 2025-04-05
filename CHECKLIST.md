@@ -31,6 +31,7 @@
 - [x] - Implement asset copying
 - [x] - image decoder to quickly preview assets
 - [x] - Use versioning numbers better major.minor.patch
+- [ ] - Fix CLI mode
 - [ ] - Make it into a table with specific details e.g size, type, time created
 - [ ] - Wait for translations
 
